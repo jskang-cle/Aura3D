@@ -1,5 +1,5 @@
 <div id="header" align="center">
-    <h3>Aura3D</h3>
+    <img width="200px" src="./logo.svg" ></img> 
     <h4><i>Aura3D is a lightweight, extensible, and high-performance 3D rendering control</i></h4>
     <div id="link">
         <span>English</span> | 
@@ -8,6 +8,11 @@
     </div>
 </div>
 <br/>
+
+![demo](./doc/images/demo.png)
+
+> [!IMPORTANT]
+> The project is actively being developed, and we welcome all to submit suggestions generously.
 
 ## Features
 ### 1. Basic Functions

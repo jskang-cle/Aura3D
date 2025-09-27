@@ -1,5 +1,6 @@
+
 <div id="header" align="center">
-	<h3>Aura3D</h3>
+	<img width="200px" src="./logo.svg" ></img> 
 	<h4><i>一个轻量级、可扩展、高性能的3D渲染控件</i></h4>
 	<div id="link" >
 		<a href="./README.md">English</a> | 
@@ -8,6 +9,13 @@
 	</div>
 </div>
 <br/>
+
+![demo](./doc/images/demo.png)
+
+
+> [!IMPORTANT]
+> 项目正在积极开发中，欢迎大家踊跃提出建议。
+
 
 ## 特性
 ### 1. 基础功能
