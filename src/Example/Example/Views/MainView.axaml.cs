@@ -83,18 +83,7 @@ namespace Example.Views
         }
 
         Camera? camera;
-
-        public void OnSetupPipeline(object sender, RoutedEventArgs args)
-        {
-            var view = (Aura3DView)sender;
-            view.CreateRenderPipeline = scene => 
-            {
-                var pipeline = new CelShadingPipeline(scene);
-                // ≈‰÷√≤Œ ˝
-                return pipeline;
-            };
-        }
-
+        
         public void OnSceneInitialized(object sender, RoutedEventArgs args)
         {
             var view = (Aura3DView)sender;
@@ -179,7 +168,7 @@ namespace Example.Views
 
                 // model.Scale = Vector3.One * 2f;
                 // model.Scale = Vector3.One * 0.03f;
-                // model.RotationDegrees = new Vector3(90, 0, 0);
+                model.RotationDegrees = new Vector3(0, 180, 0);
 
                 pl.Position = model.Position + pl.Up * 2 + pl.Left * 2f;
 

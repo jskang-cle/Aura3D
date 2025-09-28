@@ -14,7 +14,7 @@
     <vm:MainViewModel />
   </Design.DataContext>
 
-	<local:Aura3DView x:Name="aura3Dview" SetupPipeline="OnSetupPipeline" SceneInitialized="OnSceneInitialized" SceneUpdated="SceneUpdated">
+	<local:Aura3DView x:Name="aura3Dview" SceneInitialized="OnSceneInitialized" SceneUpdated="SceneUpdated">
 
 	</local:Aura3DView>
 	
