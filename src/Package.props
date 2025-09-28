@@ -8,6 +8,6 @@
     <RepositoryUrl>https://github.com/CeSun/Aura3d</RepositoryUrl>        
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/CeSun/Aura3d</PackageProjectUrl>        
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
   </PropertyGroup>
 </Project>
