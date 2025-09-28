@@ -447,25 +447,23 @@ public static class ModelLoader
 
                 mesh.Geometry = new Geometry();
 
-
-
                 foreach (var (name, accessor) in primitive.VertexAccessors)
                 {
                     switch (name)
                     {
                         case "POSITION":
-                            mesh.Geometry.SetVertexAttribute("position", 0, 3, primitive.GetVertexColumns().Positions.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
+                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Position, primitive.GetVertexColumns().Positions.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
                             break;
                         case "TEXCOORD_0":
-                            mesh.Geometry.SetVertexAttribute("texcoord", 1, 2, primitive.GetVertexColumns().TexCoords0.SelectMany(v => new float[] { v.X, v.Y }).ToList());
+                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.TexCoord, primitive.GetVertexColumns().TexCoords0.SelectMany(v => new float[] { v.X, v.Y }).ToList());
                             break;
                         case "NORMAL":
-                            mesh.Geometry.SetVertexAttribute("normal", 2, 3, primitive.GetVertexColumns().Normals.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
+                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, primitive.GetVertexColumns().Normals.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
                             break;
                         case "JOINTS_0":
                             if (skeletonMap.Count == 0)
                                 break;
-                            mesh.Geometry.SetVertexAttribute("joints", 5, 4, primitive.GetVertexColumns().Joints0.SelectMany(v => {
+                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.BoneIndices, primitive.GetVertexColumns().Joints0.SelectMany(v => {
                                 if (node.Skin == null)
                                     return new float[] { v.X, v.Y, v.Z, v.W };
                                 var x = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
@@ -478,20 +476,20 @@ public static class ModelLoader
                         case "WEIGHTS_0":
                             if (skeletonMap.Count == 0)
                                 break;
-                            mesh.Geometry.SetVertexAttribute("weights", 6, 4, primitive.GetVertexColumns().Weights0.SelectMany(v => new float[] { v.X, v.Y, v.Z, v.W }).ToList());
+                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.BoneWeights, primitive.GetVertexColumns().Weights0.SelectMany(v => new float[] { v.X, v.Y, v.Z, v.W }).ToList());
                             break;
                     }
                 }
 
                 mesh.Geometry.SetIndices(primitive.GetIndices().ToList());
 
-                var normal = mesh.Geometry.GetAttributeData("normal");
-                var uv = mesh.Geometry.GetAttributeData("texcoord");
+                var normal = mesh.Geometry.GetAttributeData(BuildInVertexAttribute.Normal);
+                var uv = mesh.Geometry.GetAttributeData(BuildInVertexAttribute.TexCoord);
                 if (normal != null && uv != null)
                 {
                     InitMeshTbn(mesh.Geometry.Indices, normal, uv, out var tangents, out var bitangents);
-                    mesh.Geometry.SetVertexAttribute("tangents", 3, 3, tangents);
-                    mesh.Geometry.SetVertexAttribute("bitangents", 4, 3, bitangents);
+                    mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
+                    mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
                 }
 
                 if (primitive.Material != null)

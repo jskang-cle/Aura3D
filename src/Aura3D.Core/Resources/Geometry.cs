@@ -1,5 +1,6 @@
 ﻿using Silk.NET.OpenGLES;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Aura3D.Core.Resources;
@@ -44,6 +45,21 @@ public class Geometry : IGpuResource, IClone<Geometry>
         VertexAttributeLocations.Add(location);
     }
 
+    public void SetVertexAttribute(BuildInVertexAttribute attribute, List<float> data)
+    {
+        SetVertexAttribute(attribute.ToString(), (uint)attribute, attribute switch
+        {
+            BuildInVertexAttribute.Position => 3,
+            BuildInVertexAttribute.TexCoord => 2,
+            BuildInVertexAttribute.Normal => 3,
+            BuildInVertexAttribute.Tangent => 3,
+            BuildInVertexAttribute.Bitangent => 3,
+            BuildInVertexAttribute.BoneIndices => 4,
+            BuildInVertexAttribute.BoneWeights => 4,
+            _ => throw new Exception("Unknown built-in vertex attribute")
+        }, data);
+    }
+
     public void SetIndices(List<uint> indices)
     {
         Indices = indices;
@@ -54,6 +70,11 @@ public class Geometry : IGpuResource, IClone<Geometry>
         if (!VertexAttributes.ContainsKey(name))
             return null;
         return VertexAttributes[name].Data;
+    }
+
+    public List<float>? GetAttributeData(BuildInVertexAttribute attribute)
+    {
+        return GetAttributeData(attribute.ToString());
     }
 
     public void Destroy(GL gl)
@@ -137,4 +158,15 @@ public struct VertexAttribute
     public uint Location;
     public int Size;
     public List<float> Data;
+}
+
+public enum BuildInVertexAttribute
+{
+    Position = 0,
+    TexCoord = 1,
+    Normal = 2,
+    Tangent = 3,
+    Bitangent = 4,
+    BoneIndices = 5,
+    BoneWeights = 6
 }
