@@ -67,7 +67,7 @@ public class Model : Node
             parentNode.AddChild(cloneNode);
         }
 
-        cloneNode.Transform = node.Transform;
+        cloneNode.LocalTransform = node.LocalTransform;
         cloneNode.Enable = node.Enable;
         cloneNode.Name = node.Name;
 

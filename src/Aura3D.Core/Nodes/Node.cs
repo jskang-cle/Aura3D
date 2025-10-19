@@ -15,41 +15,21 @@ public partial class Node
 
     #region Transform
 
-    /// <summary>
-    /// 节点的旋转四元数表示。
-    /// </summary>
-    private Quaternion _rotationQuaternion;
+    protected bool _transformDirty = true;
 
-    /// <summary>
-    /// 节点的欧拉角（度数）表示。
-    /// </summary>
-    private Vector3 _rotationDegrees;
-
-    /// <summary>
-    /// 节点的欧拉角（弧度）表示。
-    /// </summary>
-    private Vector3 _rotation;
+    public void MarkTransformDirty()
+    {
+        _transformDirty = true;
+        foreach (var child in Children)
+        {
+            child.MarkTransformDirty();
+        }
+    }
 
     /// <summary>
     /// 节点的位置。
     /// </summary>
     private Vector3 _position;
-
-    /// <summary>
-    /// 节点的缩放，默认为 (1,1,1)。
-    /// </summary>
-    private Vector3 _scale = new Vector3(1.0f, 1.0f, 1.0f);
-
-    /// <summary>
-    /// 节点的所有子节点集合。
-    /// </summary>
-    private HashSet<Node> _children = new HashSet<Node>();
-
-
-    private Matrix4x4 _transform;
-
-    private Matrix4x4 _worldtransform;
-
 
     /// <summary>
     /// 获取或设置节点的位置。
@@ -61,20 +41,20 @@ public partial class Node
         {
             _position = value;
 
-            _transform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
+            MarkTransformDirty();
 
-            if (Parent == null)
+            if (autoUpdateTransform)
             {
-                _worldtransform = _transform;
+                UpdateTransform();
             }
-            else
-            {
-                _worldtransform = _transform * Parent.WorldTransform;
-            }
-
-            updateChildrenWorldTransform();
         }
     }
+
+
+    /// <summary>
+    /// 节点的欧拉角（弧度）表示。
+    /// </summary>
+    private Vector3 _rotation;
 
     /// <summary>
     /// 获取或设置节点的旋转（弧度）。
@@ -90,20 +70,20 @@ public partial class Node
 
             _rotationQuaternion = Quaternion.CreateFromYawPitchRoll(value.Y, value.X, value.Z);
 
-            _transform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
+            MarkTransformDirty();
 
-            if (Parent == null)
+            if (autoUpdateTransform)
             {
-                _worldtransform = _transform;
+                UpdateTransform();
             }
-            else
-            {
-                _worldtransform = _transform * Parent.WorldTransform;
-            }
-
-            updateChildrenWorldTransform();
         }
     }
+
+
+    /// <summary>
+    /// 节点的欧拉角（度数）表示。
+    /// </summary>
+    private Vector3 _rotationDegrees;
 
     /// <summary>
     /// 获取或设置节点的旋转（度数）。
@@ -119,20 +99,19 @@ public partial class Node
 
             _rotationQuaternion = Quaternion.CreateFromYawPitchRoll(_rotation.Y, _rotation.X, _rotation.Z);
 
-            _transform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
+            MarkTransformDirty();
 
-            if (Parent == null)
+            if (autoUpdateTransform)
             {
-                _worldtransform = _transform;
+                UpdateTransform();
             }
-            else
-            {
-                _worldtransform = _transform * Parent.WorldTransform;
-            }
-
-            updateChildrenWorldTransform();
         }
     }
+
+    /// <summary>
+    /// 节点的旋转四元数表示。
+    /// </summary>
+    private Quaternion _rotationQuaternion;
 
     /// <summary>
     /// 获取或设置节点的旋转（四元数）。
@@ -148,20 +127,18 @@ public partial class Node
 
             _rotationDegrees = new Vector3(_rotation.X.RadiansToDegree(), _rotation.Y.RadiansToDegree(), _rotation.Z.RadiansToDegree());
 
-            _transform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
+            MarkTransformDirty();
 
-            if (Parent == null)
+            if (autoUpdateTransform)
             {
-                _worldtransform = _transform;
-            }
-            else
-            {
-                _worldtransform = _transform * Parent.WorldTransform;
+                UpdateTransform();
             }
 
-            updateChildrenWorldTransform();
         }
     }
+
+
+    private Vector3 _scale = new Vector3(1.0f, 1.0f, 1.0f);
 
     /// <summary>
     /// 获取或设置节点的缩放。缩放值必须为正数。
@@ -173,102 +150,118 @@ public partial class Node
         {
             _scale = value;
 
-            _transform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
+            MarkTransformDirty();
 
-            if (Parent == null)
+            if (autoUpdateTransform)
             {
-                _worldtransform = _transform;
+                UpdateTransform();
             }
-            else
-            {
-                _worldtransform = _transform * Parent.WorldTransform;
-            }
-
-
-            updateChildrenWorldTransform();
         }
     }
 
 
+
+    private Matrix4x4 _localTransform;
     /// <summary>
     /// 获取节点的本地变换矩阵。
     /// </summary>
-    public Matrix4x4 Transform 
+    public Matrix4x4 LocalTransform 
     { 
-        get => _transform;
+        get => _localTransform;
         set
         {
+            _localTransform = value;
 
-            _position = value.Translation;
-
-            _rotationQuaternion = value.Rotation();
-
-            _rotation = _rotationQuaternion.ToEulerAngles();
-
-            _rotationDegrees = new Vector3(_rotation.X.RadiansToDegree(), _rotation.Y.RadiansToDegree(), _rotation.Z.RadiansToDegree());
-
-            _scale = value.Scale();
-
-            _transform = value;
-
-            if (Parent == null)
+            using (BeginTransformUpdate())
             {
-                _worldtransform = _transform;
-            }
-            else
-            {
-                _worldtransform = _transform * Parent.WorldTransform;
-            }
+                Position = _localTransform.Translation;
 
+                RotationQuaternion = _localTransform.Rotation();
 
-            updateChildrenWorldTransform();
+                Scale = _localTransform.Scale();
+            }
         }
     }
 
+    private Matrix4x4 _worldTransform;
     /// <summary>
     /// 获取节点的世界变换矩阵（包含父节点变换）。
     /// </summary>
     public Matrix4x4 WorldTransform
-    {   
-        
+    {
+        get => _worldTransform;
+
         set
         {
-            _worldtransform = value;
-
-            Matrix4x4 transform;
+            _worldTransform = value;
 
             if (Parent != null)
             {
-
-                Matrix4x4.Invert(Parent.WorldTransform, out var inverseWorldTransform);
-
-                transform = _worldtransform * inverseWorldTransform;
-
+                LocalTransform = _worldTransform * Parent.WorldTransform.Inverse();
             }
             else
             {
-                transform = _worldtransform;
+                LocalTransform = _worldTransform;
             }
-
-
-            _position = transform.Translation;
-
-            _rotationQuaternion = transform.Rotation();
-
-            _rotation = _rotationQuaternion.ToEulerAngles();
-
-            _rotationDegrees = new Vector3(_rotation.X.RadiansToDegree(), _rotation.Y.RadiansToDegree(), _rotation.Z.RadiansToDegree());
-
-            _scale = transform.Scale();
-
-            _transform = transform;
-
-            updateChildrenWorldTransform();
-
         }
-        get => _worldtransform;
+    }
+
+    
+    private bool autoUpdateTransform = true;
 
 
+    private class TransformUpdateScope : IDisposable
+    {
+        private Node _node;
+        public TransformUpdateScope(Node node)
+        {
+            _node = node;
+        }
+        public void Dispose()
+        {
+            _node.EndTransformUpdate();
+        }
+    }
+
+    public IDisposable BeginTransformUpdate()
+    {
+        autoUpdateTransform = false;
+
+        return new TransformUpdateScope(this);
+    }
+
+    protected void EndTransformUpdate()
+    {
+        autoUpdateTransform = true;
+
+        UpdateTransform();
+    }
+
+
+    protected void UpdateTransform()
+    {
+        if (_transformDirty == false)
+            return;
+        _transformDirty = false;
+
+        // 更新本地变换
+        _localTransform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
+
+        if (Parent != null)
+        {
+            // 计算世界变换
+            _worldTransform = _localTransform * Parent.WorldTransform;
+        }
+        else
+        {
+            _worldTransform = _localTransform;
+        }
+
+        foreach(var child in Children)
+        {
+            child._transformDirty = true;
+            child.UpdateTransform();
+        }
     }
 
     public Vector3 Forward => WorldTransform.ForwardVector();
@@ -285,27 +278,18 @@ public partial class Node
 
     public Node()
     {
-        _worldtransform  = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
 
-        _transform = _worldtransform;
+        _rotationDegrees = new Vector3(0, 0, 0);
 
         _rotation = new Vector3(_rotationDegrees.X.DegreeToRadians(), _rotationDegrees.Y.DegreeToRadians(), _rotationDegrees.Z.DegreeToRadians());
 
         _rotationQuaternion = Quaternion.CreateFromYawPitchRoll(_rotation.Y, _rotation.X, _rotation.Z);
 
-        updateChildrenWorldTransform();
+        _scale = new Vector3(1.0f, 1.0f, 1.0f);
+
+        UpdateTransform();
     }
-    protected void updateChildrenWorldTransform()
-    {
 
-        foreach (var child in Children)
-        {
-            child._worldtransform = child.Transform * _worldtransform;
-
-            child.updateChildrenWorldTransform();
-        }
-
-    }
     #endregion
 
     #region Hierarchy
@@ -316,6 +300,9 @@ public partial class Node
     /// 获取节点的父节点。
     /// </summary>
     public Node? Parent { get; private set; }
+
+
+    protected HashSet<Node> _children = new HashSet<Node>();
 
     /// <summary>
     /// 获取节点的所有子节点（只读）。
@@ -391,7 +378,7 @@ public partial class Node
         child.Parent = null;
 
         // 将子节点的本地变换设置为其世界变换，保持位置不变
-        child.Transform = lastWorldTransform;
+        child.LocalTransform = lastWorldTransform;
 
         if (CurrentScene != null)
         {

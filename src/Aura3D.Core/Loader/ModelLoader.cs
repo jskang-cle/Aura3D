@@ -414,7 +414,7 @@ public static class ModelLoader
 
         parent.AddChild(currentNode);
 
-        currentNode.Transform = node.LocalMatrix;
+        currentNode.LocalTransform = node.LocalMatrix;
 
         if (node.Mesh != null)
         {
@@ -439,7 +439,7 @@ public static class ModelLoader
 
                 currentNode.AddChild(mesh);
 
-                mesh.Transform = Matrix4x4.Identity;
+                mesh.LocalTransform = Matrix4x4.Identity;
 
                 mesh.Name = node.Name;
 
