@@ -15,7 +15,7 @@ public partial class Node
 
     #region Transform
 
-    protected bool _transformDirty = true;
+    private bool _transformDirty = true;
 
     public void MarkTransformDirty()
     {
@@ -138,7 +138,7 @@ public partial class Node
     }
 
 
-    private Vector3 _scale = new Vector3(1.0f, 1.0f, 1.0f);
+    private Vector3 _scale;
 
     /// <summary>
     /// 获取或设置节点的缩放。缩放值必须为正数。
@@ -210,16 +210,11 @@ public partial class Node
     private bool autoUpdateTransform = true;
 
 
-    private class TransformUpdateScope : IDisposable
+    private class TransformUpdateScope(Node node) : IDisposable
     {
-        private Node _node;
-        public TransformUpdateScope(Node node)
-        {
-            _node = node;
-        }
         public void Dispose()
         {
-            _node.EndTransformUpdate();
+            node.EndTransformUpdate();
         }
     }
 
@@ -238,7 +233,7 @@ public partial class Node
     }
 
 
-    protected void UpdateTransform()
+    protected virtual void UpdateTransform()
     {
         if (_transformDirty == false)
             return;
