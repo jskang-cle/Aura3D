@@ -42,7 +42,7 @@ public abstract partial class RenderPipeline
 
     private int lastSpotLightLimit;
 
-    protected event Action<int, int, int>? lightLimitChangedEvent;
+    protected event Action<int, int, int>? LightLimitChangedEvent;
 
     protected void RegisterRenderPass(RenderPass renderPass, RenderPassGroup renderPassGroup)
     {
@@ -118,6 +118,7 @@ public abstract partial class RenderPipeline
             AddGpuResource(gpuResource);
         }
 
+        node.UpdateTransform();
     }
 
     public void RemoveNode(Node node)
@@ -149,7 +150,7 @@ public abstract partial class RenderPipeline
             lastPointLightLimit = PointLightLimit;
             lastSpotLightLimit = SpotLightLimit;
             lastDirectionalLightLimit = DirectionalLightLimit;
-            lightLimitChangedEvent?.Invoke(lastDirectionalLightLimit, lastPointLightLimit, lastSpotLightLimit);
+            LightLimitChangedEvent?.Invoke(lastDirectionalLightLimit, lastPointLightLimit, lastSpotLightLimit);
         }
     }
 

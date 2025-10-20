@@ -142,7 +142,7 @@ public class Mesh : Node
     /// <summary>
     /// 重写UpdateTransform方法，确保在变换更新后也更新世界空间边界框
     /// </summary>
-    protected override void UpdateTransform()
+    public override void UpdateTransform()
     {
         base.UpdateTransform();
         UpdateWorldBoundingBox();

@@ -19,6 +19,10 @@ public partial class Node
 
     public void MarkTransformDirty()
     {
+        if (CurrentScene != null && CurrentScene.RenderPipeline != null)
+        {
+            
+        }
         _transformDirty = true;
         foreach (var child in Children)
         {
@@ -233,7 +237,7 @@ public partial class Node
     }
 
 
-    protected virtual void UpdateTransform()
+    public virtual void UpdateTransform()
     {
         if (_transformDirty == false)
             return;

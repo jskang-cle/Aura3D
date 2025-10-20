@@ -9,14 +9,14 @@ public class CelShadingPipeline : RenderPipeline
     public CelShadingPipeline(Scene scene)
     {
         var shadowMapPass = new ShadowMapPass(this);
-        lightLimitChangedEvent += shadowMapPass.UpdateLightNumLimit;
+        LightLimitChangedEvent += shadowMapPass.UpdateLightNumLimit;
         RegisterRenderPass(shadowMapPass, RenderPassGroup.Once);
 
 
         RegisterRenderPass(new BackgroundPass(this).SetOutPutRenderTarget("BaseRenderTarget"), RenderPassGroup.EveryCamera);
 
         var basePass = (CelLightPass)new CelLightPass(this).SetOutPutRenderTarget("BaseRenderTarget");
-		lightLimitChangedEvent += basePass.UpdateLightNumLimit;
+		LightLimitChangedEvent += basePass.UpdateLightNumLimit;
         RegisterRenderPass(basePass, RenderPassGroup.EveryCamera);
 
         var outlinePass = (OutlinePass)new OutlinePass(this).SetOutPutRenderTarget("BaseRenderTarget");
@@ -25,7 +25,7 @@ public class CelShadingPipeline : RenderPipeline
 
         var translucentPass = (CelTranslucentPass)new CelTranslucentPass(this).SetOutPutRenderTarget("BaseRenderTarget");
         RegisterRenderPass(translucentPass, RenderPassGroup.EveryCamera);
-		lightLimitChangedEvent += translucentPass.UpdateLightNumLimit;
+		LightLimitChangedEvent += translucentPass.UpdateLightNumLimit;
 
 
         RegisterRenderPass(new GammaCorrectionPass(this, "BaseRenderTarget", "Color").SetOutPutRenderTarget("GammaOutput"), RenderPassGroup.EveryCamera);

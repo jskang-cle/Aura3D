@@ -9,20 +9,20 @@ public class BlinnPhongPipeline : RenderPipeline
     public BlinnPhongPipeline(Scene scene)
     {
         var shadowMapPass = new ShadowMapPass(this);
-        lightLimitChangedEvent += shadowMapPass.UpdateLightNumLimit;
+        LightLimitChangedEvent += shadowMapPass.UpdateLightNumLimit;
         RegisterRenderPass(shadowMapPass, RenderPassGroup.Once);
 
 
         RegisterRenderPass(new BackgroundPass(this).SetOutPutRenderTarget("BaseRenderTarget"), RenderPassGroup.EveryCamera);
 
         var basePass = (LightPass)new LightPass(this).SetOutPutRenderTarget("BaseRenderTarget");
-        lightLimitChangedEvent += basePass.UpdateLightNumLimit;
+        LightLimitChangedEvent += basePass.UpdateLightNumLimit;
         RegisterRenderPass(basePass, RenderPassGroup.EveryCamera);
 
 
         var translucentPass = (TranslucentPass)new TranslucentPass(this).SetOutPutRenderTarget("BaseRenderTarget");
         RegisterRenderPass(translucentPass, RenderPassGroup.EveryCamera);
-        lightLimitChangedEvent += translucentPass.UpdateLightNumLimit;
+        LightLimitChangedEvent += translucentPass.UpdateLightNumLimit;
 
 
         RegisterRenderPass(new GammaCorrectionPass(this, "BaseRenderTarget", "Color").SetOutPutRenderTarget("GammaOutput"), RenderPassGroup.EveryCamera);

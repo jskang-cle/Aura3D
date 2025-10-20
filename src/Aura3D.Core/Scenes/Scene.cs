@@ -1,4 +1,5 @@
-﻿using Aura3D.Core.Nodes;
+﻿using System.Security.Cryptography.X509Certificates;
+using Aura3D.Core.Nodes;
 using Aura3D.Core.Renderers;
 
 namespace Aura3D.Core.Scenes;
@@ -7,7 +8,9 @@ public class Scene
 {
     public IReadOnlySet<Node> Nodes => _nodes;
 
-    private HashSet<Node> _nodes = new HashSet<Node>();
+    private readonly HashSet<Node> _nodes = [];
+
+    private readonly HashSet<Node> _dirtyNodes = [];
 
     public RenderPipeline RenderPipeline { get; set; }
 
@@ -68,10 +71,7 @@ public class Scene
         {
             if (camera.RenderTarget != null && camera.RenderTarget is ControlRenderTarget controlRenderTarget)
             {
-                if (ControlRenderTargets.Contains(controlRenderTarget))
-                {
-                    ControlRenderTargets.Remove(controlRenderTarget);
-                }
+                ControlRenderTargets.Remove(controlRenderTarget);
             }
         }
 
@@ -81,9 +81,22 @@ public class Scene
         }
     }
 
+    public void AddNodeTransformDirty(Node node)
+    {
+        if (_nodes.Contains(node) == false)
+            return;
+        if (_dirtyNodes.Contains(node) == true)
+            return;
+        _dirtyNodes.Add(node);
+    }
 
     public void Update(double deltaTime)
     {
+        foreach(var node in _dirtyNodes)
+        {
+            node.UpdateTransform();
+        }
+        _dirtyNodes.Clear();
         foreach(var node in Nodes)
         {
             node.Update(deltaTime);
