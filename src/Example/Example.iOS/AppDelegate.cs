@@ -18,6 +18,8 @@ namespace Example.iOS
         protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
         {
             return base.CustomizeAppBuilder(builder)
+                
+                .With(new iOSPlatformOptions{RenderingMode = [iOSRenderingMode.OpenGl]})
                 .WithInterFont();
         }
     }
