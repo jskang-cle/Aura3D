@@ -52,7 +52,7 @@ public partial class RenderPass
 
         var vertex = gl.CreateShader(ShaderType.VertexShader);
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (System.OperatingSystem.IsMacOS())
         {
             vs = vs.Replace("#version 300 es", "#version 330 core");
             fs = fs.Replace("#version 300 es", "#version 330 core");
