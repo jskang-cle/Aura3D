@@ -2,6 +2,7 @@
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using SharpGLTF.Schema2;
+using System.Text.Json;
 using System.IO;
 using System.Numerics;
 using Material = Aura3D.Core.Resources.Material;
@@ -9,8 +10,68 @@ using Mesh = Aura3D.Core.Nodes.Mesh;
 using Node = Aura3D.Core.Nodes.Node;
 using Texture = Aura3D.Core.Resources.Texture;
 using TextureWrapMode = Aura3D.Core.Resources.TextureWrapMode;
+using SharpGLTF.IO;
+using System.Text.Json.Nodes;
+using System;
 
 namespace Aura3D.Core;
+
+public class CelShadingMaterialExtension
+{
+    public Texture? ILM { get; set; }
+
+    public Texture? SDF { get; set; }
+
+    public Texture? ShadowRamp { get; set; }
+
+    public Texture? SpecularRamp { get; set; }
+
+    public CelShadingMaterialExtension() { }
+
+    private static Texture? GetTextureAtIndex(ModelRoot modelRoot, int index)
+    {
+        if(index < 0 || index > modelRoot.LogicalTextures.Count)
+            return null;
+        SharpGLTF.Schema2.Texture glTexture = modelRoot.LogicalTextures[index];
+
+        var data = glTexture.PrimaryImage.Content.Content;
+        var tex = TextureLoader.LoadTexture(data.ToArray());
+        return tex;
+    }
+
+    public CelShadingMaterialExtension(ModelRoot modelRoot, IReadOnlyDictionary<string, JsonNode> keyValuePairs) 
+    {
+
+        var tempNode = keyValuePairs["ILM"].AsObject()["index"];
+        if(tempNode != null)
+        {
+            int index = tempNode.GetValue<int>();
+            ILM = GetTextureAtIndex(modelRoot, index);
+        }
+
+        tempNode = keyValuePairs["SDF"].AsObject()["index"];
+        if (tempNode != null)
+        {
+            int index = tempNode.GetValue<int>();
+            SDF = GetTextureAtIndex(modelRoot, index);
+        }
+
+        tempNode = keyValuePairs["ShadowRamp"].AsObject()["index"];
+        if (tempNode != null)
+        {
+            int index = tempNode.GetValue<int>();
+            ShadowRamp = GetTextureAtIndex(modelRoot, index);
+        }
+
+        tempNode = keyValuePairs["SpecularRamp"].AsObject()["index"];
+        if (tempNode != null)
+        {
+            int index = tempNode.GetValue<int>();
+            SpecularRamp = GetTextureAtIndex(modelRoot, index);
+        }
+    }
+
+}
 
 public static class ModelLoader
 {
@@ -221,6 +282,42 @@ public static class ModelLoader
                 if (tex != null)
                 {
                     textureMap[texture] = tex;
+                }
+            }
+        }
+
+        foreach (var material in modelRoot.LogicalMaterials)
+        {
+            // 检查是否存在 AURA3D_TEXTURES_CELSHADING 扩展
+            if (material.Extensions != null)
+            {
+                // 方法1: 使用 SharpGLTF 的通用扩展访问方式
+                foreach (var ext in material.Extensions)
+                {
+                    string ext_name = null;
+
+                    var nameProperty = ext.GetType().GetProperty("Name");
+                    if (nameProperty != null)
+                    {
+                        ext_name = (string)nameProperty.GetValue(ext);
+                    }
+                    if(ext_name == null || ext_name != "AURA3D_TEXTURES_CELSHADING")
+                    {
+                        continue;
+                    }
+
+                    IReadOnlyDictionary<string, JsonNode> keyValuePairs = null;
+                    var propertiesType = ext.GetType().GetProperty("Properties");
+                    if (propertiesType != null)
+                    {
+                        keyValuePairs = (IReadOnlyDictionary<string, JsonNode>)propertiesType.GetValue(ext);
+                    }
+                    if (keyValuePairs == null)
+                    {
+                        continue;
+                    }
+
+                    new CelShadingMaterialExtension(modelRoot, keyValuePairs);
                 }
             }
         }
