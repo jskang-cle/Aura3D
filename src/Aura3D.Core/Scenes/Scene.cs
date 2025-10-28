@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Renderers;
 
@@ -46,6 +47,12 @@ public class Scene
             }
         }
 
+
+        if (node is IOtreeObject otreeObject)
+        {
+            otreeObject.OnChanged += OnNodeTransformDirty;
+        }
+
         foreach (var child in node.Children)
         {
             AddNode(child);
@@ -75,6 +82,11 @@ public class Scene
             }
         }
 
+        if (node is IOtreeObject otreeObject)
+        {
+            otreeObject.OnChanged -= OnNodeTransformDirty;
+        }
+
         foreach (var child in node.Children)
         {
             RemoveNode(child);
@@ -89,7 +101,12 @@ public class Scene
             return;
         _dirtyNodes.Add(node);
     }
-
+    void OnNodeTransformDirty(IOtreeObject otreeObject)
+    {
+        if (otreeObject is not Node node)
+            return;
+        AddNodeTransformDirty(node);
+    }
     public void Update(double deltaTime)
     {
         foreach(var node in _dirtyNodes)
