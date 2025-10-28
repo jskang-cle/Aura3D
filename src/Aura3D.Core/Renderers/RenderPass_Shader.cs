@@ -1,6 +1,7 @@
 ﻿using Silk.NET.OpenGLES;
 using System.Drawing;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using Aura3D.Core.Math;
 using Aura3D.Core.Resources;
@@ -50,6 +51,12 @@ public partial class RenderPass
         var fs = FragmentShader.Replace("//{{defines}}", definesText);
 
         var vertex = gl.CreateShader(ShaderType.VertexShader);
+
+        if (System.OperatingSystem.IsMacOS())
+        {
+            vs = vs.Replace("#version 300 es", "#version 330 core");
+            fs = fs.Replace("#version 300 es", "#version 330 core");
+        }
 
         gl.ShaderSource(vertex, vs);
 
