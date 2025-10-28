@@ -13,9 +13,10 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
-
+    <!--
 	<local:Aura3DView x:Name="aura3Dview" SceneInitialized="OnSceneInitialized" SceneUpdated="SceneUpdated">
 
 	</local:Aura3DView>
-	
+	-->
+    <local:VeldridControl></local:VeldridControl>
 </UserControl>

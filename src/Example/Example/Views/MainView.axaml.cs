@@ -26,6 +26,7 @@ namespace Example.Views
         public MainView()
         {
             InitializeComponent();
+            /*
             aura3Dview.Focusable = true;
             this.aura3Dview.PointerPressed += (s, e) =>
             {
@@ -80,6 +81,7 @@ namespace Example.Views
                     camera!.Position += camera.Right * (float)deltaTime;
                 }
             };
+            */
         }
 
         Camera? camera;

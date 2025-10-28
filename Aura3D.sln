@@ -31,6 +31,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		src\Package.props = src\Package.props
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rdparty", "3rdparty", "{CD420951-9FA1-47C3-B1AA-2A8D7A002700}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Veldrid", "3rdparty\veldrid\src\Veldrid\Veldrid.csproj", "{2146C79A-DA8A-F2D6-222B-22C5A42A3B01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Veldrid.OpenGLBindings", "3rdparty\veldrid\src\Veldrid.OpenGLBindings\Veldrid.OpenGLBindings.csproj", "{95871E8F-B874-3972-8C4C-8994211FEA3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Veldrid.MetalBindings", "3rdparty\veldrid\src\Veldrid.MetalBindings\Veldrid.MetalBindings.csproj", "{478457F7-33F8-F6B3-24D8-7716413F1550}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +87,18 @@ Global
 		{F96B6840-0CD4-4794-A351-3B415823319A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F96B6840-0CD4-4794-A351-3B415823319A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F96B6840-0CD4-4794-A351-3B415823319A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2146C79A-DA8A-F2D6-222B-22C5A42A3B01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2146C79A-DA8A-F2D6-222B-22C5A42A3B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2146C79A-DA8A-F2D6-222B-22C5A42A3B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2146C79A-DA8A-F2D6-222B-22C5A42A3B01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95871E8F-B874-3972-8C4C-8994211FEA3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95871E8F-B874-3972-8C4C-8994211FEA3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95871E8F-B874-3972-8C4C-8994211FEA3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95871E8F-B874-3972-8C4C-8994211FEA3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{478457F7-33F8-F6B3-24D8-7716413F1550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{478457F7-33F8-F6B3-24D8-7716413F1550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{478457F7-33F8-F6B3-24D8-7716413F1550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{478457F7-33F8-F6B3-24D8-7716413F1550}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +111,9 @@ Global
 		{3359D9B4-1CE3-F8FB-D88A-B091D568EB05} = {5858C076-6091-4F51-AC46-7F299A4FDF5C}
 		{78D98599-9343-43BC-B359-DFD1C65EC3B1} = {5858C076-6091-4F51-AC46-7F299A4FDF5C}
 		{F96B6840-0CD4-4794-A351-3B415823319A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{2146C79A-DA8A-F2D6-222B-22C5A42A3B01} = {CD420951-9FA1-47C3-B1AA-2A8D7A002700}
+		{95871E8F-B874-3972-8C4C-8994211FEA3E} = {CD420951-9FA1-47C3-B1AA-2A8D7A002700}
+		{478457F7-33F8-F6B3-24D8-7716413F1550} = {CD420951-9FA1-47C3-B1AA-2A8D7A002700}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9DD70FFC-DCCE-4FB7-A583-15A054911F89}
