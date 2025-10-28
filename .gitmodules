@@ -1,0 +1,3 @@
+[submodule "3rdparty/veldrid"]
+	path = 3rdparty/veldrid
+	url = https://github.com/CeSun/veldrid
