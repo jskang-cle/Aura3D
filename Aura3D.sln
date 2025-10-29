@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Veldrid.OpenGLBindings", "3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Veldrid.MetalBindings", "3rdparty\veldrid\src\Veldrid.MetalBindings\Veldrid.MetalBindings.csproj", "{478457F7-33F8-F6B3-24D8-7716413F1550}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Veldrid.SPIRV", "3rdparty\veldrid-spirv\src\Veldrid.SPIRV\Veldrid.SPIRV.csproj", "{395B284C-E21F-24C5-2468-4466E2EDD267}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{478457F7-33F8-F6B3-24D8-7716413F1550}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{478457F7-33F8-F6B3-24D8-7716413F1550}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{478457F7-33F8-F6B3-24D8-7716413F1550}.Release|Any CPU.Build.0 = Release|Any CPU
+		{395B284C-E21F-24C5-2468-4466E2EDD267}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{395B284C-E21F-24C5-2468-4466E2EDD267}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{395B284C-E21F-24C5-2468-4466E2EDD267}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{395B284C-E21F-24C5-2468-4466E2EDD267}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,6 +120,7 @@ Global
 		{2146C79A-DA8A-F2D6-222B-22C5A42A3B01} = {CD420951-9FA1-47C3-B1AA-2A8D7A002700}
 		{95871E8F-B874-3972-8C4C-8994211FEA3E} = {CD420951-9FA1-47C3-B1AA-2A8D7A002700}
 		{478457F7-33F8-F6B3-24D8-7716413F1550} = {CD420951-9FA1-47C3-B1AA-2A8D7A002700}
+		{395B284C-E21F-24C5-2468-4466E2EDD267} = {CD420951-9FA1-47C3-B1AA-2A8D7A002700}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9DD70FFC-DCCE-4FB7-A583-15A054911F89}

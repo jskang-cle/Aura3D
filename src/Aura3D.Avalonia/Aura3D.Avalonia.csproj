@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../Package.props"/>
+  <Import Project="../Package.props" />
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\3rdparty\veldrid-spirv\src\Veldrid.SPIRV\Veldrid.SPIRV.csproj" />
     <ProjectReference Include="..\Aura3D.Core\Aura3D.Core.csproj" />
   </ItemGroup>
 
