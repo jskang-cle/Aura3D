@@ -461,25 +461,25 @@ public static class ModelLoader
 
                 mesh.Name = node.Name;
 
-                mesh.Geometry = new Geometry();
+                var geometry = new Geometry();
 
                 foreach (var (name, accessor) in primitive.VertexAccessors)
                 {
                     switch (name)
                     {
                         case "POSITION":
-                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Position, primitive.GetVertexColumns().Positions.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
+                            geometry.SetVertexAttribute(BuildInVertexAttribute.Position, primitive.GetVertexColumns().Positions.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
                             break;
                         case "TEXCOORD_0":
-                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.TexCoord, primitive.GetVertexColumns().TexCoords0.SelectMany(v => new float[] { v.X, v.Y }).ToList());
+                            geometry.SetVertexAttribute(BuildInVertexAttribute.TexCoord, primitive.GetVertexColumns().TexCoords0.SelectMany(v => new float[] { v.X, v.Y }).ToList());
                             break;
                         case "NORMAL":
-                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, primitive.GetVertexColumns().Normals.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
+                            geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, primitive.GetVertexColumns().Normals.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
                             break;
                         case "JOINTS_0":
                             if (skeletonMap.Count == 0)
                                 break;
-                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.BoneIndices, primitive.GetVertexColumns().Joints0.SelectMany(v =>
+                            geometry.SetVertexAttribute(BuildInVertexAttribute.BoneIndices, primitive.GetVertexColumns().Joints0.SelectMany(v =>
                             {
                                 if (node.Skin == null)
                                     return new float[] { v.X, v.Y, v.Z, v.W };
@@ -493,21 +493,23 @@ public static class ModelLoader
                         case "WEIGHTS_0":
                             if (skeletonMap.Count == 0)
                                 break;
-                            mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.BoneWeights, primitive.GetVertexColumns().Weights0.SelectMany(v => new float[] { v.X, v.Y, v.Z, v.W }).ToList());
+                            geometry.SetVertexAttribute(BuildInVertexAttribute.BoneWeights, primitive.GetVertexColumns().Weights0.SelectMany(v => new float[] { v.X, v.Y, v.Z, v.W }).ToList());
                             break;
                     }
                 }
 
-                mesh.Geometry.SetIndices(primitive.GetIndices().ToList());
+                geometry.SetIndices(primitive.GetIndices().ToList());
 
-                var normal = mesh.Geometry.GetAttributeData(BuildInVertexAttribute.Normal);
-                var uv = mesh.Geometry.GetAttributeData(BuildInVertexAttribute.TexCoord);
+                var normal = geometry.GetAttributeData(BuildInVertexAttribute.Normal);
+                var uv = geometry.GetAttributeData(BuildInVertexAttribute.TexCoord);
                 if (normal != null && uv != null)
                 {
-                    ModelHelper.CalcVerticsTbn(mesh.Geometry.Indices, normal, uv, out var tangents, out var bitangents);
-                    mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
-                    mesh.Geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
+                    ModelHelper.CalcVerticsTbn(geometry.Indices, normal, uv, out var tangents, out var bitangents);
+                    geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
+                    geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
                 }
+
+                mesh.Geometry = geometry;
 
                 if (primitive.Material != null)
                 {

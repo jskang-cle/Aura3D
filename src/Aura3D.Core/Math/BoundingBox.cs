@@ -6,8 +6,13 @@ namespace Aura3D.Core.Math
     /// 轴对齐边界框（Axis-Aligned Bounding Box）
     /// 用于碰撞检测和视锥体剔除
     /// </summary>
-    public struct BoundingBox
+    public struct BoundingBox(object obj)
     {
+        /// <summary>
+        /// 关联的对象
+        /// </summary>
+        public object Object = obj;
+
         /// <summary>
         /// 边界框的最小点
         /// </summary>
@@ -38,7 +43,7 @@ namespace Aura3D.Core.Math
         /// </summary>
         /// <param name="min">最小点</param>
         /// <param name="max">最大点</param>
-        public BoundingBox(Vector3 min, Vector3 max)
+        public BoundingBox(Vector3 min, Vector3 max, object obj) : this(obj)
         {
             Min = min;
             Max = max;
@@ -49,10 +54,10 @@ namespace Aura3D.Core.Math
         /// </summary>
         /// <param name="points">点列表</param>
         /// <returns>包含所有点的边界框</returns>
-        public static BoundingBox CreateFromPoints(IEnumerable<Vector3> points)
+        public static BoundingBox CreateFromPoints(IEnumerable<Vector3> points, object obj)
         {
             if (points == null || !points.Any())
-                return new BoundingBox(Vector3.Zero, Vector3.Zero);
+                return new BoundingBox(Vector3.Zero, Vector3.Zero, obj);
 
             var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -63,7 +68,7 @@ namespace Aura3D.Core.Math
                 max = Vector3.Max(max, point);
             }
 
-            return new BoundingBox(min, max);
+            return new BoundingBox(min, max, obj);
         }
 
         /// <summary>
@@ -131,7 +136,7 @@ namespace Aura3D.Core.Math
             };
 
             // 从变换后的顶点创建新的边界框
-            return CreateFromPoints(vertices);
+            return CreateFromPoints(vertices, this);
         }
 
         /// <summary>
