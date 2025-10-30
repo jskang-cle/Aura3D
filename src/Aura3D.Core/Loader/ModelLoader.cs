@@ -19,9 +19,9 @@ public static class ModelLoader
 
     
     public static void RegisterMaterialExtensions<TExtension>(string extensionName, Func<ModelRoot, SharpGLTF.Schema2.Material, List<Channel>> handleFunc) 
-        where TExtension : JsonSerializable
+        where TExtension : JsonSerializable, new()
     {
-        SharpGLTF.Schema2.ExtensionsFactory.RegisterExtension<SharpGLTF.Schema2.Material, TExtension>(extensionName, p => new Aura3DCelTextures(p));
+        SharpGLTF.Schema2.ExtensionsFactory.RegisterExtension<SharpGLTF.Schema2.Material, TExtension>(extensionName, p => new TExtension());
         _materialExtensions.Add(handleFunc);
     }
 

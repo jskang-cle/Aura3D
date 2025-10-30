@@ -15,10 +15,7 @@ public class Aura3DCelTextures : ExtraProperties
     public new const string SCHEMANAME = "AURA3D_TEXTURES_CELSHADING";
     protected override string GetSchemaName() => SCHEMANAME;
 
-    public Aura3DCelTextures(SharpGLTF.Schema2.Material root)
-    {
-        
-    }
+    public Aura3DCelTextures(){}
 
     #region reflection
     protected override IEnumerable<string> ReflectFieldsNames()
