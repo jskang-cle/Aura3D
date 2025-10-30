@@ -153,7 +153,7 @@ namespace Example.Views
 
 
             // using (var s = AssetLoader.Open(new Uri("avares://Example/Assets/Models/Soldier.glb")))
-            using (var s = AssetLoader.Open(new Uri("avares://Example/Assets/Models/output2.glb")))
+            using (var s = AssetLoader.Open(new Uri("avares://Example/Assets/Models/NPC_Avatar_Girl_Sword_Nilou.glb")))
             {
 
                 var model = ModelLoader.LoadGlbModel(s);
