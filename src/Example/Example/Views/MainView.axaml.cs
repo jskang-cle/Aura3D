@@ -153,12 +153,12 @@ namespace Example.Views
 
 
             // using (var s = AssetLoader.Open(new Uri("avares://Example/Assets/Models/Soldier.glb")))
-            using (var s = AssetLoader.Open(new Uri("avares://Example/Assets/Models/NPC_Avatar_Girl_Sword_Nilou.glb")))
+            using (var s = AssetLoader.Open(new Uri("avares://Example/Assets/Models/Soldier.glb")))
             {
 
-                var model = ModelLoader.LoadGlbModel(s);
+                var (model, animations) = ModelLoader.LoadGlbModelAndAnimations(s);
 
-                //model.AnimationSampler = new AnimationSampler(animations.First());
+                model.AnimationSampler = new AnimationSampler(animations.First());
 
                 view.AddNode(model);
 
@@ -166,9 +166,9 @@ namespace Example.Views
 
                 model.Position += model.Up * 0.5f;
 
-                 model.Scale = Vector3.One * 2f;
+                // model.Scale = Vector3.One * 2f;
                 // model.Scale = Vector3.One * 0.03f;
-                model.RotationDegrees = new Vector3(0, 0, 0);
+                model.RotationDegrees = new Vector3(0, 180, 0);
 
                 pl.Position = model.Position + pl.Up * 2 + pl.Left * 2f;
 
