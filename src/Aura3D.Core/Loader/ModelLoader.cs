@@ -2,18 +2,28 @@
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using SharpGLTF.Schema2;
-using System.IO;
 using System.Numerics;
 using Material = Aura3D.Core.Resources.Material;
 using Mesh = Aura3D.Core.Nodes.Mesh;
 using Node = Aura3D.Core.Nodes.Node;
 using Texture = Aura3D.Core.Resources.Texture;
 using TextureWrapMode = Aura3D.Core.Resources.TextureWrapMode;
+using SharpGLTF.IO;
+
 
 namespace Aura3D.Core;
 
 public static class ModelLoader
 {
+    static HashSet<Func<ModelRoot, SharpGLTF.Schema2.Material, List<Channel>>> _materialExtensions = []; 
+
+    
+    public static void RegisterMaterialExtensions<TExtension>(string extensionName, Func<ModelRoot, SharpGLTF.Schema2.Material, List<Channel>> handleFunc) 
+        where TExtension : JsonSerializable, new()
+    {
+        SharpGLTF.Schema2.ExtensionsFactory.RegisterExtension<SharpGLTF.Schema2.Material, TExtension>(extensionName, p => new TExtension());
+        _materialExtensions.Add(handleFunc);
+    }
 
     public static (SkinnedModel, List<Resources.Animation>) LoadGlbModelAndAnimations(Stream stream)
     {
@@ -62,6 +72,7 @@ public static class ModelLoader
 
     public static Model LoadGlbModel(Stream stream)
     {
+        
         var modelRoot = ModelRoot.ReadGLB(stream, new ReadSettings { Validation = SharpGLTF.Validation.ValidationMode.TryFix });
 
         return processModelRoot(modelRoot);
@@ -225,6 +236,7 @@ public static class ModelLoader
             }
         }
 
+
         foreach (var material in modelRoot.LogicalMaterials)
         {
             if (materialMap.ContainsKey(material))
@@ -240,6 +252,12 @@ public static class ModelLoader
                 AlphaMode.MASK => BlendMode.Masked,
                 _ => BlendMode.Opaque,
             };
+
+            foreach(var func in _materialExtensions)
+            {
+                var tempList = func(modelRoot, material);
+                mat.Channels.AddRange(tempList);
+            }
 
             foreach (var gltfChannel in material.Channels)
             {

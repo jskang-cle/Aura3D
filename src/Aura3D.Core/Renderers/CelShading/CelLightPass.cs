@@ -151,34 +151,40 @@ public class CelLightPass : RenderPass
 
             foreach(var channel in mesh.Material.Channels)
             {
-                if (channel.Name == "BaseColor")
-                {
-                    if (channel.Texture != null)
-                    {
-                        UniformTexture("BaseColorTexture", channel.Texture);
-                        UniformInt("HasBaseColorTexture", 1);
-                    }
-                    else
-                    {
-                        UniformInt("HasBaseColorTexture", 0);
-                        UniformTexture("BaseColorTexture", 0);
-                        UniformColor("BaseColor", channel.Color);
-                    }
-                }
-                else if (channel.Name == "Normal")
-                {
-
-
-                    if (channel.Texture != null)
-                    {
-                        UniformTexture("NormalTexture", channel.Texture);
-                        UniformInt("HasNormalTexture", 1);
-                    }
-                    else
-                    {
-                        UniformTexture("NormalTexture", 0);
-                        UniformInt("HasNormalTexture", 0);
-                    }
+                switch(channel.Name){
+                    case "ILM":
+                        break;
+                    case "SDF":
+                        break;
+                    case "ShadowRamp":
+                        break;
+                    case "SpecularRamp":
+                        break;
+                    case "BaseColor":
+                        if (channel.Texture != null)
+                        {
+                            UniformTexture("BaseColorTexture", channel.Texture);
+                            UniformInt("HasBaseColorTexture", 1);
+                        }
+                        else
+                        {
+                            UniformInt("HasBaseColorTexture", 0);
+                            UniformTexture("BaseColorTexture", 0);
+                            UniformColor("BaseColor", channel.Color);
+                        }
+                        break;
+                    case "Normal":
+                        if (channel.Texture != null)
+                        {
+                            UniformTexture("NormalTexture", channel.Texture);
+                            UniformInt("HasNormalTexture", 1);
+                        }
+                        else
+                        {
+                            UniformTexture("NormalTexture", 0);
+                            UniformInt("HasNormalTexture", 0);
+                        }
+                        break;
                 }
 
                 if (mesh.Material.DoubleSided == false)
