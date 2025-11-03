@@ -40,6 +40,7 @@ public class VeldridControl : OpenGlControlBase, IExternalOpenGLThreadCallback
 
                     _commandList.SetFramebuffer(device.SwapchainFramebuffer);
                     _commandList.ClearColorTarget(0, RgbaFloat.Red);
+                    _commandList.ClearDepthStencil(1.0f);
                     _commandList.SetVertexBuffer(0, _vertexBuffer);
                     _commandList.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
                     _commandList.SetPipeline(_pipeline);
