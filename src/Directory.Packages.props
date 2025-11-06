@@ -20,5 +20,6 @@
     <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.5" />
     <PackageVersion Include="Silk.NET.OpenGLES" Version="2.22.0" />
     <PackageVersion Include="StbImageSharp" Version="2.30.15" />
+	<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>
 </Project>
