@@ -1,40 +1,77 @@
 ﻿using Aura3D.Avalonia.OpenGL;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
+using Avalonia.Rendering.Composition;
+using Microsoft.VisualBasic;
 using Silk.NET.OpenGLES;
 using System.Drawing;
+using Veldrid;
 
 namespace Aura3D.Avalonia;
 
-public class VeldridControl : OpenGL.OpenGlControlBase
+public class VeldridControl : Control
 {
-    public IGlContext? glContext;
+    Compositor? _compositor;
 
-    GL? gl;
-    protected override void OnOpenGlInit(GlInterface gl)
+    GraphicsDevice? _graphicsDevice;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        base.OnOpenGlInit(gl);
+        base.OnAttachedToVisualTree(e);
 
-        this.gl = GL.GetApi(gl.GetProcAddress);
-
+        initialize();
     }
 
-    int fbo = 0;
-    int color = 0;
-    protected override void OnOpenGlRender(GlInterface gl, int fb)
+
+    protected void OnUpdate()
     {
-        this.fbo = fb;
-        this.gl.BindFramebuffer(FramebufferTarget.Framebuffer, (uint)this.fbo);
-        this.gl.ClearColor(Color.FromArgb(255, color / 10, 0, 0));
-        this.gl.Clear(ClearBufferMask.ColorBufferBit);
-        if (color++ >= 2550)
-            color = 0;
-        RequestNextFrameRendering();
+        if (!_initialized)
+            return;
+        if (_compositor == null)
+            return;
+
+        _compositor.RequestCompositionUpdate(OnUpdate);
     }
 
-    
+    bool _initialized = false;
+
+    async void initialize()
+    {
+        if (_initialized)
+            return;
+        try
+        {
+
+            var selfVisual = ElementComposition.GetElementVisual(this);
+
+            if (selfVisual == null)
+                throw new InvalidOperationException("Failed to get ElementVisual from control.");
+
+            _compositor = selfVisual.Compositor;
+
+            var interop = await _compositor.TryGetCompositionGpuInterop();
+
+            if (interop == null)
+                throw new InvalidOperationException("Failed to get GpuInterop from Compositor.");
+
+            _initialized = true;
+
+            _compositor.RequestCompositionUpdate(OnUpdate);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    GraphicsDevice CreateGraphicsDeviceFromOpenGL(ICompositionGpuInterop interop)
+    {
 
 
+        return null;
+    }
 
 }
+
