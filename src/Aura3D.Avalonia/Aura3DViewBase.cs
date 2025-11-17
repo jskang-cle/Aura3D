@@ -7,10 +7,11 @@ using Avalonia.Rendering;
 using System.Diagnostics;
 using Aura3D.Core.Resources;
 using Aura3D.Core.Renderers;
+using Aura3D.Avalonia.OpenGL;
 
 namespace Aura3D.Avalonia;
 
-public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlControlBase, ICustomHitTest
+public abstract class Aura3DViewBase : OpenGlControlBase, ICustomHitTest
 {
     public Scene? Scene { get; protected set; }
 

@@ -5,7 +5,7 @@
              xmlns:vm="clr-namespace:Example.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Example.Views.MainView"
-		     xmlns:local="clr-namespace:Aura3D.Avalonia;assembly=Aura3D.Avalonia"
+		     xmlns:local="clr-namespace:Aura3D.Avalonia.Controls;assembly=Aura3D.Avalonia"
              x:DataType="vm:MainViewModel"
 			 Background="#f2f4f8">
   <Design.DataContext>
@@ -18,5 +18,8 @@
 
 	</local:Aura3DView>
 	-->
-    <local:VeldridControl></local:VeldridControl>
+	<!--
+	<local:VeldridControl></local:VeldridControl>-->
+
+	<TextBlock Text="123"></TextBlock>
 </UserControl>

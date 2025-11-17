@@ -12,10 +12,6 @@
     <ProjectReference Include="..\Aura3D.Core\Aura3D.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controls\" />
-  </ItemGroup>
-
 
 	<Target Name="AvaloniaAura3DAvaloniaRuntimeAssemblies" AfterTargets="ResolvePackageAssets" BeforeTargets="ResolveLockFileReferences">
 		<ItemGroup>
