@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Include="Avalonia.Diagnostics">
@@ -20,9 +19,21 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Irihi.Ursa" />
+    <PackageReference Include="Irihi.Ursa.Themes.Semi" />
+    <PackageReference Include="Semi.Avalonia" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Aura3D.Avalonia\Aura3D.Avalonia.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Pages\BaseGeometriesPage.axaml.cs">
+      <DependentUpon>BaseGeometriesPage.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Pages\GltfModelPage.axaml.cs">
+      <DependentUpon>GltfModelPage.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
