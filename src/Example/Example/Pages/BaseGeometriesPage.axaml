@@ -3,6 +3,21 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		     xmlns:local="clr-namespace:Aura3D.Avalonia;assembly=Aura3D.Avalonia"
              x:Class="Example.Pages.BaseGeometriesPage">
-  Welcome to GeometriesPage!
+     <DockPanel>
+		 <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+            
+             <Button Margin="10" Content="Box" Click="Button_Click"></Button>
+
+            <Button Margin="10" Content="Sphere" Click="Button_Click"></Button>
+
+            <Button Margin="10" Content="Cylinder" Click="Button_Click"></Button>
+
+            <Button Margin="10" Content="Plane" Click="Button_Click"></Button>
+         </StackPanel>    
+
+         <local:Aura3DView SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated"></local:Aura3DView>
+
+     </DockPanel>
 </UserControl>

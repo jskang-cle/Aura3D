@@ -28,12 +28,4 @@
     <ProjectReference Include="..\..\Aura3D.Avalonia\Aura3D.Avalonia.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Pages\BaseGeometriesPage.axaml.cs">
-      <DependentUpon>BaseGeometriesPage.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Pages\GltfModelPage.axaml.cs">
-      <DependentUpon>GltfModelPage.axaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
 </Project>
