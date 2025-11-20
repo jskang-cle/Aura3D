@@ -79,9 +79,9 @@ public class SphereGeometry : Geometry
                 // normal = normalized position (for sphere centered at origin)
                 var n = new Vector3(px, py, pz);
                 if (n.LengthSquared() > 0f) n = Vector3.Normalize(n);
-                normals.Add(n.X);
-                normals.Add(n.Y);
-                normals.Add(n.Z);
+                normals.Add(-1 * n.X);
+                normals.Add(-1 * n.Y);
+                normals.Add(-1 * n.Z);
 
                 // uv
                 uvs.Add(u);

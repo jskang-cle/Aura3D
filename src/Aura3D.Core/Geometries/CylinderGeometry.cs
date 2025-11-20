@@ -82,9 +82,9 @@ public class CylinderGeometry : Geometry
                 float slope = (RadiusBottom - RadiusTop) / Height; // rise over run
                 var normal = new Vector3(sin, slope, cos);
                 if (normal.LengthSquared() > 0f) normal = Vector3.Normalize(normal);
-                normals.Add(normal.X);
-                normals.Add(normal.Y);
-                normals.Add(normal.Z);
+                normals.Add(-1 * normal.X);
+                normals.Add(-1 * normal.Y);
+                normals.Add(-1 * normal.Z);
 
                 // uv
                 uvs.Add(u);
@@ -137,7 +137,7 @@ public class CylinderGeometry : Geometry
                     float py = halfHeight;
 
                     positions.Add(px); positions.Add(py); positions.Add(pz);
-                    normals.Add(0f); normals.Add(1f); normals.Add(0f);
+                    normals.Add(0f); normals.Add(-1f); normals.Add(0f);
                     uvs.Add((sin * 0.5f) + 0.5f); uvs.Add((cos * 0.5f) + 0.5f);
                     index++;
                 }
@@ -145,7 +145,7 @@ public class CylinderGeometry : Geometry
                 // center
                 int centerIndex = index++;
                 positions.Add(0f); positions.Add(halfHeight); positions.Add(0f);
-                normals.Add(0f); normals.Add(1f); normals.Add(0f);
+                normals.Add(0f); normals.Add(-1f); normals.Add(0f);
                 uvs.Add(0.5f); uvs.Add(0.5f);
 
                 for (int x = 0; x < RadialSegments; x++)
@@ -176,7 +176,7 @@ public class CylinderGeometry : Geometry
                     float py = -halfHeight;
 
                     positions.Add(px); positions.Add(py); positions.Add(pz);
-                    normals.Add(0f); normals.Add(-1f); normals.Add(0f);
+                    normals.Add(0f); normals.Add(1f); normals.Add(0f);
                     uvs.Add((sin * 0.5f) + 0.5f); uvs.Add((cos * 0.5f) + 0.5f);
                     index++;
                 }
@@ -184,7 +184,7 @@ public class CylinderGeometry : Geometry
                 // center
                 int centerIndex = index++;
                 positions.Add(0f); positions.Add(-halfHeight); positions.Add(0f);
-                normals.Add(0f); normals.Add(-1f); normals.Add(0f);
+                normals.Add(0f); normals.Add(1f); normals.Add(0f);
                 uvs.Add(0.5f); uvs.Add(0.5f);
 
                 for (int x = 0; x < RadialSegments; x++)
