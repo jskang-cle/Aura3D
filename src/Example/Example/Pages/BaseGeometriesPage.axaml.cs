@@ -115,7 +115,7 @@ public partial class BaseGeometriesPage : UserControl
         if (this.mesh == null)
             return;
         pitch += (float)(e.DeltaTime * 10);
-        mesh?.RotationDegrees = new Vector3(pitch, 0, 0);
+        mesh.RotationDegrees = new Vector3(pitch, 0, 0);
     }
 
     private void Button_Click(object? sender, RoutedEventArgs e)
