@@ -500,11 +500,11 @@ public static class ModelLoader
 
                 geometry.SetIndices(primitive.GetIndices().ToList());
 
-                var normal = geometry.GetAttributeData(BuildInVertexAttribute.Normal);
-                var uv = geometry.GetAttributeData(BuildInVertexAttribute.TexCoord);
-                if (normal != null && uv != null)
+                var normals = geometry.GetAttributeData(BuildInVertexAttribute.Normal);
+                var uvs = geometry.GetAttributeData(BuildInVertexAttribute.TexCoord);
+                if (normals != null && uvs != null)
                 {
-                    ModelHelper.CalcVerticsTbn(geometry.Indices, normal, uv, out var tangents, out var bitangents);
+                    ModelHelper.CalcVerticsTbn(geometry.Indices, normals, uvs, out var tangents, out var bitangents);
                     geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
                     geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
                 }
