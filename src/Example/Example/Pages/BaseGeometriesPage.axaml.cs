@@ -88,15 +88,14 @@ public partial class BaseGeometriesPage : UserControl
             view.AddNode(mesh);
 
 
-            var pl = new PointLight();
 
-            pl.LightColor = Color.White;
+            var dl = new DirectionalLight();
 
-            pl.CastShadow = true;
+            dl.RotationDegrees = new Vector3(-30, 0, 0);
 
-            pl.AttenuationRadius = 2;
+            dl.LightColor = Color.White;
 
-            view.AddNode(pl);
+            view.AddNode(dl);
 
             this.mesh = mesh;
 
