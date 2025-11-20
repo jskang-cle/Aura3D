@@ -112,7 +112,12 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
 
     public void AddNode<T>(T node) where T : Node
     {
-        Scene.AddNode(node);
+        Scene?.AddNode(node);
+    }
+
+    public void Remove(Node node)
+    {
+        Scene?.RemoveNode(node);
     }
 
     protected override void OnSizeChanged(SizeChangedEventArgs e)
