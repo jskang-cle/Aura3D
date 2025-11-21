@@ -13,11 +13,15 @@ public class Scene
 
     private readonly HashSet<Node> _dirtyNodes = [];
 
+    public Octree Octree { get; set; }
+
     public RenderPipeline RenderPipeline { get; set; }
 
     public Scene(Func<Scene, RenderPipeline> createRenderPipeline)
     {
         RenderPipeline = createRenderPipeline(this);
+
+        Octree = new Octree(new System.Numerics.Vector3(1000, 1000, 1000), 5);
     }
 
     public HashSet<ControlRenderTarget> ControlRenderTargets { get; } = new HashSet<ControlRenderTarget>();
@@ -48,7 +52,7 @@ public class Scene
         }
 
 
-        if (node is IOtreeObject otreeObject)
+        if (node is IOctreeObject otreeObject)
         {
             otreeObject.OnChanged += OnNodeTransformDirty;
         }
@@ -82,7 +86,7 @@ public class Scene
             }
         }
 
-        if (node is IOtreeObject otreeObject)
+        if (node is IOctreeObject otreeObject)
         {
             otreeObject.OnChanged -= OnNodeTransformDirty;
         }
@@ -101,7 +105,7 @@ public class Scene
             return;
         _dirtyNodes.Add(node);
     }
-    void OnNodeTransformDirty(IOtreeObject otreeObject)
+    void OnNodeTransformDirty(IOctreeObject otreeObject)
     {
         if (otreeObject is not Node node)
             return;

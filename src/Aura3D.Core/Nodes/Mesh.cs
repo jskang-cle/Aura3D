@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Aura3D.Core.Nodes;
 
-public class Mesh : Node, IOtreeObject
+public class Mesh : Node, IOctreeObject
 {
     private Material? material;
     public Material? Material 
@@ -82,7 +82,7 @@ public class Mesh : Node, IOtreeObject
     /// </summary>
     private BoundingBox? localBoundingBox;
 
-    public event Action<IOtreeObject> OnChanged = delegate { };
+    public event Action<IOctreeObject> OnChanged = delegate { };
 
     /// <summary>
     /// 更新边界框
@@ -122,7 +122,7 @@ public class Mesh : Node, IOtreeObject
         }
         
         // 从顶点位置创建局部空间边界框
-        localBoundingBox = Math.BoundingBox.CreateFromPoints(positions, this);
+        localBoundingBox = Math.BoundingBox.CreateFromPoints(positions);
         
         // 更新世界空间中的边界框
         UpdateWorldBoundingBox();
