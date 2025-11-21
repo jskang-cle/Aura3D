@@ -51,6 +51,7 @@ public class Mesh : Node, IOctreeObject
         }
     }
 
+
     public override List<IGpuResource> GetGpuResources()
     {
         if (Geometry == null)
@@ -76,7 +77,8 @@ public class Mesh : Node, IOctreeObject
     }
 
     public Model? Model { get; set; }
-    
+    public List<OctreeNode> BelongingNodes => [];
+
     /// <summary>
     /// 局部空间中的边界框
     /// </summary>

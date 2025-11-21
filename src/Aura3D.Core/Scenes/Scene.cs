@@ -13,7 +13,7 @@ public class Scene
 
     private readonly HashSet<Node> _dirtyNodes = [];
 
-    public Octree Octree { get; set; }
+    public Octree StaticMeshOctree { get; set; }
 
     public RenderPipeline RenderPipeline { get; set; }
 
@@ -21,7 +21,7 @@ public class Scene
     {
         RenderPipeline = createRenderPipeline(this);
 
-        Octree = new Octree(new System.Numerics.Vector3(1000, 1000, 1000), 5);
+        StaticMeshOctree = new Octree(new System.Numerics.Vector3(1000, 1000, 1000), 5);
     }
 
     public HashSet<ControlRenderTarget> ControlRenderTargets { get; } = new HashSet<ControlRenderTarget>();
@@ -55,6 +55,11 @@ public class Scene
         if (node is IOctreeObject otreeObject)
         {
             otreeObject.OnChanged += OnNodeTransformDirty;
+        }
+
+        if (node is Mesh mesh)
+        {
+            StaticMeshOctree.Add(mesh);
         }
 
         foreach (var child in node.Children)
@@ -91,6 +96,12 @@ public class Scene
             otreeObject.OnChanged -= OnNodeTransformDirty;
         }
 
+
+        if (node is Mesh mesh)
+        {
+            StaticMeshOctree.Remove(mesh);
+        }
+
         foreach (var child in node.Children)
         {
             RemoveNode(child);
@@ -115,7 +126,15 @@ public class Scene
     {
         foreach(var node in _dirtyNodes)
         {
+            if (_nodes.Contains(node) == false)
+                continue;
+
             node.UpdateTransform();
+
+            if (node is Mesh mesh)
+            {
+                StaticMeshOctree.Update(mesh);
+            }
         }
         _dirtyNodes.Clear();
         foreach(var node in Nodes)

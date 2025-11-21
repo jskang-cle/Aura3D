@@ -94,6 +94,8 @@ public class Octree
 
         _rootNode.Add(obj);
         _allObjects.Add(obj);
+
+        
         return true;
     }
 
@@ -177,7 +179,7 @@ public class Octree
 /// <summary>
 /// 八叉树节点（内部实现）
 /// </summary>
-internal class OctreeNode
+public class OctreeNode
 {
     /// <summary>
     /// 所属八叉树
