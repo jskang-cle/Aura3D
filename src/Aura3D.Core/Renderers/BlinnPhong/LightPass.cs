@@ -65,28 +65,28 @@ public class LightPass : RenderPass
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => FilterSkeletonMesh(mesh) == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+            RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
         }
 
         UseShader("BLENDMODE_MASKED");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => FilterSkeletonMesh(mesh) == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+            RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => FilterSkeletonMesh(mesh) && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+            RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH", "BLENDMODE_MASKED");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => FilterSkeletonMesh(mesh) && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+            RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
         }
     }
 
@@ -298,7 +298,7 @@ public class LightPass : RenderPass
         normalMatrix = Matrix4x4.Transpose(normalMatrix);
         UniformMatrix4("normalMatrix", normalMatrix);
 
-        if (FilterSkeletonMesh(mesh))
+        if (IsSkeletonMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;

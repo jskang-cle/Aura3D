@@ -1,4 +1,6 @@
 ﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Resources;
+using SharpGLTF.Transforms;
 using Silk.NET.OpenGLES;
 using System.Drawing;
 using System.Numerics;
@@ -105,8 +107,57 @@ public partial class RenderPass
         }
     }
 
+    public void RenderStaticMeshes(Func<Mesh, bool> filter, Matrix4x4 view, Matrix4x4 projection)
+    {
+        foreach (var mesh in renderPipeline.Meshes)
+        {
+            if (mesh.Enable == false)
+                continue;
+            if (mesh.Geometry == null)
+                continue;
+            if (IsSkeletonMesh(mesh) == true)
+                continue;
+            if (filter(mesh))
+            {
+                RenderMesh(mesh, view, projection);
+            }
+        }
+    }
 
-    protected bool FilterSkeletonMesh(Mesh mesh)
+    public void RenderSkinnedMeshes(Func<Mesh, bool> filter, Matrix4x4 view, Matrix4x4 projection)
+    {
+        foreach (var mesh in renderPipeline.Meshes)
+        {
+            if (mesh.Enable == false)
+                continue;
+            if (mesh.Geometry == null)
+                continue;
+            if (IsSkeletonMesh(mesh) == false)
+                continue;
+            if (filter(mesh))
+            {
+                RenderMesh(mesh, view, projection);
+            }
+        }
+    }
+
+
+    protected bool IsMaterialBlendMode(Mesh mesh, BlendMode mode)
+    {
+        if (mesh.Material == null)
+            if (mode == BlendMode.Opaque)
+                return true;
+            else
+                return false;
+        else
+        {
+            if (mesh.Material.BlendMode == mode)
+                return true;
+            return false;
+
+        }
+    }
+    protected bool IsSkeletonMesh(Mesh mesh)
     {
         if (mesh.IsSkinnedMesh == true && mesh is SkinnedMesh skinnedMesh && skinnedMesh.Skeleton != null)
             return true;

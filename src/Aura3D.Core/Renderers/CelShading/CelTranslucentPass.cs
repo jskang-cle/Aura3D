@@ -30,14 +30,14 @@ public class CelTranslucentPass : LightPass
         SetupUniform(camera);
         using(PushTextureUnit())
         {
-            RenderMeshes(mesh => FilterSkeletonMesh(mesh) == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Translucent), camera.View, camera.Projection);
+            RenderMeshes(mesh => IsSkeletonMesh(mesh) == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Translucent), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH", "BLENDMODE_TRANSLUCENT");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => FilterSkeletonMesh(mesh) && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Translucent), camera.View, camera.Projection);
+            RenderMeshes(mesh => IsSkeletonMesh(mesh) && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Translucent), camera.View, camera.Projection);
         }
 
     }

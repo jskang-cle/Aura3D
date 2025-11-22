@@ -136,7 +136,7 @@ public class ShadowMapPass : RenderPass
         UniformMatrix4("viewMatrix", view);
         UniformMatrix4("projectionMatrix", projection);
 
-        RenderMeshes(mesh =>  mesh.IsSkinnedMesh == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), view, projection);
+        RenderStaticMeshes(mesh =>  IsMaterialBlendMode(mesh, BlendMode.Opaque), view, projection);
 
 
         UseShader("BLENDMODE_MASKED");
@@ -144,14 +144,14 @@ public class ShadowMapPass : RenderPass
         UniformMatrix4("viewMatrix", view);
         UniformMatrix4("projectionMatrix", projection);
 
-        RenderMeshes(mesh =>  mesh.IsSkinnedMesh == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Masked), view, projection);
+        RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), view, projection);
 
 
         UseShader("SKINNED_MESH");
         UniformMatrix4("viewMatrix", view);
         UniformMatrix4("projectionMatrix", projection);
 
-        RenderMeshes(mesh => mesh.IsSkinnedMesh && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), view, projection);
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), view, projection);
 
 
 
@@ -160,7 +160,7 @@ public class ShadowMapPass : RenderPass
         UniformMatrix4("viewMatrix", view);
         UniformMatrix4("projectionMatrix", projection);
 
-        RenderMeshes(mesh => mesh.IsSkinnedMesh && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Masked), view, projection);
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), view, projection);
 
     }
 
@@ -186,7 +186,7 @@ public class ShadowMapPass : RenderPass
         }
 
 
-        if (FilterSkeletonMesh(mesh))
+        if (IsSkeletonMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;

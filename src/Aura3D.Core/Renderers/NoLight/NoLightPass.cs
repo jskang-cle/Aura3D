@@ -29,23 +29,23 @@ public class NoLightPass : RenderPass
         UseShader();
         UniformMatrix4("viewMatrix", camera.View);
         UniformMatrix4("projectionMatrix", camera.Projection);
-        RenderMeshes(mesh => FilterSkeletonMesh(mesh) == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+        RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
 
 
         UseShader("BLENDMODE_MASKED");
         UniformMatrix4("viewMatrix", camera.View);
         UniformMatrix4("projectionMatrix", camera.Projection);
-        RenderMeshes(mesh => FilterSkeletonMesh(mesh) == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+        RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
 
         UseShader("SKINNED_MESH");
         UniformMatrix4("viewMatrix", camera.View);
         UniformMatrix4("projectionMatrix", camera.Projection);
-        RenderMeshes(mesh => FilterSkeletonMesh(mesh) && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
 
         UseShader("SKINNED_MESH", "BLENDMODE_MASKED");
         UniformMatrix4("viewMatrix", camera.View);
         UniformMatrix4("projectionMatrix", camera.Projection);
-        RenderMeshes(mesh => mesh.IsSkinnedMesh && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
 
 
         gl.Enable(EnableCap.Blend);
@@ -55,13 +55,13 @@ public class NoLightPass : RenderPass
         UseShader("BLENDMODE_TRANSLUCENT");
         UniformMatrix4("viewMatrix", camera.View);
         UniformMatrix4("projectionMatrix", camera.Projection);
-        RenderMeshes(mesh => FilterSkeletonMesh(mesh) == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Translucent), camera.View, camera.Projection);
+        RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
 
 
         UseShader("SKINNED_MESH", "BLENDMODE_TRANSLUCENT");
         UniformMatrix4("viewMatrix", camera.View);
         UniformMatrix4("projectionMatrix", camera.Projection);
-        RenderMeshes(mesh => FilterSkeletonMesh(mesh) && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Translucent), camera.View, camera.Projection);
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
 
     }
 
@@ -106,7 +106,7 @@ public class NoLightPass : RenderPass
             UniformFloat("alphaCutoff", mesh.Material.AlphaCutoff);
         }
 
-        if (FilterSkeletonMesh(mesh))
+        if (IsSkeletonMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;

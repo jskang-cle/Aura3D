@@ -131,4 +131,6 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
             return false;
         return true;
     }
+
+    public Camera MainCamera => Scene.MainCamera;
 }

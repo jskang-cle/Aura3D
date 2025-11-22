@@ -1,7 +1,7 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Aura3D.Core.Math;
+﻿using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Renderers;
+using System.Drawing;
 
 namespace Aura3D.Core.Scenes;
 
@@ -13,6 +13,8 @@ public class Scene
 
     private readonly HashSet<Node> _dirtyNodes = [];
 
+    public Camera MainCamera { get; private set; }
+
     public Octree StaticMeshOctree { get; set; }
 
     public RenderPipeline RenderPipeline { get; set; }
@@ -22,6 +24,14 @@ public class Scene
         RenderPipeline = createRenderPipeline(this);
 
         StaticMeshOctree = new Octree(new System.Numerics.Vector3(1000, 1000, 1000), 5);
+
+        MainCamera = new Camera();
+
+        MainCamera.ClearColor = Color.AliceBlue;
+
+        MainCamera.ClearType = ClearType.Color;
+
+        AddNode(MainCamera);
     }
 
     public HashSet<ControlRenderTarget> ControlRenderTargets { get; } = new HashSet<ControlRenderTarget>();
