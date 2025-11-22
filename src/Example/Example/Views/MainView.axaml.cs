@@ -15,5 +15,6 @@ public partial class MainView : UserControl
     }
     private void UserControl_ActualThemeVariantChanged(object? sender, System.EventArgs e)
     {
+
     }
 }

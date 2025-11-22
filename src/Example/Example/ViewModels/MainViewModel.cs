@@ -23,6 +23,10 @@ namespace Example.ViewModels
                     Title = "Load Gltf Model",
                     ViewModel = new GltfModelViewModel()
                 },
+                new MenuViewModel {
+                    Title = "Frustum Culling ",
+                    ViewModel = new FrustumCullingViewModel()
+                }
             ];
             OnNavigation(this, _menus.First());
         }

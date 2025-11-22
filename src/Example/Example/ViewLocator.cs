@@ -12,6 +12,7 @@ public class ViewLocator : IDataTemplate
         {
             BaseGeometriesViewModel baseGeometriesViewModel => new BaseGeometriesPage(),
             GltfModelViewModel gltfModelViewModel => new GltfModelPage(),
+            FrustumCullingViewModel frustumCullingViewModel => new FrustumCullingPage(),
             _ => new TextBlock() { Text = "NotFound" }
         };
     }

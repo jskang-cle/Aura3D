@@ -62,19 +62,7 @@ public partial class GltfModelPage : UserControl
             return;
         }
 
-        var camera = new Camera();
-
-        camera.ClearColor = Color.AliceBlue;
-
-        camera.ClearType = ClearType.Color;
-
-        camera.NearPlane = 0.1f;
-
-        camera.FarPlane = 50;
-
-        modelPosition = camera.Position + camera.Forward * 2;
-
-        view.AddNode(camera);
+        modelPosition = view.MainCamera.Position + view.MainCamera.Forward * 2;
 
         var dl = new DirectionalLight();
 

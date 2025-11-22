@@ -41,17 +41,6 @@ public partial class BaseGeometriesPage : UserControl
         }
         try
         {
-            var camera = new Camera();
-
-            camera.ClearColor = Color.AliceBlue;
-
-            camera.ClearType = ClearType.Color;
-
-            camera.NearPlane = 0.1f;
-
-            camera.FarPlane = 50;
-
-            view.AddNode(camera);
 
             var mesh = new Mesh();
 
@@ -81,7 +70,7 @@ public partial class BaseGeometriesPage : UserControl
 
             mesh.Material.DoubleSided = true;
 
-            mesh.Position = camera.Position + camera.Forward * 3;
+            mesh.Position = view.MainCamera.Position + view.MainCamera.Forward * 3;
 
             mesh.RotationDegrees = new Vector3(90, 0, 0);
 
