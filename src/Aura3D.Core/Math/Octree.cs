@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Silk.NET.Core.Native;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -7,7 +8,7 @@ namespace Aura3D.Core.Math;
 /// <summary>
 /// 三维八叉树空间索引，用于高效的空间查询和物体管理（单线程版本）
 /// </summary>
-public class Octree
+public class Octree<T> where T : IOctreeObject
 {
     /// <summary>
     /// 八叉树最大深度
@@ -24,12 +25,12 @@ public class Octree
     /// <summary>
     /// 八叉树根节点
     /// </summary>
-    private readonly OctreeNode _rootNode;
+    private readonly OctreeNode<T> _rootNode;
 
     /// <summary>
     /// 所有加入八叉树的物体
     /// </summary>
-    private readonly HashSet<IOctreeObject> _allObjects = new HashSet<IOctreeObject>();
+    private readonly HashSet<T> _allObjects = new HashSet<T>();
 
     /// <summary>
     /// 初始化八叉树
@@ -56,7 +57,7 @@ public class Octree
     /// 创建八叉树根节点
     /// </summary>
     /// <returns>根节点</returns>
-    private OctreeNode CreateRootNode()
+    private OctreeNode<T> CreateRootNode()
     {
         return CreateOctreeNode(Vector3.Zero, _size, 0);
     }
@@ -68,9 +69,9 @@ public class Octree
     /// <param name="size">节点尺寸</param>
     /// <param name="depth">节点深度</param>
     /// <returns>新的八叉树节点</returns>
-    internal OctreeNode CreateOctreeNode(Vector3 center, Vector3 size, int depth)
+    internal OctreeNode<T> CreateOctreeNode(Vector3 center, Vector3 size, int depth)
     {
-        return new OctreeNode(this, center, size, depth);
+        return new OctreeNode<T>(this, center, size, depth);
     }
 
     /// <summary>
@@ -80,7 +81,7 @@ public class Octree
     /// <returns>添加成功返回 true，已存在返回 false</returns>
     /// <exception cref="ArgumentNullException">obj 为 null 时抛出</exception>
     /// <exception cref="ArgumentException">obj 的包围盒无效时抛出</exception>
-    public bool Add(IOctreeObject obj)
+    public bool Add(T obj)
     {
         ArgumentNullException.ThrowIfNull(obj);
 
@@ -105,7 +106,7 @@ public class Octree
     /// <param name="obj">待移除的物体</param>
     /// <returns>移除成功返回 true，不存在返回 false</returns>
     /// <exception cref="ArgumentNullException">obj 为 null 时抛出</exception>
-    public bool Remove(IOctreeObject obj)
+    public bool Remove(T obj)
     {
         ArgumentNullException.ThrowIfNull(obj);
 
@@ -113,9 +114,10 @@ public class Octree
             return false;
 
         // 从所有所属节点移除
-        foreach (var node in obj.BelongingNodes.ToArray())
+        foreach (var objNode in obj.BelongingNodes.ToArray())
         {
-            node.Remove(obj);
+            if (objNode is OctreeNode<T> node)
+                node.Remove(obj);
         }
         obj.BelongingNodes.Clear();
 
@@ -129,7 +131,7 @@ public class Octree
     /// <param name="obj">待更新的物体</param>
     /// <exception cref="ArgumentNullException">obj 为 null 时抛出</exception>
     /// <exception cref="KeyNotFoundException">obj 未加入八叉树时抛出</exception>
-    public void Update(IOctreeObject obj)
+    public void Update(T obj)
     {
         ArgumentNullException.ThrowIfNull(obj);
 
@@ -137,9 +139,10 @@ public class Octree
             throw new KeyNotFoundException("物体未加入八叉树，无法更新");
 
         // 从所有所属节点移除
-        foreach (var node in obj.BelongingNodes.ToArray())
+        foreach (var objNode in obj.BelongingNodes.ToArray())
         {
-            node.Remove(obj);
+            if (objNode is OctreeNode<T> node)
+                node.Remove(obj);
         }
         obj.BelongingNodes.Clear();
 
@@ -153,13 +156,33 @@ public class Octree
     /// <param name="queryBox">查询包围盒</param>
     /// <returns>符合条件的物体集合</returns>
     /// <exception cref="ArgumentNullException">queryBox 为 null 时抛出</exception>
-    public List<IOctreeObject> Query(BoundingBox queryBox)
+
+
+
+    /// <summary>
+    /// 空间查询：获取指定包围盒内的所有物体
+    /// </summary>
+    /// <param name="queryBox">查询包围盒</param>
+    /// <returns>符合条件的物体集合</returns>
+    /// <exception cref="ArgumentNullException">queryBox 为 null 时抛出</exception>
+    public void Query(BoundingBox queryBox, List<T> result)
     {
         ArgumentNullException.ThrowIfNull(queryBox);
 
-        var result = new List<IOctreeObject>();
         _rootNode.Query(queryBox, result);
-        return result;
+    }
+
+    /// <summary>
+    /// 空间查询：获取指定包围盒内的所有物体
+    /// </summary>
+    /// <param name="filter">判断函数</param>
+    /// <returns>符合条件的物体集合</returns>
+    /// <exception cref="ArgumentNullException">queryBox 为 null 时抛出</exception>
+    public void Query(Func<BoundingBox, bool> filter, List<T> result)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        _rootNode.Query(filter, result);
     }
 
     /// <summary>
@@ -179,12 +202,12 @@ public class Octree
 /// <summary>
 /// 八叉树节点（内部实现）
 /// </summary>
-public class OctreeNode
+public class OctreeNode<T> where T : IOctreeObject
 {
     /// <summary>
     /// 所属八叉树
     /// </summary>
-    private readonly Octree _octree;
+    private readonly Octree<T> _octree;
 
     /// <summary>
     /// 节点深度（根节点为 0）
@@ -199,12 +222,12 @@ public class OctreeNode
     /// <summary>
     /// 子节点（8个，初始化时为 null，按需创建）
     /// </summary>
-    private List<OctreeNode>? _children;
+    private List<OctreeNode<T>>? _children;
 
     /// <summary>
     /// 当前节点存储的物体
     /// </summary>
-    private readonly HashSet<IOctreeObject> _objects = new HashSet<IOctreeObject>();
+    private readonly HashSet<T> _objects = new HashSet<T>();
 
     /// <summary>
     /// 初始化八叉树节点
@@ -213,7 +236,7 @@ public class OctreeNode
     /// <param name="center">节点中心点</param>
     /// <param name="size">节点尺寸</param>
     /// <param name="depth">节点深度</param>
-    public OctreeNode(Octree octree, Vector3 center, Vector3 size, int depth)
+    public OctreeNode(Octree<T> octree, Vector3 center, Vector3 size, int depth)
     {
         _octree = octree;
         _depth = depth;
@@ -224,7 +247,7 @@ public class OctreeNode
     /// 添加物体到节点（递归）
     /// </summary>
     /// <param name="obj">待添加的物体</param>
-    public void Add(IOctreeObject obj)
+    public void Add(T obj)
     {
         // 1. 达到最大深度，直接添加到当前节点
         if (_depth >= _octree.MaxDepth)
@@ -271,7 +294,7 @@ public class OctreeNode
     /// 从节点移除物体（递归）
     /// </summary>
     /// <param name="obj">待移除的物体</param>
-    public void Remove(IOctreeObject obj)
+    public void Remove(T obj)
     {
         // 从当前节点移除
         _objects.Remove(obj);
@@ -291,7 +314,7 @@ public class OctreeNode
     /// </summary>
     /// <param name="queryBox">查询包围盒</param>
     /// <param name="result">查询结果（输出参数）</param>
-    public void Query(BoundingBox queryBox, List<IOctreeObject> result)
+    public void Query(BoundingBox queryBox, List<T> result)
     {
         // 当前节点与查询盒无交集，直接返回
         if (!BoundingBox.Intersects(queryBox))
@@ -310,6 +333,36 @@ public class OctreeNode
             foreach (var child in _children)
             {
                 child.Query(queryBox, result);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 空间查询（递归）
+    /// </summary>
+    /// <param name="filter">判断函数</param>
+    /// <param name="result">查询结果（输出参数）</param>
+    public void Query(Func<BoundingBox, bool> filter, List<T> result)
+    {
+        if (filter.Invoke(this.BoundingBox) == false) 
+            return;
+
+        // 添加当前节点中符合条件的物体
+        foreach (var obj in _objects)
+        {
+            if (filter.Invoke(obj.BoundingBox) && !result.Contains(obj))
+            {
+                result.Add(obj);
+            }
+        }
+
+        // 递归查询子节点
+        if (_children != null)
+        {
+            foreach (var child in _children)
+            {
+                child.Query(filter, result);
             }
         }
     }
@@ -338,7 +391,7 @@ public class OctreeNode
         if (_children != null)
             return;
 
-        _children = new List<OctreeNode>(8);
+        _children = new List<OctreeNode<T>>(8);
         var center = BoundingBox.Center;
         var childSize = BoundingBox.Size / 2;
         var quarterSize = BoundingBox.Size / 4;

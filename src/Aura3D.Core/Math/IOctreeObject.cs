@@ -20,7 +20,7 @@ public interface IOctreeObject
     /// <summary>
     /// 物体所属的八叉树节点（用于快速移除/更新）
     /// </summary>
-    List<OctreeNode> BelongingNodes { get; }
+    List<object> BelongingNodes { get; }
 
     event Action<IOctreeObject>? OnChanged;
 }

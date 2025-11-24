@@ -1,6 +1,7 @@
 ﻿using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
+using Aura3D.Core.Scenes;
 using Silk.NET.OpenGLES;
 using System.Numerics;
 
@@ -8,6 +9,15 @@ namespace Aura3D.Core.Renderers;
 
 public abstract partial class RenderPipeline
 {
+    public RenderPipeline(Scene scene)
+    {
+        this.Scene = scene;
+    }
+
+    public bool EnableFrustumCulling { get; set; } = true;
+
+    public Scene Scene { get; private set; }
+
     public List<Mesh> Meshes { get; } = new List<Mesh>();
 
     public List<Camera> Cameras { get; } = new List<Camera>();

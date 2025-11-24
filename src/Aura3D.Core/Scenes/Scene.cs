@@ -15,7 +15,7 @@ public class Scene
 
     public Camera MainCamera { get; private set; }
 
-    public Octree StaticMeshOctree { get; set; }
+    public Octree<Mesh> StaticMeshOctree { get; set; }
 
     public RenderPipeline RenderPipeline { get; set; }
 
@@ -23,7 +23,7 @@ public class Scene
     {
         RenderPipeline = createRenderPipeline(this);
 
-        StaticMeshOctree = new Octree(new System.Numerics.Vector3(1000, 1000, 1000), 5);
+        StaticMeshOctree = new Octree<Mesh>(new System.Numerics.Vector3(100, 100, 100), 5);
 
         MainCamera = new Camera();
 

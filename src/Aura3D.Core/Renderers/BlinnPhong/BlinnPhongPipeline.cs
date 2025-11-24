@@ -6,7 +6,7 @@ namespace Aura3D.Core.Renderers;
 public class BlinnPhongPipeline : RenderPipeline
 {
 
-    public BlinnPhongPipeline(Scene scene)
+    public BlinnPhongPipeline(Scene scene) : base(scene)
     {
         var shadowMapPass = new ShadowMapPass(this);
         LightLimitChangedEvent += shadowMapPass.UpdateLightNumLimit;

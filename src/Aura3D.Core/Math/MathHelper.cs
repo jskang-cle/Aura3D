@@ -148,4 +148,29 @@ public static class MatrixHelper
         var scaleMatrix = Matrix4x4.CreateScale(scale);
         return scaleMatrix * rotationMatrix * positionMatrix;
     }
+
+
+    public static void ExtractPlanes(Matrix4x4 viewProj, Span<Plane> planes)
+    {
+        // 列主序矩阵：取列向量
+        Vector4 col1 = new Vector4(viewProj.M11, viewProj.M21, viewProj.M31, viewProj.M41);
+        Vector4 col2 = new Vector4(viewProj.M12, viewProj.M22, viewProj.M32, viewProj.M42);
+        Vector4 col3 = new Vector4(viewProj.M13, viewProj.M23, viewProj.M33, viewProj.M43);
+        Vector4 col4 = new Vector4(viewProj.M14, viewProj.M24, viewProj.M34, viewProj.M44);
+
+
+        planes[0] = NormalizePlane(new Plane(new Vector3(col4.X + col1.X, col4.Y + col1.Y, col4.Z + col1.Z), col4.W + col1.W)); // Left
+        planes[1] = NormalizePlane(new Plane(new Vector3(col4.X - col1.X, col4.Y - col1.Y, col4.Z - col1.Z), col4.W - col1.W)); // Right
+        planes[2] = NormalizePlane(new Plane(new Vector3(col4.X + col2.X, col4.Y + col2.Y, col4.Z + col2.Z), col4.W + col2.W)); // Bottom
+        planes[3] = NormalizePlane(new Plane(new Vector3(col4.X - col2.X, col4.Y - col2.Y, col4.Z - col2.Z), col4.W - col2.W)); // Top
+        planes[4] = NormalizePlane(new Plane(new Vector3(col4.X + col3.X, col4.Y + col3.Y, col4.Z + col3.Z), col4.W + col3.W)); // Near
+        planes[5] = NormalizePlane(new Plane(new Vector3(col4.X - col3.X, col4.Y - col3.Y, col4.Z - col3.Z), col4.W - col3.W)); // Far
+
+    }
+
+    private static Plane NormalizePlane(Plane p)
+    {
+        float length = p.Normal.Length();
+        return new Plane(p.Normal / length, p.D / length);
+    }
 }

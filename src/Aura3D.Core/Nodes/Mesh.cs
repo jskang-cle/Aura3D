@@ -77,7 +77,7 @@ public class Mesh : Node, IOctreeObject
     }
 
     public Model? Model { get; set; }
-    public List<OctreeNode> BelongingNodes => [];
+    public List<object> BelongingNodes => [];
 
     /// <summary>
     /// 局部空间中的边界框

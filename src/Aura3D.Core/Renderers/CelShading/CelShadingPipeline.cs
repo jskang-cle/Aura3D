@@ -6,7 +6,7 @@ namespace Aura3D.Core.Renderers;
 public class CelShadingPipeline : RenderPipeline
 {
 
-    public CelShadingPipeline(Scene scene)
+    public CelShadingPipeline(Scene scene) : base(scene)
     {
         var shadowMapPass = new ShadowMapPass(this);
         LightLimitChangedEvent += shadowMapPass.UpdateLightNumLimit;

@@ -10,7 +10,7 @@ namespace Aura3D.Core.Renderers;
 
 public class NoLightPipeline : RenderPipeline
 {
-    public NoLightPipeline(Scene scene)
+    public NoLightPipeline(Scene scene) : base(scene)
     {
         var noLightPass = new NoLightPass(this);
 

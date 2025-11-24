@@ -299,6 +299,49 @@ public class BoundingBox : IEquatable<BoundingBox>
         return minEqual && maxEqual;
     }
 
+
+    public bool IsBoxInsideFrustum(Span<Plane> planes)
+    {
+        // 生成 AABB 的 8 个顶点
+        Span<Vector3> corners = stackalloc Vector3[8];
+        corners[0] = new Vector3(Min.X, Min.Y, Min.Z);
+        corners[1] = new Vector3(Max.X, Min.Y, Min.Z);
+        corners[2] = new Vector3(Min.X, Max.Y, Min.Z);
+        corners[3] = new Vector3(Max.X, Max.Y, Min.Z);
+        corners[4] = new Vector3(Min.X, Min.Y, Max.Z);
+        corners[5] = new Vector3(Max.X, Min.Y, Max.Z);
+        corners[6] = new Vector3(Min.X, Max.Y, Max.Z);
+        corners[7] = new Vector3(Max.X, Max.Y, Max.Z);
+
+        // 遍历六个平面
+        foreach (var plane in planes)
+        {
+            bool allOutside = true;
+
+            foreach (var corner in corners)
+            {
+                // 点到平面的距离
+                float dist = Plane.DotCoordinate(plane, corner);
+
+                if (dist >= 0)
+                {
+                    // 至少一个点在平面内侧
+                    allOutside = false;
+                    break;
+                }
+            }
+
+            if (allOutside)
+            {
+                // 所有点都在平面外 → 整个盒子在视锥体外
+                return false;
+            }
+        }
+
+        // 所有平面都通过测试 → 在视锥体内或相交
+        return true;
+    }
+
     /// <summary>
     /// 比较对象是否与当前包围盒相等
     /// </summary>
@@ -334,6 +377,7 @@ public class BoundingBox : IEquatable<BoundingBox>
         return EqualityComparer<BoundingBox>.Default.Equals(left, right);
     }
 
+
     /// <summary>
     /// 不等运算符重载
     /// </summary>
@@ -351,4 +395,5 @@ public class BoundingBox : IEquatable<BoundingBox>
         return $"BoundingBox(Min=({Min.X:F6}, {Min.Y:F6}, {Min.Z:F6}), " +
                $"Max=({Max.X:F6}, {Max.Y:F6}, {Max.Z:F6}))";
     }
+
 }
