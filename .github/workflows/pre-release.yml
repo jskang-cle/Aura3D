@@ -1,4 +1,4 @@
-name: Weekly build
+name: pre-release build
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
         id: generate_version
         run: |
           DATE_VERSION=$(date +'%Y%m%d')
-          VERSION="1.0.0-weekly.${DATE_VERSION}"
+          VERSION="2.0.0-pre-release.${DATE_VERSION}"
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
       # 修复打包命令：移除多余空格，参数紧凑拼接
