@@ -87,7 +87,7 @@ public partial class FrustumCullingPage : UserControl
             return;
         }
 
-        int num = 1000; // 100个mesh对象
+        int num = 10000; // 100个mesh对象
         float spacing = 1.5f; // Cube间距（>1避免重叠，可按需调整）
 
         // 计算10×10网格的居中偏移（让整体以原点为中心）

@@ -54,6 +54,7 @@ public abstract partial class RenderPipeline
 
     protected event Action<int, int, int>? LightLimitChangedEvent;
 
+    public List<Mesh> VisibleMeshesInCamera = [];
     protected void RegisterRenderPass(RenderPass renderPass, RenderPassGroup renderPassGroup)
     {
         if (renderPassGroup == RenderPassGroup.EveryCamera)
@@ -182,6 +183,13 @@ public abstract partial class RenderPipeline
         {
             if (camera.Enable == false)
                 continue;
+            if (EnableFrustumCulling == true)
+                UpdateVisibleMeshesInCamera(camera.View, camera.Projection);
+            else
+            {
+                VisibleMeshesInCamera.Clear();
+                VisibleMeshesInCamera.AddRange(Meshes);
+            }
             BeforeCameraRender(camera);
             foreach (var renderPass in EveryCameraRenderPasses)
             {
@@ -194,6 +202,55 @@ public abstract partial class RenderPipeline
         AfterRender();
     }
 
+    private Plane[] planes = new Plane[6];
+    public void UpdateVisibleMeshesInCamera(Matrix4x4 view, Matrix4x4 projection)
+    {
+        VisibleMeshesInCamera.Clear();
+        
+        var viewProjection = view * projection;
+
+        Matrix4x4.Invert(viewProjection, out Matrix4x4 invViewProj);
+
+        Span<Vector3> ndcCorners = stackalloc Vector3[]
+        {
+            new Vector3(-1,-1,-1), new Vector3(1,-1,-1),
+            new Vector3(-1, 1,-1), new Vector3(1, 1,-1),
+            new Vector3(-1,-1, 1), new Vector3(1,-1, 1),
+            new Vector3(-1, 1, 1), new Vector3(1, 1, 1)
+        };
+
+        Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+        foreach (var c in ndcCorners)
+        {
+            Vector4 p = new Vector4(c, 1.0f);
+            Vector4 world = Vector4.Transform(p, invViewProj);
+            world /= world.W;
+
+            Vector3 wpos = new Vector3(world.X, world.Y, world.Z);
+            min = Vector3.Min(min, wpos);
+            max = Vector3.Max(max, wpos);
+        }
+
+        var cameraBoudingBox = new BoundingBox (min, max);
+
+
+        MatrixHelper.ExtractPlanes(viewProjection, planes);
+
+        this.Scene.StaticMeshOctree.Query(boundingBox =>
+        {
+            if (cameraBoudingBox.Intersects(boundingBox))
+            {
+                if (boundingBox.IsBoxInsideFrustum(planes))
+                {
+                    return true;
+                }
+            }
+            return false;
+
+        }, VisibleMeshesInCamera);
+    }
     public virtual void BeforeRender()
     {
 

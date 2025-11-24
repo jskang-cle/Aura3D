@@ -26,7 +26,8 @@ public partial class RenderPass
     protected List<PointLight> PointLights => renderPipeline.PointLights;
 
     protected List<SpotLight> SpotLights => renderPipeline.SpotLights;
-
+    
+    protected List<Mesh> VisibleMeshesInCamera => renderPipeline.VisibleMeshesInCamera;
     protected GL gl => renderPipeline.gl!;
     public virtual void Setup()
     {
@@ -113,6 +114,22 @@ public partial class RenderPass
             }
         }
     }
+    
+    public void RenderMeshesFromList(List<Mesh> meshes, Func<Mesh, bool> filter, Matrix4x4 view, Matrix4x4 projection)
+    {
+        foreach (var mesh in meshes)
+        {
+            if (mesh.Enable == false)
+                continue;
+            if (mesh.Geometry == null)
+                continue;
+            if (filter(mesh))
+            {
+                RenderMesh(mesh, view, projection);
+            }
+        }
+    }
+    
     List<Mesh> meshes = new List<Mesh>();
     Plane[] planes = new Plane[6];
     public void RenderStaticMeshes(Func<Mesh, bool> filter, Matrix4x4 view, Matrix4x4 projection)

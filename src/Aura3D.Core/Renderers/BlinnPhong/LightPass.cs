@@ -65,14 +65,14 @@ public class LightPass : RenderPass
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
+            RenderMeshesFromList(VisibleMeshesInCamera, mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
         }
 
         UseShader("BLENDMODE_MASKED");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
+            RenderMeshesFromList(VisibleMeshesInCamera, mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH");

@@ -12,7 +12,7 @@ public class BlinnPhongPipeline : RenderPipeline
         LightLimitChangedEvent += shadowMapPass.UpdateLightNumLimit;
         RegisterRenderPass(shadowMapPass, RenderPassGroup.Once);
 
-
+        
         RegisterRenderPass(new BackgroundPass(this).SetOutPutRenderTarget("BaseRenderTarget"), RenderPassGroup.EveryCamera);
 
         var basePass = (LightPass)new LightPass(this).SetOutPutRenderTarget("BaseRenderTarget");
