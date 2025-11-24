@@ -7,8 +7,8 @@
              x:Class="Example.Pages.FrustumCullingPage">
   <DockPanel>
 	  <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-		  <CheckBox Content="Frustum Culling"></CheckBox>
+		  <CheckBox x:Name="checkbox" Content="Frustum Culling" IsCheckedChanged="CheckBox_IsCheckedChanged"></CheckBox>
       </StackPanel>
-      <local:Aura3DView SceneInitialized="Aura3DView_SceneInitialized"/>
+      <local:Aura3DView x:Name="aura3Dview" SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="aura3Dview_SceneUpdated"/>
   </DockPanel>
 </UserControl>
