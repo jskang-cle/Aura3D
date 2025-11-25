@@ -7,7 +7,9 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 
 namespace Example.Pages;
@@ -48,9 +50,13 @@ public partial class FrustumCullingPage : UserControl
             {
                 var delta = newPosition - point;
 
-                aura3Dview.MainCamera!.RotationDegrees = new Vector3(
-                    (float)(aura3Dview.MainCamera.RotationDegrees.X + (float)delta.Y * (float)deltaTime * 20),
-                    (float)(aura3Dview.MainCamera.RotationDegrees.Y + (float)delta.X * (float)deltaTime * 20f), 0);
+                if (aura3Dview.MainCamera != null)
+                {
+
+                    aura3Dview.MainCamera!.RotationDegrees = new Vector3(
+                        (float)(aura3Dview.MainCamera.RotationDegrees.X + (float)delta.Y * (float)deltaTime * 20),
+                        (float)(aura3Dview.MainCamera.RotationDegrees.Y + (float)delta.X * (float)deltaTime * 20f), 0);
+                }
 
             }
             point = newPosition;
@@ -59,6 +65,11 @@ public partial class FrustumCullingPage : UserControl
 
         this.aura3Dview.KeyDown += (s, e) =>
         {
+
+            if (aura3Dview.MainCamera == null)
+            {
+                return;
+            }
             if (e.Key == Avalonia.Input.Key.W)
             {
                 aura3Dview.MainCamera!.Position += aura3Dview.MainCamera.Forward * (float)deltaTime;
@@ -78,6 +89,89 @@ public partial class FrustumCullingPage : UserControl
         };
 
     }
+
+    List<Mesh> meshes = [];
+    BoxGeometry? box = null;
+    Material? material = null;
+
+    private void Build(Aura3DView view, int num)
+    {
+        foreach(var mesh in meshes)
+        {
+            view.Remove(mesh);
+        }
+
+        meshes.Clear();
+        if (box == null)
+        {
+             box = new BoxGeometry();
+        }
+        if (material == null)
+        {
+             material = new Material
+            {
+                BlendMode = BlendMode.Opaque,
+                Channels = new List<Channel>
+                    {
+                        new Channel()
+                        {
+                            Name = "BaseColor",
+                            Color = Color.White,
+                        }
+                    }
+            };
+        }
+
+        int gridSize = (int)Math.Ceiling(Math.Pow(num, 1.0 / 3.0));
+        float spacing = 2f;
+        float offset = (gridSize - 1) * spacing / 2f;
+
+        int currentIndex = 0;
+        for (int x = 0; x < gridSize; x++)
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                for (int z = 0; z < gridSize; z++)
+                {
+                    if (currentIndex >= num) break;
+
+                    float xPos = x * spacing - offset;
+                    float yPos = y * spacing - offset;
+                    float zPos = z * spacing - offset;
+
+                    var mesh = new Mesh
+                    {
+                        Geometry = box,
+                        Material = material,
+                        Position = new Vector3(xPos, yPos, zPos)
+                    };
+
+                    view.AddNode(mesh);
+                    meshes.Add(mesh);
+                    currentIndex++;
+                }
+            }
+        }
+
+        // è®¡ç®—æ•´ä½“èŒƒå›´
+        float minX = -offset;
+        float maxX = offset;
+        float minZ = -offset;
+        float maxZ = offset;
+        float minY = -1f;   // ä½ å›ºå®šçš„ Y
+        float maxY = 1f;    // å¯ä»¥ç¨å¾®ç»™ç‚¹é«˜åº¦ä½™é‡
+
+        var rand = new Random();
+
+        // åœ¨èŒƒå›´å†…éšæœºç”Ÿæˆæ‘„åƒæœºä½ç½®
+        float camX = (float)(rand.NextDouble() * (maxX - minX) + minX);
+        float camY = (float)(rand.NextDouble() * (maxY - minY) + minY);
+        float camZ = (float)(rand.NextDouble() * (maxZ - minZ) + minZ);
+
+        // è®¾ç½®æ‘„åƒæœº
+        view.MainCamera.Position = new Vector3(camX, camY, camZ);
+
+    }
     private void Aura3DView_SceneInitialized(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         var view = sender as Aura3DView;
@@ -87,61 +181,7 @@ public partial class FrustumCullingPage : UserControl
             return;
         }
 
-        int num = 10000; // 100¸ömesh¶ÔÏó
-        float spacing = 1.5f; // Cube¼ä¾à£¨>1±ÜÃâÖØµþ£¬¿É°´Ðèµ÷Õû£©
-
-        // ¼ÆËã10¡Á10Íø¸ñµÄ¾ÓÖÐÆ«ÒÆ£¨ÈÃÕûÌåÒÔÔ­µãÎªÖÐÐÄ£©
-        int gridSize = (int)Math.Sqrt(num);
-        float offset = (gridSize - 1) * spacing / 2f;
-
-        int currentIndex = 0; // ÒÑ´´½¨µÄmesh¼ÆÊý
-        var box = new BoxGeometry();
-        var material = new Material
-        {
-            BlendMode = BlendMode.Opaque,
-            Channels = new List<Channel>
-                    {
-                        new Channel()
-                        {
-                            Name = "BaseColor",
-                            Color = Color.White,
-                        }
-                    }
-        };
-        for (int xIndex = 0; xIndex < gridSize; xIndex++)
-        {
-            for (int zIndex = 0; zIndex < gridSize; zIndex++)
-            {
-                // ´ïµ½100¸öÔòÍ£Ö¹´´½¨
-                if (currentIndex >= num) break;
-
-                var mesh = new Mesh();
-
-                mesh.Geometry = box;
-
-                mesh.Material = material;
-
-                // ºËÐÄ£º¼ÆËã¾ùÔÈ·Ö²¼µÄÎ»ÖÃ£¨Y¹Ì¶¨Îª0£©
-                // X×ø±ê£ºÍø¸ñÁÐ¡Á¼ä¾à - ¾ÓÖÐÆ«ÒÆ
-                float xPos = xIndex * spacing - offset;
-                // Y×ø±ê¹Ì¶¨Îª0
-                float yPos = -1f;
-                // Z×ø±ê£ºÍø¸ñÐÐ¡Á¼ä¾à - ¾ÓÖÐÆ«ÒÆ
-                float zPos = zIndex * spacing - offset;
-
-                // ÉèÖÃmeshµÄPosition£¨ÐèÆ¥ÅäÄãÏîÄ¿ÖÐPositionµÄ¸³Öµ·½Ê½£©
-                // ÈôPositionÊÇVector3½á¹¹Ìå£¬Ö±½Ó¸³Öµ£»ÈôÎªµ¥¶ÀµÄX/Y/ZÊôÐÔ£¬·Ö±ð¸³Öµ
-                mesh.Position = new Vector3(xPos, yPos, zPos);
-                // ÈôÄãµÄPositionÊÇ·Ö¿ªµÄÊôÐÔ£¬Ìæ»»Îª£º
-                // mesh.PositionX = xPos;
-                // mesh.PositionY = yPos;
-                // mesh.PositionZ = zPos;
-
-                view.AddNode(mesh);
-                currentIndex++;
-            }
-            if (currentIndex >= num) break;
-        }
+        Build(aura3Dview, 1000);
 
         var dl = new DirectionalLight();
 
@@ -154,11 +194,23 @@ public partial class FrustumCullingPage : UserControl
     }
 
     double deltaTime = 0;
+
+    private List<double> deltaTimes = [];
     private void aura3Dview_SceneUpdated(object? sender, UpdateRoutedEventArgs args)
     {
-        var view = (Aura3DView)sender;
         deltaTime = args.DeltaTime;
-        Console.WriteLine(deltaTime);
+
+        if (deltaTimes.Count >= 10)
+        {
+            deltaTimes.RemoveAt(0);
+        }
+
+        deltaTimes.Add(deltaTime);
+
+        var dt = deltaTimes.Average();
+
+        frameText.Text = "å¸§çŽ‡:" + (int)(1 / dt);
+
     }
 
     private void CheckBox_IsCheckedChanged(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -167,12 +219,22 @@ public partial class FrustumCullingPage : UserControl
             return;
         if (checkbox.IsChecked == null || checkbox.IsChecked == false)
         {
-            
+
             aura3Dview.Scene.RenderPipeline.EnableFrustumCulling = false;
         }
         else
         {
             aura3Dview.Scene.RenderPipeline.EnableFrustumCulling = true;
         }
+    }
+
+    private void Button_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (int.TryParse(numTextBox.Text.Trim(), out var num))
+        {
+            Build(aura3Dview, num);
+        }
+
+
     }
 }
