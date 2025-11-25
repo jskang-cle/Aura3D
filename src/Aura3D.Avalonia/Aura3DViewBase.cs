@@ -46,6 +46,8 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
 
         var deltaTime = Stopwatch.Elapsed.TotalSeconds;
 
+        Stopwatch.Restart();
+
         Scene.RenderPipeline.DefaultFramebuffer = (uint)fb;
 
 
@@ -84,7 +86,6 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
 
         OnSceneUpdated(deltaTime);
 
-        Stopwatch.Restart();
 
         RequestNextFrameRendering();
     }
