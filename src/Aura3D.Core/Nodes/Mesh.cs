@@ -77,14 +77,16 @@ public class Mesh : Node, IOctreeObject
     }
 
     public Model? Model { get; set; }
-    public List<object> BelongingNodes => [];
+    public List<object> BelongingNodes => belongingNodes;
+
+    private List<object> belongingNodes = [];
 
     /// <summary>
     /// 局部空间中的边界框
     /// </summary>
     private BoundingBox? localBoundingBox;
 
-    public event Action<IOctreeObject> OnChanged = delegate { };
+    public event Action<IOctreeObject>? OnChanged = delegate { };
 
     /// <summary>
     /// 更新边界框
@@ -95,7 +97,7 @@ public class Mesh : Node, IOctreeObject
         {
             localBoundingBox = null;
             boundingBox = null;
-            OnChanged.Invoke(this);
+            OnChanged?.Invoke(this);
             return;
         }
         
@@ -105,7 +107,7 @@ public class Mesh : Node, IOctreeObject
         {
             localBoundingBox = null;
             boundingBox = null;
-            OnChanged.Invoke(this);
+            OnChanged?.Invoke(this);
             return;
         }
         
@@ -128,7 +130,7 @@ public class Mesh : Node, IOctreeObject
         
         // 更新世界空间中的边界框
         UpdateWorldBoundingBox();
-        OnChanged.Invoke(this);
+        OnChanged?.Invoke(this);
     }
     
     /// <summary>
@@ -154,6 +156,6 @@ public class Mesh : Node, IOctreeObject
     {
         base.UpdateTransform();
         UpdateWorldBoundingBox();
-        OnChanged.Invoke(this);
+        OnChanged?.Invoke(this);
     }
 }

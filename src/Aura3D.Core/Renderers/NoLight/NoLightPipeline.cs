@@ -35,7 +35,7 @@ public class NoLightPipeline : RenderPipeline
         base.BeforeCameraRender(camera);
         if (gl == null)
             return;
-        SortMeshes(Meshes, camera);
+        SortMeshes(VisibleMeshesInCamera, camera);
         gl.Viewport(0, 0, camera.RenderTarget.Width, camera.RenderTarget.Height);
     }
 }

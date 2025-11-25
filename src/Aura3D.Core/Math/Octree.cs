@@ -20,12 +20,13 @@ public class Octree<T> where T : IOctreeObject
     /// 八叉树根节点尺寸
     /// </summary>
     public Vector3 Size => _size;
-    private readonly Vector3 _size;
+
+    private Vector3 _size;
 
     /// <summary>
     /// 八叉树根节点
     /// </summary>
-    private readonly OctreeNode<T> _rootNode;
+    private OctreeNode<T> _rootNode;
 
     /// <summary>
     /// 所有加入八叉树的物体
@@ -93,11 +94,58 @@ public class Octree<T> where T : IOctreeObject
         if (_allObjects.Contains(obj))
             return false;
 
+
+        if (_rootNode.BoundingBox.Contains(obj.BoundingBox) == false)
+        {
+            foreach (var obj2 in _allObjects)
+            {
+                foreach(var objNode in obj2.BelongingNodes)
+                {
+                    if (objNode is OctreeNode<T> node)
+                    {
+                        node.Remove(obj2);
+                    }
+                }
+                obj2.BelongingNodes.Clear();
+            }
+
+            var newSize = Size;
+
+            if (obj.BoundingBox.Max.X > _rootNode.BoundingBox.Max.X || obj.BoundingBox.Min.X < _rootNode.BoundingBox.Min.X)
+            {
+                newSize.X = newSize.X * 2;
+            }
+
+            if (obj.BoundingBox.Max.Y > _rootNode.BoundingBox.Max.Y || obj.BoundingBox.Min.Y < _rootNode.BoundingBox.Min.Y)
+            {
+                newSize.Y = newSize.Y * 2;
+            }
+
+            if (obj.BoundingBox.Max.Z > _rootNode.BoundingBox.Max.Z || obj.BoundingBox.Min.Z < _rootNode.BoundingBox.Min.Z)
+            {
+                newSize.Z = newSize.Z * 2;
+            }
+
+            Rebuild(newSize);
+        }
+
         _rootNode.Add(obj);
         _allObjects.Add(obj);
 
         
         return true;
+    }
+
+    private void Rebuild(Vector3 newSize)
+    {
+        _size = newSize;
+        _rootNode = CreateRootNode();
+
+        foreach(var obj in _allObjects)
+        {
+            _rootNode.Add(obj);
+        }
+
     }
 
     /// <summary>

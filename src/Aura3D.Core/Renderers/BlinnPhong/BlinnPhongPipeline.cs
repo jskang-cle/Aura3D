@@ -43,7 +43,7 @@ public class BlinnPhongPipeline : RenderPipeline
     {
         if (gl == null)
             return;
-        SortMeshes(Meshes, camera);
+        SortMeshes(VisibleMeshesInCamera, camera);
         gl.Viewport(0, 0, camera.RenderTarget.Width, camera.RenderTarget.Height);
 
     }

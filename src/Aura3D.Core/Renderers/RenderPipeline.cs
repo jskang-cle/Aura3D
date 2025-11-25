@@ -183,13 +183,13 @@ public abstract partial class RenderPipeline
         {
             if (camera.Enable == false)
                 continue;
+
+            VisibleMeshesInCamera.Clear();
             if (EnableFrustumCulling == true)
-                UpdateVisibleMeshesInCamera(camera.View, camera.Projection);
+                UpdateVisibleMeshesInCamera(camera.View, camera.Projection, VisibleMeshesInCamera);
             else
-            {
-                VisibleMeshesInCamera.Clear();
                 VisibleMeshesInCamera.AddRange(Meshes);
-            }
+
             BeforeCameraRender(camera);
             foreach (var renderPass in EveryCameraRenderPasses)
             {
@@ -203,9 +203,8 @@ public abstract partial class RenderPipeline
     }
 
     private Plane[] planes = new Plane[6];
-    public void UpdateVisibleMeshesInCamera(Matrix4x4 view, Matrix4x4 projection)
+    public void UpdateVisibleMeshesInCamera(Matrix4x4 view, Matrix4x4 projection, List<Mesh> meshes)
     {
-        VisibleMeshesInCamera.Clear();
         
         var viewProjection = view * projection;
 
@@ -249,7 +248,7 @@ public abstract partial class RenderPipeline
             }
             return false;
 
-        }, VisibleMeshesInCamera);
+        }, meshes);
     }
     public virtual void BeforeRender()
     {

@@ -115,6 +115,11 @@ public partial class RenderPass
         }
     }
     
+    public void RenderVisibleMeshesInCamera(Func<Mesh, bool> filter, Matrix4x4 view, Matrix4x4 projection)
+    {
+        RenderMeshesFromList(VisibleMeshesInCamera, filter, view, projection);
+    }
+
     public void RenderMeshesFromList(List<Mesh> meshes, Func<Mesh, bool> filter, Matrix4x4 view, Matrix4x4 projection)
     {
         foreach (var mesh in meshes)
@@ -138,51 +143,9 @@ public partial class RenderPass
 
         if (EnableFrustumCulling == true)
         {
-            var viewProjection = view * projection;
-
-            Matrix4x4.Invert(viewProjection, out Matrix4x4 invViewProj);
-
-            Span<Vector3> ndcCorners = stackalloc Vector3[]
-            {
-                new Vector3(-1,-1,-1), new Vector3(1,-1,-1),
-                new Vector3(-1, 1,-1), new Vector3(1, 1,-1),
-                new Vector3(-1,-1, 1), new Vector3(1,-1, 1),
-                new Vector3(-1, 1, 1), new Vector3(1, 1, 1)
-            };
-
-            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-
-            foreach (var c in ndcCorners)
-            {
-                Vector4 p = new Vector4(c, 1.0f);
-                Vector4 world = Vector4.Transform(p, invViewProj);
-                world /= world.W;
-
-                Vector3 wpos = new Vector3(world.X, world.Y, world.Z);
-                min = Vector3.Min(min, wpos);
-                max = Vector3.Max(max, wpos);
-            }
-
-            var cameraBoudingBox = new BoundingBox (min, max);
-
-
-            MatrixHelper.ExtractPlanes(viewProjection, planes);
-
             meshes.Clear();
 
-            this.Scene.StaticMeshOctree.Query(boundingBox =>
-            {
-                if (cameraBoudingBox.Intersects(boundingBox))
-                {
-                    if (boundingBox.IsBoxInsideFrustum(planes))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-
-            }, meshes);
+            renderPipeline.UpdateVisibleMeshesInCamera(view, projection, meshes);
 
             list = meshes;
 

@@ -29,7 +29,7 @@ public class TranslucentPass : LightPass
         SetupUniform(camera);
         using(PushTextureUnit())
         {
-            RenderMeshesFromList(VisibleMeshesInCamera, mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
+            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH", "BLENDMODE_TRANSLUCENT");
