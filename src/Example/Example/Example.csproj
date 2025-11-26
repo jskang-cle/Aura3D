@@ -28,4 +28,10 @@
     <ProjectReference Include="..\..\Aura3D.Avalonia\Aura3D.Avalonia.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Pages\AnimationPage.axaml.cs">
+      <DependentUpon>AnimationPage.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

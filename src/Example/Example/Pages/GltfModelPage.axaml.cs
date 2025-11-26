@@ -98,6 +98,7 @@ public partial class GltfModelPage : UserControl
                             model.Position = modelPosition;
                             model.Position = modelPosition - model.Up * 1;
                             model.Scale = Vector3.One * 4;
+                            model.RotationDegrees = Vector3.Zero;
                             return model;
                         }
                     });
@@ -116,6 +117,7 @@ public partial class GltfModelPage : UserControl
                             var model = ModelLoader.LoadGlbModel(stream);
                             model.Position = modelPosition;
                             model.Position = modelPosition - model.Up * 1;
+                            model.RotationDegrees = new Vector3(0, 180, 0);
                             return model;
                         }
                     });
@@ -135,6 +137,7 @@ public partial class GltfModelPage : UserControl
                             model.Position = modelPosition;
                             model.Position = modelPosition - model.Up * 1;
                             model.Scale = Vector3.One * 5;
+                            model.RotationDegrees = Vector3.Zero;
                             return model;
                         }
                     });

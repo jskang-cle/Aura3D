@@ -26,6 +26,10 @@ namespace Example.ViewModels
                 new MenuViewModel {
                     Title = "Frustum Culling ",
                     ViewModel = new FrustumCullingViewModel()
+                },
+                new MenuViewModel {
+                    Title = "Animation",
+                    ViewModel = new AnimationViewModel()
                 }
             ];
             OnNavigation(this, _menus.First());

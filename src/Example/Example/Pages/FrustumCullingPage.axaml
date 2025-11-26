@@ -13,16 +13,16 @@
 				  
                   <TextBlock Text="box num: " VerticalAlignment="Center"></TextBlock>
                   <Border Padding="0 0 10 0">
-                    <TextBox x:Name="numTextBox" Width="50" Text="3000"></TextBox>
+                    <TextBox x:Name="numTextBox" Text="3000"></TextBox>
                   </Border>
-                  <Button Content="重新生成" Click="Button_Click"></Button>
+                  <Button Content="generate" Click="Button_Click"></Button>
               </StackPanel>
 			  
           </Border>
 
           <Border Margin="10">
               <StackPanel Orientation="Horizontal" >
-                  <TextBlock  Padding="0 0 20 0" VerticalAlignment="Center" x:Name="frameText" Text="帧率：0"></TextBlock>
+                  <TextBlock  Padding="0 0 20 0"  Width="80" VerticalAlignment="Center" x:Name="frameText" Text="fps: 0"></TextBlock>
 		          <CheckBox VerticalAlignment="Center" x:Name="checkbox" Content="Frustum Culling" IsCheckedChanged="CheckBox_IsCheckedChanged"></CheckBox>
           
               </StackPanel>
