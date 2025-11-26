@@ -186,7 +186,7 @@ public class ShadowMapPass : RenderPass
         }
 
 
-        if (IsSkeletonMesh(mesh))
+        if (IsSkinnedMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;

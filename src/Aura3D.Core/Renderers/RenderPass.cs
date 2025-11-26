@@ -156,7 +156,7 @@ public partial class RenderPass
                 continue;
             if (mesh.Geometry == null)
                 continue;
-            if (IsSkeletonMesh(mesh) == true)
+            if (IsSkinnedMesh(mesh) == true)
                 continue;
             if (filter(mesh))
             {
@@ -173,7 +173,7 @@ public partial class RenderPass
                 continue;
             if (mesh.Geometry == null)
                 continue;
-            if (IsSkeletonMesh(mesh) == false)
+            if (IsSkinnedMesh(mesh) == false)
                 continue;
             if (filter(mesh))
             {
@@ -197,7 +197,7 @@ public partial class RenderPass
 
         }
     }
-    protected bool IsSkeletonMesh(Mesh mesh)
+    protected bool IsSkinnedMesh(Mesh mesh)
     {
         if (mesh.IsSkinnedMesh == true && mesh is SkinnedMesh skinnedMesh && skinnedMesh.Skeleton != null)
             return true;

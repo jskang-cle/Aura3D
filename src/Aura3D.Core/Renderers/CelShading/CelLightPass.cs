@@ -205,7 +205,7 @@ public class CelLightPass : RenderPass
         UniformMatrix4("normalMatrix", normalMatrix);
 
 
-        if (IsSkeletonMesh(mesh))
+        if (IsSkinnedMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;

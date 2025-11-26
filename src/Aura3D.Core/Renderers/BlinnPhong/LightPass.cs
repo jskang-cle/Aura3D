@@ -65,14 +65,14 @@ public class LightPass : RenderPass
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
+            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque) && !IsSkinnedMesh(mesh), camera.View, camera.Projection);
         }
 
         UseShader("BLENDMODE_MASKED");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
+            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked) && !IsSkinnedMesh(mesh), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH");
@@ -298,7 +298,7 @@ public class LightPass : RenderPass
         normalMatrix = Matrix4x4.Transpose(normalMatrix);
         UniformMatrix4("normalMatrix", normalMatrix);
 
-        if (IsSkeletonMesh(mesh))
+        if (IsSkinnedMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;

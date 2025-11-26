@@ -49,14 +49,14 @@ public class OutlinePass : RenderPass
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => IsSkeletonMesh(mesh) == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+            RenderMeshes(mesh => IsSkinnedMesh(mesh) == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
         }
 
         UseShader("BLENDMODE_MASKED");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => IsSkeletonMesh(mesh) == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+            RenderMeshes(mesh => IsSkinnedMesh(mesh) == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH");
@@ -104,7 +104,7 @@ public class OutlinePass : RenderPass
         UniformMatrix4("normalPrjMatrix", normalPrjMatrix);
 
 
-        if (IsSkeletonMesh(mesh))
+        if (IsSkinnedMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;

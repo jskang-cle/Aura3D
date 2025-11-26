@@ -106,7 +106,7 @@ public class NoLightPass : RenderPass
             UniformFloat("alphaCutoff", mesh.Material.AlphaCutoff);
         }
 
-        if (IsSkeletonMesh(mesh))
+        if (IsSkinnedMesh(mesh))
         {
             var skinnedMesh = mesh as SkinnedMesh;
             var skeleton = skinnedMesh!.Skeleton!;
