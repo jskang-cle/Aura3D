@@ -36,7 +36,7 @@ window.Load += () =>
     ];
     foreach(var filename in name)
     {
-        var stream = new StreamReader($"../../../../../Example/Example/Assets/Textures/skybox/{filename}").BaseStream;
+        var stream = new StreamReader($"../../../../../../example/Example/Assets/Textures/skybox/{filename}").BaseStream;
         list.Add(stream);
     }
 
