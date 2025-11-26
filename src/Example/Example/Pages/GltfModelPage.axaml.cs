@@ -5,6 +5,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
+using Avalonia.Platform.Storage;
+using Example.ViewModels;
 using System;
 using System.Drawing;
 using System.Numerics;
@@ -28,7 +30,7 @@ public partial class GltfModelPage : UserControl
     Model? currentModel
     {
         get => _currentModel;
-        set 
+        set
         {
             if (_currentModel == value)
                 return;
@@ -49,9 +51,48 @@ public partial class GltfModelPage : UserControl
         InitializeComponent();
     }
 
-    private void Button_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private async void Button_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
 
+        if (DataContext is GltfModelViewModel vm == false)
+            return;
+
+        var toplevel = TopLevel.GetTopLevel(this);
+
+        var files = await toplevel.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions()
+            {
+                Title = "Select GLB File",
+                AllowMultiple = false,
+                FileTypeFilter = [
+                    new FilePickerFileType("glb model file"){
+                        Patterns = ["*.glb"]
+                    }
+                    ]
+            });
+
+        foreach (var file in files)
+        {
+
+
+            using (var stream = await file.OpenReadAsync())
+            {
+                var model = ModelLoader.LoadGlbModel(stream);
+
+                model.Position = modelPosition;
+
+                model.Position = modelPosition - model.Up * 1;
+
+                model.RotationDegrees = Vector3.Zero;
+
+                currentModel = model;
+
+                vm.Scale = 1;
+
+                vm.Yaw = currentModel.RotationDegrees.Y;
+            }
+
+        }
     }
 
     private void Aura3DView_SceneInitialized(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -79,6 +120,8 @@ public partial class GltfModelPage : UserControl
 
     private async void Button_Click_1(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        if (DataContext is GltfModelViewModel vm == false)
+            return;
 
         var button = sender as Button;
         if (button == null)
@@ -147,6 +190,35 @@ public partial class GltfModelPage : UserControl
                 break;
             default:
                 break;
+        }
+        if (currentModel != null)
+        {
+            vm.Scale = currentModel.Scale.X;
+            vm.Yaw = currentModel.RotationDegrees.Y;
+        }
+
+    }
+
+    private void Slider_ValueChanged(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+
+        if (DataContext is GltfModelViewModel vm == false)
+            return;
+        if (currentModel != null)
+        {
+            currentModel.Scale = new Vector3((float)vm.Scale);
+        }
+    }
+
+
+    private void Slider_ValueChanged2(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+
+        if (DataContext is GltfModelViewModel vm == false)
+            return;
+        if (currentModel != null)
+        {
+            currentModel.RotationDegrees = new Vector3(0, (float)vm.Yaw, 0);
         }
     }
 }

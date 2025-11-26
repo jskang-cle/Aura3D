@@ -4,16 +4,32 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:local="clr-namespace:Aura3D.Avalonia;assembly=Aura3D.Avalonia"
-             
+             xmlns:vm="clr-namespace:Example.ViewModels"
+             x:DataType="vm:GltfModelViewModel"
              x:Class="Example.Pages.GltfModelPage">
   <DockPanel>
-    <DockPanel DockPanel.Dock="Top" HorizontalAlignment="Left">
-		<Button Margin="10"  Content="Open File" Click="Button_Click"></Button>
-        <Button x:Name="lionButton" Margin="10"  Content="lion head" Click="Button_Click_1"></Button>
-        <Button x:Name="soldierButton" Margin="10"  Content="soldier" Click="Button_Click_1"></Button>
-        <Button x:Name="woodenButton" Margin="10"  Content="wooden stool" Click="Button_Click_1"></Button>
-    </DockPanel>
+    
+        <StackPanel  DockPanel.Dock="Top">
+			
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+		        <Button Margin="10"  Content="Open File" Click="Button_Click"></Button>
+                <Button x:Name="lionButton" Margin="10"  Content="lion head" Click="Button_Click_1"></Button>
+                <Button x:Name="soldierButton" Margin="10"  Content="soldier" Click="Button_Click_1"></Button>
+                <Button x:Name="woodenButton" Margin="10"  Content="wooden stool" Click="Button_Click_1"></Button>
+            </StackPanel>
 
-     <local:Aura3DView x:Name="aura3d" SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated"></local:Aura3DView>
+            <StackPanel  Orientation="Horizontal">
+	            <TextBlock VerticalAlignment="Center" Text="Scale:"></TextBlock>
+	            <Slider VerticalAlignment="Center" Minimum="0.01" Maximum="15" Value="{Binding Scale}" Width="200" ValueChanged="Slider_ValueChanged"></Slider>
+            </StackPanel>
+
+        
+            <StackPanel  Orientation="Horizontal">
+	            <TextBlock VerticalAlignment="Center" Text="Rotation Yaw:"></TextBlock>
+	            <Slider VerticalAlignment="Center" Minimum="0" Maximum="360" Value="{Binding Yaw}" Width="200" ValueChanged="Slider_ValueChanged2"></Slider>
+            </StackPanel>
+
+        </StackPanel>
+    <local:Aura3DView x:Name="aura3d" SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated"></local:Aura3DView>
   </DockPanel>
 </UserControl>
