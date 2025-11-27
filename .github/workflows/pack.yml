@@ -11,11 +11,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
       
-      - name: Pack Aura3D.Core
-        run: dotnet pack src/Aura3D.Core -o nugets
-
       - name: Pack Aura3D.Avalonia
-        run: dotnet pack src/Aura3D.Avalonia -o nugets
+        run: dotnet pack src/Aura3D.Avalonia -o nugets -c Release /p:Version=${{ steps.generate_version.outputs.VERSION }}
       
+      - name: Pack Aura3D.Model.AssimpLoader
+        run: dotnet pack src/Aura3D.Model.AssimpLoader -o nugets -c Release /p:Version=${{ steps.generate_version.outputs.VERSION }}
+
+      - name: Upload to Nuget
+        run: dotnet nuget push "nugets/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
       - name: Upload to Nuget
         run: dotnet nuget push "nugets/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
