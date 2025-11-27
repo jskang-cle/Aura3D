@@ -55,8 +55,11 @@ Initialize your scene in the SceneInitialized event:
  {
 	
     var view = (Aura3DView)sender;
-
+    
+    // Version 0.0.1 requires manual instantiation of the camera
     var camera = new Camera();
+    // For other versions or newer releases, the main camera is built-in
+    var camera = view.MainCamera;
 
     camera.ClearColor = Color.Gray;
 

@@ -23,7 +23,8 @@
 - 光源
 - 投影
 - 蒙皮动画
-- 实例化渲染
+- 八叉树场景管理
+- 视锥体剔除
 - 默认布林冯渲染管线
 ### 2. 进阶功能
 - 自定义管线 
@@ -57,7 +58,10 @@ dotnet add package Aura3D.Avalonia
 
     var view = (Aura3DView)sender;
 
+    // 0.0.1版本需要手动new相机
     var camera = new Camera();
+    // 其他或者更新版本内置了主相机
+    var camera = view.MainCamera;
 
     camera.ClearColor = Color.Gray;
 
