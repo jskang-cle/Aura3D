@@ -20,7 +20,7 @@ namespace Example.ViewModels
                     ViewModel = new BaseGeometriesViewModel()
                 },
                 new MenuViewModel {
-                    Title = "Load Gltf Model",
+                    Title = "Load Model File",
                     ViewModel = new GltfModelViewModel()
                 },
                 new MenuViewModel {

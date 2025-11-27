@@ -10,6 +10,7 @@ using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using Example.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
@@ -62,21 +63,95 @@ public partial class GltfModelPage : UserControl
 
         var toplevel = TopLevel.GetTopLevel(this);
 
+        List<FilePickerFileType> filePickerFileTypes = [
+                    new ("gltf file"){ Patterns = ["*.glb", "*.gltf"] },
+                    new ("3D Manufacturing Format ") { Patterns = ["*.3mf"] },
+                    new ("Collada") { Patterns = ["*.dae", "*.xml"] },
+                    new ("Biovision BVH") { Patterns = ["*.bvh"] },
+                    new ("3D Studio Max 3DS") { Patterns = ["*.3ds"] },
+                    new ("3D Studio Max ASE") { Patterns = ["*.ase"] },
+                    new ("FBX-Format, as ASCII and binary") { Patterns = ["*.fbx"] },
+                    new ("Stanford Polygon Library") { Patterns = ["*.ply"] },
+                    new ("AutoCAD DXF") { Patterns = ["*.dxf"] },
+                    new ("IFC-STEP") { Patterns = ["*.ifc"] },
+                    new ("IQM-Format") { Patterns = ["*.iqm"] },
+                    new ("Neutral File Format") { Patterns = ["*.nff"] },
+                    new ("Sense8 WorldToolkit") { Patterns = ["*.nff"] },
+                    new ("Valve Model") { Patterns = ["*.smd", "*.vta"] },
+                    new ("Quake I") { Patterns = ["*.mdl"] },
+                    new ("Quake II") { Patterns = ["*.mdl2"] },
+                    new ("Quake III") { Patterns = ["*.mdl3"] },
+                    new ("Quake 3 BSP") { Patterns = ["*.pk3"] },
+                    new ("RtCW") { Patterns = ["*.mdc"] },
+                    new ("Doom 3") { Patterns = ["*.md5mesh", "*.md5anim", "*.md5camera"] },
+                    new ("DirectX X") { Patterns = ["*.x"] },
+                    new ("Quick3D") { Patterns = ["*.q3o", "*.q3s"] },
+                    new ("Raw Triangles") { Patterns = ["*.raw"] },
+                    new ("AC3D") { Patterns = ["*.ac", "*.ac3d"] },
+                    new ("Stereolithography") { Patterns = ["*.stl"] },
+                    new ("Autodesk DXF") { Patterns = ["*.dxf"] },
+                    new ("Irrlicht Mesh") { Patterns = ["*.irrmesh", "*.xml"] },
+                    new ("Irrlicht Scene ") { Patterns = ["*.irr", "*.xml"] },
+                    new ("Object File Format") { Patterns = ["*.off"] },
+                    new ("Wavefront Object") { Patterns = ["*.obj"] },
+                    new ("Terragen Terrain") { Patterns = ["*.ter"] },
+                    new ("3D GameStudio Model") { Patterns = ["*.mdl"] },
+                    new ("3D GameStudio Terrain") { Patterns = ["*.hmp"] },
+                    new ("Ogre") { Patterns = ["*.mesh.xml", "*.skeleton.xml", "*.material"] },
+                    new ("OpenGEX-Fomat") { Patterns = ["*.ogex"] },
+                    new ("Milkshape 3D") { Patterns = ["*.ms3d"] },
+                    new ("LightWave Model") { Patterns = ["*.lwo"] },
+                    new ("LightWave Scene") { Patterns = ["*.lws"] },
+                    new ("Modo Model") { Patterns = ["*.lxo"] },
+                    new ("CharacterStudio Motion") { Patterns = ["*.csm"] },
+                    new ("Stanford Ply") { Patterns = ["*.ply"] },
+                    new ("TrueSpace") { Patterns = ["*.cob", "*.scn"] },
+                    new ("XGL-3D-Format") { Patterns = ["*.xgl"] }
+                    ];
+        List<string> allextensions = [];
+        foreach(var filePickerFileType in filePickerFileTypes)
+        {
+            foreach(var pattern in filePickerFileType.Patterns)
+            {
+                allextensions.Add(pattern);
+            }
+        }
+        filePickerFileTypes.Insert(0, new FilePickerFileType("all type file") { Patterns = allextensions });
         var files = await toplevel.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions()
             {
-                Title = "Select GLB File",
+                Title = "Select Model File",
                 AllowMultiple = false,
-                FileTypeFilter = [
-                    new FilePickerFileType("glb model file"){
-                        Patterns = ["*.*"]
-                    }
-                    ]
+                FileTypeFilter = filePickerFileTypes
             });
 
         foreach (var file in files)
         {
-            var model = AssimpLoader.Load(file.Path.LocalPath);
+            Model? model = null;
+            var path = file.TryGetLocalPath();
+            if (path != null)
+            {
+                var extension = Path.GetExtension(path);
+                if (extension != null)
+                {
+                    if (extension.ToLower() == "glb")
+                    {
+                        model = ModelLoader.LoadGlbModel(path);
+                    }
+                    else if (extension.ToLower() == "gltf")
+                    {
+                        model = ModelLoader.LoadGltfModel(path);
+                    }
+                }
+                if (model == null)
+                {
+                    model = AssimpLoader.Load(path);
+                }
+            }
+            else
+            {
+                 model = AssimpLoader.Load(await file.OpenReadAsync());
+            }
 
             model.Position = modelPosition;
 
