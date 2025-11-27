@@ -8,6 +8,7 @@ using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Numerics;
 using System.Text;
 
@@ -18,8 +19,6 @@ public static class AssimpLoader
     public unsafe static Aura3D.Core.Nodes.Model Load(string path)
     {
         var model = new Aura3D.Core.Nodes.Model();
-
-        Dictionary<int, Core.Resources.Material> materialsMap = new();
 
         var defaultFlags = PostProcessSteps.Triangulate
                   | PostProcessSteps.GenerateNormals
@@ -33,7 +32,36 @@ public static class AssimpLoader
 
         var scene = importer.ImportFile(path, defaultFlags);
 
-        processMaterial(scene, materialsMap, directory);
+        return processScene(scene, directory, null);
+    }
+
+
+    public unsafe static Aura3D.Core.Nodes.Model Load(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    {
+        var model = new Aura3D.Core.Nodes.Model();
+
+        var defaultFlags = PostProcessSteps.Triangulate
+                  | PostProcessSteps.GenerateNormals
+                  | PostProcessSteps.OptimizeMeshes
+                  | PostProcessSteps.CalculateTangentSpace;
+
+        var importer = new AssimpContext();
+
+
+        var scene = importer.ImportFileFromStream(stream, defaultFlags);
+
+        return processScene(scene, null, loadTextureFunc);
+    }
+
+
+    private unsafe static Aura3D.Core.Nodes.Model processScene(Scene scene, string? directory, Func<string, Core.Resources.Texture>? loadTextureFunc)
+    {
+
+        Dictionary<int, Core.Resources.Material> materialsMap = new();
+
+        var model = new Aura3D.Core.Nodes.Model();
+
+        processMaterial(scene, materialsMap, directory, loadTextureFunc);
 
         processNode(scene, scene.RootNode, model, materialsMap);
 
@@ -41,7 +69,7 @@ public static class AssimpLoader
     }
 
 
-    public static unsafe void processMaterial(Scene scene, Dictionary<int, Core.Resources.Material> materialsMap, string path)
+    public static unsafe void processMaterial(Scene scene, Dictionary<int, Core.Resources.Material> materialsMap, string? path, Func<string, Core.Resources.Texture>? loadTextureFunc)
     {
         for (int i = 0; i < scene.MaterialCount; i++)
         {
@@ -64,14 +92,14 @@ public static class AssimpLoader
             if (assimpMaterial.HasTextureDiffuse && assimpMaterial.TextureDiffuse.FilePath != null)
             {
                 var slot = assimpMaterial.TextureDiffuse;
-                texture = processTexture(scene, slot, path);
+                texture = processTexture(scene, slot, path, loadTextureFunc);
 
                
             }
             else if (assimpMaterial.PBR.HasTextureBaseColor && assimpMaterial.PBR.TextureBaseColor.FilePath != null)
             {
                 var slot = assimpMaterial.PBR.TextureBaseColor;
-                texture = processTexture(scene, slot, path);
+                texture = processTexture(scene, slot, path, loadTextureFunc);
 
             }
             if (texture != null)
@@ -88,7 +116,7 @@ public static class AssimpLoader
             if (assimpMaterial.HasTextureNormal && assimpMaterial.TextureNormal.FilePath != null)
             {
                 var slot = assimpMaterial.TextureNormal;
-                texture = processTexture(scene, slot, path);
+                texture = processTexture(scene, slot, path, loadTextureFunc);
 
                 material.Channels.Add(new Channel
                 {
@@ -105,7 +133,7 @@ public static class AssimpLoader
     }
 
 
-    private static unsafe Core.Resources.Texture processTexture(Scene scene, TextureSlot textureSlot, string path)
+    private static unsafe Core.Resources.Texture? processTexture(Scene scene, TextureSlot textureSlot, string? path, Func<string, Core.Resources.Texture>? loadTextureFunc)
     {
         if (textureSlot.FilePath[0] == '*')
         {
@@ -155,20 +183,36 @@ public static class AssimpLoader
         }
         else
         {
-            var filePath = Path.Combine(path, textureSlot.FilePath);
-
-            StbImage.stbi_set_flip_vertically_on_load_thread(1);
-            try
+            if (loadTextureFunc!=null)
             {
-                using (var sr = new StreamReader(filePath))
+                return loadTextureFunc(textureSlot.FilePath);
+            }
+            else if (path != null)
+            {
+
+                var filePath = Path.Combine(path, textureSlot.FilePath);
+
+                StbImage.stbi_set_flip_vertically_on_load_thread(1);
+                try
                 {
-                    return TextureLoader.LoadTexture(sr.BaseStream);
+                    using (var sr = new StreamReader(filePath))
+                    {
+                        return TextureLoader.LoadTexture(sr.BaseStream);
+                    }
+                }
+                catch(FileNotFoundException)
+                {
+                    return null;
+                }
+                finally
+                {
+
+                    StbImage.stbi_set_flip_vertically_on_load_thread(0);
                 }
             }
-            finally
+            else
             {
-
-                StbImage.stbi_set_flip_vertically_on_load_thread(0);
+                return null;
             }
         }
 
