@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Aura3D.Avalonia\Aura3D.Avalonia.csproj" />
+    <ProjectReference Include="..\..\src\Aura3D.Model.AssimpLoader\Aura3D.Model.AssimpLoader.csproj" />
   </ItemGroup>
 
   <ItemGroup>

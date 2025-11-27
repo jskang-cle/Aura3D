@@ -3,12 +3,13 @@ using Aura3D.Core;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Renderers;
 using Aura3D.Core.Scenes;
+using Aura3D.Model;
 using Silk.NET.Windowing;
 using System.Drawing;
 using System.Numerics;
 
 var window = Window.Create(WindowOptions.Default);
-Scene scene = new Scene(scene => new CelShadingPipeline(scene));
+Scene scene = new Scene(scene => new BlinnPhongPipeline(scene));
 
 window.Load += () =>
 {
@@ -54,7 +55,7 @@ window.Load += () =>
     AddNode(camera);
 
 
-    using (var sr = new StreamReader("../../../../../Example/Example/Assets/Models/Soldier.glb"))
+    using (var sr = new StreamReader("../../../../../../example/Example/Assets/Models/Soldier.glb"))
     {
         var (model, animations) = ModelLoader.LoadGlbModelAndAnimations(sr.BaseStream);
 
@@ -70,7 +71,7 @@ window.Load += () =>
 
     }
     var node = new Node();
-    using (var sr = new StreamReader("../../../../../Example/Example/Assets/Models/coffee_table_round_01_1k.glb"))
+    using (var sr = new StreamReader("../../../../../../example/Example/Assets/Models/coffee_table_round_01_1k.glb"))
     {
 
         var model = ModelLoader.LoadGlbModel(sr.BaseStream);
@@ -86,6 +87,18 @@ window.Load += () =>
         node.Position = model.Position;
 
     }
+
+
+    var model3 = AssimpLoader.Load("C:\\Users\\cesun\\Downloads\\wooden_stool_02_1k.blend\\wooden_stool_02_1k.gltf");
+
+    model3.Position = camera.Position + camera.Forward * 10;
+
+    model3.Position += camera.Down * 2;
+
+    model3.Scale = Vector3.One * 5f;
+
+    AddNode(model3);
+
 
     camera.Position = camera.Position + camera.Up * 4;
 

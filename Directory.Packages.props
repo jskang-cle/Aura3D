@@ -2,11 +2,12 @@
   <!-- https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-	<AvaloniaVersion>11.2.8</AvaloniaVersion>
+    <AvaloniaVersion>11.2.8</AvaloniaVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
     <!-- Important: keep version in sync! -->
+    <PackageVersion Include="AssimpNetter" Version="6.0.2.1" />
     <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
@@ -19,6 +20,7 @@
     <PackageVersion Include="Irihi.Ursa.Themes.Semi" Version="1.13.0" />
     <PackageVersion Include="Semi.Avalonia" Version="11.2.1.10" />
     <PackageVersion Include="Silk.NET" Version="2.22.0" />
+    <PackageVersion Include="Silk.NET.Assimp" Version="2.22.0" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
     <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.5" />
     <PackageVersion Include="Silk.NET.OpenGLES" Version="2.22.0" />

@@ -1,6 +1,8 @@
+using Assimp;
 using Aura3D.Avalonia;
 using Aura3D.Core;
 using Aura3D.Core.Nodes;
+using Aura3D.Model;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -9,6 +11,7 @@ using Avalonia.Platform.Storage;
 using Example.ViewModels;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
 using Ursa.Common;
@@ -66,31 +69,26 @@ public partial class GltfModelPage : UserControl
                 AllowMultiple = false,
                 FileTypeFilter = [
                     new FilePickerFileType("glb model file"){
-                        Patterns = ["*.glb"]
+                        Patterns = ["*.*"]
                     }
                     ]
             });
 
         foreach (var file in files)
         {
+            var model = AssimpLoader.Load(file.Path.LocalPath);
 
+            model.Position = modelPosition;
 
-            using (var stream = await file.OpenReadAsync())
-            {
-                var model = ModelLoader.LoadGlbModel(stream);
+            model.Position = modelPosition - model.Up * 1;
 
-                model.Position = modelPosition;
+            model.RotationDegrees = Vector3.Zero;
 
-                model.Position = modelPosition - model.Up * 1;
+            currentModel = model;
 
-                model.RotationDegrees = Vector3.Zero;
+            vm.Scale = 1;
 
-                currentModel = model;
-
-                vm.Scale = 1;
-
-                vm.Yaw = currentModel.RotationDegrees.Y;
-            }
+            vm.Yaw = currentModel.RotationDegrees.Y;
 
         }
     }
