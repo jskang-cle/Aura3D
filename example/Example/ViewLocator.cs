@@ -14,6 +14,7 @@ public class ViewLocator : IDataTemplate
             GltfModelViewModel gltfModelViewModel => new GltfModelPage(),
             FrustumCullingViewModel frustumCullingViewModel => new FrustumCullingPage(),
             AnimationViewModel animationViewModel => new AnimationPage(),
+            RoboticArmViewModel roboticArmViewModel => new RoboticArmPage(),
             _ => new TextBlock() { Text = "NotFound" }
         };
     }

@@ -134,11 +134,11 @@ public partial class GltfModelPage : UserControl
                 var extension = Path.GetExtension(path);
                 if (extension != null)
                 {
-                    if (extension.ToLower() == "glb")
+                    if (extension.ToLower() == ".glb")
                     {
                         model = ModelLoader.LoadGlbModel(path);
                     }
-                    else if (extension.ToLower() == "gltf")
+                    else if (extension.ToLower() == ".gltf")
                     {
                         model = ModelLoader.LoadGltfModel(path);
                     }
