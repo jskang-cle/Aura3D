@@ -1,5 +1,6 @@
 ﻿using Assimp;
 using Aura3D.Core;
+using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using Silk.NET.OpenGLES;
@@ -16,7 +17,7 @@ namespace Aura3D.Model;
 
 public static class AssimpLoader
 {
-    public unsafe static Aura3D.Core.Nodes.Model Load(string path)
+    public unsafe static Aura3D.Core.Nodes.Model Load(string path, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
     {
         var model = new Aura3D.Core.Nodes.Model();
 
@@ -32,7 +33,16 @@ public static class AssimpLoader
 
         var scene = importer.ImportFile(path, defaultFlags);
 
-        return processScene(scene, directory, null);
+        processSkeleton(scene);
+
+        return processScene(scene, directory,  loadTextureFunc);
+    }
+
+
+    public unsafe static List<Core.Resources.Animation> LoadAnimations(string path)
+    {
+
+        return [];
     }
 
 
@@ -135,11 +145,19 @@ public static class AssimpLoader
 
     private static unsafe Core.Resources.Texture? processTexture(Scene scene, TextureSlot textureSlot, string? path, Func<string, Core.Resources.Texture>? loadTextureFunc)
     {
+        EmbeddedTexture? assimpTexture = null;
+
         if (textureSlot.FilePath[0] == '*')
         {
-            var assimpTexture = scene.Textures[int.Parse(textureSlot.FilePath.Skip(1).Take(textureSlot.FilePath.Length - 1).ToArray())];
-
-            if (assimpTexture.HasCompressedData)
+            assimpTexture = scene.Textures[int.Parse(textureSlot.FilePath.Skip(1).Take(textureSlot.FilePath.Length - 1).ToArray())];
+        }
+        else if (scene.TextureCount > 0)
+        {
+            assimpTexture = scene.Textures.FirstOrDefault(texture => texture.Filename == textureSlot.FilePath);
+        }
+        if (assimpTexture != null)
+        {
+            if (assimpTexture.IsCompressed == true)
             {
                 StbImage.stbi_set_flip_vertically_on_load_thread(1);
                 try
@@ -166,7 +184,7 @@ public static class AssimpLoader
                 texture.ColorFormat = ColorFormat.RGBA;
 
                 List<byte> data = [];
-                for(int i = 0; i < assimpTexture.NonCompressedDataSize; i++)
+                for (int i = 0; i < assimpTexture.NonCompressedDataSize; i++)
                 {
                     data.Add(assimpTexture.NonCompressedData[i].R);
                     data.Add(assimpTexture.NonCompressedData[i].G);
@@ -310,5 +328,54 @@ public static class AssimpLoader
             processNode(scene, node.Children[i],currentNode, materialMap);
         }
     }
+
+    public static Skeleton processSkeleton(Scene scene)
+    {
+        Dictionary<string, Core.Resources.Bone> boneMap = [];
+        var skeleton = new Skeleton();
+        processNode(scene, scene.RootNode, boneMap);
+
+        foreach (var (name, bone) in boneMap)
+        {
+            var node = scene.RootNode.FindNode(name);
+
+            if (node.Parent != null && boneMap.TryGetValue(node.Parent.Name, out var parentBone))
+            {
+
+                bone.Parent = parentBone;
+                parentBone.Children.Add(bone);
+
+            }
+        }
+        return skeleton;
+    }
+
+    private static void processNode(Scene scene, Assimp.Node node, Dictionary<string, Core.Resources.Bone> boneMap)
+    {
+        foreach (var meshIndex in node.MeshIndices)
+        {
+            var mesh = scene.Meshes[meshIndex];
+            if (mesh.HasBones)
+            {
+                foreach(var assiBone in mesh.Bones)
+                {
+                    if (boneMap.ContainsKey(assiBone.Name))
+                        continue;
+                    var bone = new Core.Resources.Bone();
+                    bone.Name = assiBone.Name;
+                    bone.InverseWorldMatrix = assiBone.OffsetMatrix;
+                    bone.WorldMatrix = assiBone.OffsetMatrix.Inverse();
+                    bone.Index = boneMap.Count;
+                    boneMap.Add(assiBone.Name, bone);
+                }
+            }    
+        }
+        foreach(var child in node.Children)
+        {
+            processNode(scene, child, boneMap);
+        }
+    }
+
+
 
 }
