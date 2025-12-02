@@ -112,38 +112,20 @@ public partial class RoboticArmPage : UserControl
             await Task.Delay(10);
         }
 
-        var node = App.model.Clone(CopyType.FullCopy);
+        var model = App.model.Clone(CopyType.SharedResourceData);
 
-        HashSet<Material> map = [];
-        foreach (var mesh in node.Meshes)
-        {
-            if (mesh.Material == null)
-                continue;
-            if (map.Contains(mesh.Material))
-                continue;
-            foreach (var channel in mesh.Material.Channels)
-            {
-                if (channel == null)
-                    continue;
-                if (channel.Texture is Texture texture)
-                {
-                    channel.Texture = texture.Clone();
 
-                }
-            }
-        }
+        item1 = model.Meshes.First(mesh => mesh.Name == "item1");
+        item2 = model.Meshes.First(mesh => mesh.Name == "item2");
+        item3 = model.Meshes.First(mesh => mesh.Name == "item3");
+        item4 = model.Meshes.First(mesh => mesh.Name == "item4");
+        item5 = model.Meshes.First(mesh => mesh.Name == "item5");
+        item6 = model.Meshes.First(mesh => mesh.Name == "item6");
+        item7 = model.Meshes.First(mesh => mesh.Name == "item7");
 
-        item1 = node.Meshes.First(mesh => mesh.Name == "item1");
-        item2 = node.Meshes.First(mesh => mesh.Name == "item2");
-        item3 = node.Meshes.First(mesh => mesh.Name == "item3");
-        item4 = node.Meshes.First(mesh => mesh.Name == "item4");
-        item5 = node.Meshes.First(mesh => mesh.Name == "item5");
-        item6 = node.Meshes.First(mesh => mesh.Name == "item6");
-        item7 = node.Meshes.First(mesh => mesh.Name == "item7");
+        model.Position = view.MainCamera.Position + view.MainCamera.Forward * 2f - view.MainCamera.Up;
 
-        node.Position = view.MainCamera.Position + view.MainCamera.Forward * 2f - view.MainCamera.Up;
-
-        view.AddNode(node);
+        view.AddNode(model);
 
         var dl = new DirectionalLight();
 
@@ -160,7 +142,7 @@ public partial class RoboticArmPage : UserControl
         slider5.Value = CalcDegree(item6.RotationDegrees.X);
         slider6.Value = CalcDegree(item7.RotationDegrees.X);
 
-        model = node;
+        this.model = model;
     }
 
     public static float CalcDegree(float degree)

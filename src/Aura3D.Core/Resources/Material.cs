@@ -27,7 +27,7 @@ public class Material : IClone<Material>
     {
         var material = Clone();
 
-        material.Channels = new List<Channel>(Channels.Count);
+        material.Channels = new List<Channel>();
 
         foreach(var channel in Channels)
         {

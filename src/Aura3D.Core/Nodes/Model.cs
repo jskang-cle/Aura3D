@@ -17,7 +17,7 @@ public class Model : Node
             if (copyType == CopyType.SharedResourceData)
             {
                 mesh.Geometry = mesh.Geometry?.Clone();
-                mesh.Material = mesh.Material?.Clone();
+                mesh.Material = mesh.Material?.DeepClone();
             }
             else if (copyType == CopyType.FullCopy)
             {
