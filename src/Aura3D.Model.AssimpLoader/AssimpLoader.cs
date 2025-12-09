@@ -308,10 +308,10 @@ public static class AssimpLoader
             }
             geometry.SetIndices(indices);
 
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, normals);
 
-            if (assimpMesh.HasNormals)
+            if (assimpMesh.HasNormals && assimpMesh.HasTextureCoords(0))
             {
-                geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, normals);
                 ModelHelper.CalcVerticsTbn(geometry.Indices, normals, uvs, out var tangents, out var bitangents);
                 geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
                 geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
