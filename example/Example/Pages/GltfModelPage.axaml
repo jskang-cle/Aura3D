@@ -16,6 +16,8 @@
                 <Button x:Name="lionButton" Margin="10"  Content="lion head" Click="Button_Click_1"></Button>
                 <Button x:Name="soldierButton" Margin="10"  Content="soldier" Click="Button_Click_1"></Button>
                 <Button x:Name="woodenButton" Margin="10"  Content="wooden stool" Click="Button_Click_1"></Button>
+				
+                <Button x:Name="resetcamera" Margin="10"  Content="ResetCamera" Click="Button_Click_1"></Button>
             </StackPanel>
 
             <StackPanel  Orientation="Horizontal">
@@ -28,6 +30,17 @@
 	            <TextBlock VerticalAlignment="Center" Text="Rotation Yaw:"></TextBlock>
 	            <Slider VerticalAlignment="Center" Minimum="0" Maximum="360" Value="{Binding Yaw}" Width="200" ValueChanged="Slider_ValueChanged2"></Slider>
             </StackPanel>
+			
+			<StackPanel  Orientation="Horizontal">
+				<TextBlock VerticalAlignment="Center" Text="Rotation Pitch:"></TextBlock>
+				<Slider VerticalAlignment="Center" Minimum="0" Maximum="360" Value="{Binding Pitch}" Width="200" ValueChanged="Slider_ValueChanged3"></Slider>
+			</StackPanel>
+
+
+			<StackPanel  Orientation="Horizontal">
+				<TextBlock VerticalAlignment="Center" Text="Rotation Roll:"></TextBlock>
+				<Slider VerticalAlignment="Center" Minimum="0" Maximum="360" Value="{Binding Roll}" Width="200" ValueChanged="Slider_ValueChanged4"></Slider>
+			</StackPanel>
 
         </StackPanel>
     <local:Aura3DView x:Name="aura3d" SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated"></local:Aura3DView>

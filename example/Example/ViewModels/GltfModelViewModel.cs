@@ -14,4 +14,8 @@ public partial class GltfModelViewModel : ViewModelBase
 
     [ObservableProperty]
     public double _yaw = 1.0;
+    [ObservableProperty]
+    public double _pitch = 1.0;
+    [ObservableProperty]
+    public double _roll = 1.0;
 }

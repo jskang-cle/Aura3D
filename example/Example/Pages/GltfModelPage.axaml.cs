@@ -1,6 +1,6 @@
-using Assimp;
 using Aura3D.Avalonia;
 using Aura3D.Core;
+using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Model;
 using Avalonia;
@@ -17,6 +17,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Ursa.Common;
 using Ursa.Controls;
+using Camera = Aura3D.Core.Nodes.Camera;
 
 namespace Example.Pages;
 
@@ -47,6 +48,7 @@ public partial class GltfModelPage : UserControl
                 _currentModel = value;
                 aura3d.Scene.AddNode(_currentModel);
 
+                aura3d.MainCamera.FitToBoundingBox(_currentModel.BoundingBox);
             }
         }
     }
@@ -165,6 +167,7 @@ public partial class GltfModelPage : UserControl
 
             vm.Yaw = currentModel.RotationDegrees.Y;
 
+
         }
     }
 
@@ -175,8 +178,6 @@ public partial class GltfModelPage : UserControl
         {
             return;
         }
-
-        modelPosition = view.MainCamera.Position + view.MainCamera.Forward * 2;
 
         var dl = new DirectionalLight();
 
@@ -211,9 +212,6 @@ public partial class GltfModelPage : UserControl
                         using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/lion_head_1k.glb")))
                         {
                             var model = ModelLoader.LoadGlbModel(stream);
-                            model.Position = modelPosition;
-                            model.Position = modelPosition - model.Up * 1;
-                            model.Scale = Vector3.One * 4;
                             model.RotationDegrees = Vector3.Zero;
                             return model;
                         }
@@ -231,8 +229,6 @@ public partial class GltfModelPage : UserControl
                         using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/Soldier.glb")))
                         {
                             var model = ModelLoader.LoadGlbModel(stream);
-                            model.Position = modelPosition;
-                            model.Position = modelPosition - model.Up * 1;
                             model.RotationDegrees = new Vector3(0, 180, 0);
                             return model;
                         }
@@ -250,9 +246,6 @@ public partial class GltfModelPage : UserControl
                         using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/wooden_stool_02_1k.glb")))
                         {
                             var model = ModelLoader.LoadGlbModel(stream);
-                            model.Position = modelPosition;
-                            model.Position = modelPosition - model.Up * 1;
-                            model.Scale = Vector3.One * 5;
                             model.RotationDegrees = Vector3.Zero;
                             return model;
                         }
@@ -260,6 +253,9 @@ public partial class GltfModelPage : UserControl
                     woodenButton.IsEnabled = true;
                 }
                 currentModel = woodenStool;
+                break;
+            case "ResetCamera":
+                aura3d.MainCamera.FitToBoundingBox(_currentModel.BoundingBox);
                 break;
             default:
                 break;
@@ -291,7 +287,29 @@ public partial class GltfModelPage : UserControl
             return;
         if (currentModel != null)
         {
-            currentModel.RotationDegrees = new Vector3(0, (float)vm.Yaw, 0);
+            currentModel.RotationDegrees = new Vector3(currentModel.RotationDegrees.X, (float)vm.Yaw, currentModel.RotationDegrees.Z);
+        }
+    }
+
+    private void Slider_ValueChanged3(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+
+        if (DataContext is GltfModelViewModel vm == false)
+            return;
+        if (currentModel != null)
+        {
+            currentModel.RotationDegrees = new Vector3((float)vm.Pitch, currentModel.RotationDegrees.Y, currentModel.RotationDegrees.Z);
+        }
+    }
+
+    private void Slider_ValueChanged4(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+
+        if (DataContext is GltfModelViewModel vm == false)
+            return;
+        if (currentModel != null)
+        {
+            currentModel.RotationDegrees = new Vector3(currentModel.RotationDegrees.X, currentModel.RotationDegrees.Y, (float)vm.Roll);
         }
     }
 }
