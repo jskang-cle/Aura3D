@@ -1,4 +1,5 @@
-﻿using Silk.NET.OpenGLES;
+﻿using Aura3D.Core.Math;
+using Silk.NET.OpenGLES;
 using System.Numerics;
 using System.Reflection.Metadata.Ecma335;
 
@@ -78,11 +79,32 @@ public class Model : Node
         return cloneNode;
 
     }
+
+    public BoundingBox BoundingBox
+    {
+        get 
+        {
+            List<BoundingBox> boundingBoxes = [];
+            if (Meshes.Count > 0)
+            {
+                foreach (var mesh in Meshes)
+                {
+                    if (mesh == null)
+                        continue;
+                    if (mesh.BoundingBox == null)
+                        continue;
+                    boundingBoxes.Add(mesh.BoundingBox);
+                }
+            }
+            return BoundingBox.CreateMerged(boundingBoxes);
+        }
+    }
 }
 
 
 public static class ModelHelper
 {
+
     public static void CalcVerticsTbn(List<uint> indices, List<float> vertexNormals, List<float> uvs, out List<float> tangents, out List<float> bitangents)
     {
         tangents = [.. new float[vertexNormals.Count]];

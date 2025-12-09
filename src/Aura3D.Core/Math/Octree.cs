@@ -94,12 +94,11 @@ public class Octree<T> where T : IOctreeObject
         if (_allObjects.Contains(obj))
             return false;
 
-
         if (_rootNode.BoundingBox.Contains(obj.BoundingBox) == false)
         {
             foreach (var obj2 in _allObjects)
             {
-                foreach(var objNode in obj2.BelongingNodes)
+                foreach (var objNode in obj2.BelongingNodes)
                 {
                     if (objNode is OctreeNode<T> node)
                     {
@@ -109,21 +108,29 @@ public class Octree<T> where T : IOctreeObject
                 obj2.BelongingNodes.Clear();
             }
 
+            var newBoudingBox = _rootNode.BoundingBox;
+
             var newSize = Size;
 
-            if (obj.BoundingBox.Max.X > _rootNode.BoundingBox.Max.X || obj.BoundingBox.Min.X < _rootNode.BoundingBox.Min.X)
+            while (newBoudingBox.Contains(obj.BoundingBox) == false)
             {
-                newSize.X = newSize.X * 2;
-            }
 
-            if (obj.BoundingBox.Max.Y > _rootNode.BoundingBox.Max.Y || obj.BoundingBox.Min.Y < _rootNode.BoundingBox.Min.Y)
-            {
-                newSize.Y = newSize.Y * 2;
-            }
+                if (obj.BoundingBox.Max.X > newSize.X / 2 || obj.BoundingBox.Min.X < newSize.X / -2)
+                {
+                    newSize.X = newSize.X * 2;
+                }
 
-            if (obj.BoundingBox.Max.Z > _rootNode.BoundingBox.Max.Z || obj.BoundingBox.Min.Z < _rootNode.BoundingBox.Min.Z)
-            {
-                newSize.Z = newSize.Z * 2;
+                if (obj.BoundingBox.Max.Y > newSize.Y / 2 || obj.BoundingBox.Min.Y < newSize.Y / -2)
+                {
+                    newSize.Y = newSize.Y * 2;
+                }
+
+                if (obj.BoundingBox.Max.Z > newSize.Z / 2 || obj.BoundingBox.Min.Z < newSize.Z / -2)
+                {
+                    newSize.Z = newSize.Z * 2;
+                }
+
+                newBoudingBox = new BoundingBox(new Vector3(newSize.X / -2, newSize.X / -2, newSize.Z / -2), new Vector3(newSize.X / 2, newSize.X / 2, newSize.Z / 2));
             }
 
             Rebuild(newSize);
