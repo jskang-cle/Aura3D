@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-              xmlns:avalonia="using:Aura3D.Avalonia"
+             xmlns:a="https://sunce.tech/aura3d"
              x:Class="Example.Pages.RoboticArmPage">
 
     <DockPanel>
@@ -84,9 +84,9 @@
         </ScrollViewer>
        
         <Border  Theme="{StaticResource CardBorder}" Padding="8">
-            <avalonia:Aura3DView x:Name="aura3Dview" SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated">
+            <a:Aura3DView x:Name="aura3Dview" SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated">
 				
-            </avalonia:Aura3DView>
+            </a:Aura3DView>
         </Border>
     </DockPanel>
 </UserControl>

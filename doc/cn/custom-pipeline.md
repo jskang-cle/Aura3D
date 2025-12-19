@@ -10,9 +10,9 @@ Aura3D 内置了两个简单的渲染管线：
 ```xaml
 <Window
     ...
-    xmlns:aura3d="clr-namespace:Aura3D.Avalonia;assembly=Aura3D.Avalonia"
+    xmlns:a="https://sunce.tech/aura3d"
     ...>
-	<aura3d:Aura3DView x:Name="aura3Dview" SetupPipeline="OnSetupPipeline"/>
+	<a:Aura3DView x:Name="aura3Dview" SetupPipeline="OnSetupPipeline"/>
 </Window>
 ```
 

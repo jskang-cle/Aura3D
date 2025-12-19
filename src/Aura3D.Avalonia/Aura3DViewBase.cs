@@ -36,21 +36,13 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
 
         Stopwatch.Start();
 
+        UpdateControlRenderTargetsSize();
+
         OnSceneInitialized();
     }
 
-    protected override void OnOpenGlRender(GlInterface gl, int fb)
+    private void UpdateControlRenderTargetsSize()
     {
-        if (Scene == null)
-            return;
-
-        var deltaTime = Stopwatch.Elapsed.TotalSeconds;
-
-        Stopwatch.Restart();
-
-        Scene.RenderPipeline.DefaultFramebuffer = (uint)fb;
-
-
         if (isSizeChanged == true)
         {
             uint width = (uint)Bounds.Width;
@@ -70,6 +62,20 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
 
             isSizeChanged = false;
         }
+    }
+
+    protected override void OnOpenGlRender(GlInterface gl, int fb)
+    {
+        if (Scene == null)
+            return;
+
+        var deltaTime = Stopwatch.Elapsed.TotalSeconds;
+
+        Stopwatch.Restart();
+
+        Scene.RenderPipeline.DefaultFramebuffer = (uint)fb;
+
+        UpdateControlRenderTargetsSize();
 
         if (this.fb != fb)
         {

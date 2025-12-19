@@ -11,9 +11,9 @@ dotnet add package Aura3D.Avalonia
 ```xaml
 <Window
     ...
-    xmlns:aura3d="clr-namespace:Aura3D.Avalonia;assembly=Aura3D.Avalonia"
+    xmlns:a="https://sunce.tech/aura3d"
     ...>
-	<aura3d:Aura3DView x:Name="aura3Dview" SceneInitialized="OnSceneInitialized"/>
+	<a:Aura3DView x:Name="aura3Dview" SceneInitialized="OnSceneInitialized"/>
 </Window>
 ```
 

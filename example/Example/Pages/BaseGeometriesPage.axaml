@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-		     xmlns:local="clr-namespace:Aura3D.Avalonia;assembly=Aura3D.Avalonia"
+             xmlns:a="https://sunce.tech/aura3d"
              x:Class="Example.Pages.BaseGeometriesPage">
      <DockPanel>
 		 <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
@@ -17,7 +17,7 @@
             <Button Margin="10" Content="Plane" Click="Button_Click"></Button>
          </StackPanel>    
 
-         <local:Aura3DView SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated"></local:Aura3DView>
+         <a:Aura3DView SceneInitialized="Aura3DView_SceneInitialized" SceneUpdated="Aura3DView_SceneUpdated"></a:Aura3DView>
 
      </DockPanel>
 </UserControl>
