@@ -35,7 +35,15 @@ public class Mesh : Node, IOctreeObject
     /// <summary>
     /// 网格的边界框
     /// </summary>
-    public BoundingBox? BoundingBox => boundingBox;
+    public BoundingBox? BoundingBox
+    {
+        get
+        {
+            UpdateTransform();
+
+            return boundingBox;
+        }
+    }
 
     public Geometry? Geometry 
     { 
@@ -154,8 +162,11 @@ public class Mesh : Node, IOctreeObject
     /// </summary>
     public override void UpdateTransform()
     {
-        base.UpdateTransform();
-        UpdateWorldBoundingBox();
-        OnChanged?.Invoke(this);
+        if (_transformDirty == true)
+        {
+            base.UpdateTransform();
+            UpdateWorldBoundingBox();
+            OnChanged?.Invoke(this);
+        }
     }
 }

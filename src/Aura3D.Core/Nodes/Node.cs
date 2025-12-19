@@ -15,7 +15,7 @@ public partial class Node
 
     #region Transform
 
-    private bool _transformDirty = true;
+    protected bool _transformDirty = true;
 
     public void MarkTransformDirty()
     {
@@ -193,8 +193,11 @@ public partial class Node
     /// </summary>
     public Matrix4x4 WorldTransform
     {
-        get => _worldTransform;
-
+        get 
+        {
+            UpdateTransform();
+            return _worldTransform;
+        }
         set
         {
             _worldTransform = value;

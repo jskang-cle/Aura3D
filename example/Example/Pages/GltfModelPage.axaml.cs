@@ -32,6 +32,9 @@ public partial class GltfModelPage : UserControl
     Model? _currentModel;
 
     Vector3 modelPosition;
+
+    Node node;
+
     Model? currentModel
     {
         get => _currentModel;
@@ -42,11 +45,41 @@ public partial class GltfModelPage : UserControl
             if (aura3d.Scene == null)
                 return;
             if (_currentModel != null)
-                aura3d.Scene.RemoveNode(_currentModel);
+            {
+                aura3d.Remove(node);
+                node.RemoveChild(_currentModel);
+                _currentModel = null;
+            }
             if (value != null)
             {
+
                 _currentModel = value;
-                aura3d.Scene.AddNode(_currentModel);
+
+                if (DataContext is GltfModelViewModel vm == false)
+                    return;
+
+                vm.Roll = 0;
+                vm.Pitch = 0;
+                vm.Yaw = 0;
+
+                if (currentModel == null || currentModel.BoundingBox == null)
+                    return;
+
+                var model = currentModel;
+
+
+                var center = (model.BoundingBox.Max - model.BoundingBox.Min) / 2 + model.BoundingBox.Min;
+
+                node.Position = center;
+
+                node.RotationDegrees = Vector3.Zero;
+
+
+                node.Scale = Vector3.One;
+                
+                node.AddChild(model);
+
+                aura3d.Scene.AddNode(node);
 
                 aura3d.MainCamera.FitToBoundingBox(_currentModel.BoundingBox);
             }
@@ -54,6 +87,7 @@ public partial class GltfModelPage : UserControl
     }
     public GltfModelPage()
     {
+        node = new Node();
         InitializeComponent();
     }
 
@@ -262,8 +296,8 @@ public partial class GltfModelPage : UserControl
         }
         if (currentModel != null)
         {
-            vm.Scale = currentModel.Scale.X;
-            vm.Yaw = currentModel.RotationDegrees.Y;
+            // vm.Scale = currentModel.Scale.X;
+            //vm.Yaw = currentModel.RotationDegrees.Y;
         }
 
     }
@@ -273,10 +307,7 @@ public partial class GltfModelPage : UserControl
 
         if (DataContext is GltfModelViewModel vm == false)
             return;
-        if (currentModel != null)
-        {
-            currentModel.Scale = new Vector3((float)vm.Scale);
-        }
+        node.Scale = new Vector3((float)vm.Scale);
     }
 
 
@@ -285,10 +316,9 @@ public partial class GltfModelPage : UserControl
 
         if (DataContext is GltfModelViewModel vm == false)
             return;
-        if (currentModel != null)
-        {
-            currentModel.RotationDegrees = new Vector3(currentModel.RotationDegrees.X, (float)vm.Yaw, currentModel.RotationDegrees.Z);
-        }
+         node.RotationDegrees = new Vector3(node.RotationDegrees.X, (float)vm.Yaw, node.RotationDegrees.Z);
+
+        Console.WriteLine(vm.Yaw);
     }
 
     private void Slider_ValueChanged3(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
@@ -296,10 +326,7 @@ public partial class GltfModelPage : UserControl
 
         if (DataContext is GltfModelViewModel vm == false)
             return;
-        if (currentModel != null)
-        {
-            currentModel.RotationDegrees = new Vector3((float)vm.Pitch, currentModel.RotationDegrees.Y, currentModel.RotationDegrees.Z);
-        }
+        node.RotationDegrees = new Vector3((float)vm.Pitch, node.RotationDegrees.Y, node.RotationDegrees.Z);
     }
 
     private void Slider_ValueChanged4(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
@@ -307,9 +334,6 @@ public partial class GltfModelPage : UserControl
 
         if (DataContext is GltfModelViewModel vm == false)
             return;
-        if (currentModel != null)
-        {
-            currentModel.RotationDegrees = new Vector3(currentModel.RotationDegrees.X, currentModel.RotationDegrees.Y, (float)vm.Roll);
-        }
+        node.RotationDegrees = new Vector3(node.RotationDegrees.X, node.RotationDegrees.Y, (float)vm.Roll);
     }
 }
