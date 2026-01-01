@@ -130,7 +130,7 @@ public class Octree<T> where T : IOctreeObject
                     newSize.Z = newSize.Z * 2;
                 }
 
-                newBoudingBox = new BoundingBox(new Vector3(newSize.X / -2, newSize.X / -2, newSize.Z / -2), new Vector3(newSize.X / 2, newSize.X / 2, newSize.Z / 2));
+                newBoudingBox = new BoundingBox(new Vector3(newSize.X / -2, newSize.Y / -2, newSize.Z / -2), new Vector3(newSize.X / 2, newSize.Y / 2, newSize.Z / 2));
             }
 
             Rebuild(newSize);
