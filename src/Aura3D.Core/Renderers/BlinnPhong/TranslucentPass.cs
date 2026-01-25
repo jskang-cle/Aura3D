@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using Silk.NET.OpenGLES;
 using Aura3D.Core.Resources;
 
@@ -29,7 +29,7 @@ public class TranslucentPass : LightPass
         SetupUniform(camera);
         using(PushTextureUnit())
         {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent) && !IsSkinnedMesh(mesh), camera.View, camera.Projection);
+            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH", "BLENDMODE_TRANSLUCENT");

@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using Silk.NET.OpenGLES;
 using System.Numerics;
 using Aura3D.Core.Resources;
@@ -15,7 +15,7 @@ public class OutlinePass : RenderPass
 
     public float AmbientIntensity = 0.1f;
 
-    private Camera camera = null;
+    private Camera? camera = null;
 
     public OutlinePass(RenderPipeline renderPipeline) : base(renderPipeline)
     {
@@ -49,14 +49,14 @@ public class OutlinePass : RenderPass
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => IsSkinnedMesh(mesh) == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+            RenderMeshes(mesh => mesh.IsSkinnedMesh == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
         }
 
         UseShader("BLENDMODE_MASKED");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderMeshes(mesh => IsSkinnedMesh(mesh) == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+            RenderMeshes(mesh => mesh.IsSkinnedMesh == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH");
@@ -94,7 +94,8 @@ public class OutlinePass : RenderPass
 
     public override void RenderMesh(Mesh mesh, Matrix4x4 view, Matrix4x4 projection)
     {
-
+        if (camera == null)
+            return;
         var normalMatrix = mesh.WorldTransform.Inverse();
         normalMatrix = Matrix4x4.Transpose(normalMatrix);
         UniformMatrix4("normalMatrix", normalMatrix);
@@ -104,15 +105,14 @@ public class OutlinePass : RenderPass
         UniformMatrix4("normalPrjMatrix", normalPrjMatrix);
 
 
-        if (IsSkinnedMesh(mesh))
+        if (mesh.IsSkinnedMesh)
         {
-            var skinnedMesh = mesh as SkinnedMesh;
-            var skeleton = skinnedMesh!.Skeleton!;
-            if (skinnedMesh!.SkinnedModel!.AnimationSampler != null)
+            var skeleton = mesh.Skeleton;
+            if (mesh.Model.AnimationSampler != null)
             {
                 for (int i = 0; i < skeleton.Bones.Count; i++)
                 {
-                    UniformMatrix4($"BoneMatrices[{i}]", skeleton.Bones[i].InverseWorldMatrix * skinnedMesh!.SkinnedModel!.AnimationSampler.BonesTransform[i]);
+                    UniformMatrix4($"BoneMatrices[{i}]", skeleton.Bones[i].InverseWorldMatrix * mesh.Model.AnimationSampler.BonesTransform[i]);
                 }
             }
             else

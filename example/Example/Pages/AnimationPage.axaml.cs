@@ -25,7 +25,7 @@ public partial class AnimationPage : UserControl
         InitializeComponent();
     }
     List<Animation> animations = [];
-    SkinnedModel? model;
+    Model? model;
     AnimationSampler? animationSampler;
     private async void Aura3DView_SceneInitialized(object? sender, RoutedEventArgs e)
     {

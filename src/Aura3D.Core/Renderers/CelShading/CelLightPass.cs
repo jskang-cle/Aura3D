@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using Silk.NET.OpenGLES;
 using System.Numerics;
 using Aura3D.Core.Resources;
@@ -205,15 +205,14 @@ public class CelLightPass : RenderPass
         UniformMatrix4("normalMatrix", normalMatrix);
 
 
-        if (IsSkinnedMesh(mesh))
+        if (mesh.IsSkinnedMesh)
         {
-            var skinnedMesh = mesh as SkinnedMesh;
-            var skeleton = skinnedMesh!.Skeleton!;
-            if (skinnedMesh!.SkinnedModel!.AnimationSampler != null)
+            var skeleton = mesh.Skeleton;
+            if (mesh.Model.AnimationSampler != null)
             {
                 for (int i = 0; i < skeleton.Bones.Count; i++)
                 {
-                    UniformMatrix4($"BoneMatrices[{i}]", skeleton.Bones[i].InverseWorldMatrix * skinnedMesh!.SkinnedModel!.AnimationSampler.BonesTransform[i]);
+                    UniformMatrix4($"BoneMatrices[{i}]", skeleton.Bones[i].InverseWorldMatrix * mesh.Model.AnimationSampler.BonesTransform[i]);
                 }
             }
             else

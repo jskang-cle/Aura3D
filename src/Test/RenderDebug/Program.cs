@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+// See https://aka.ms/new-console-template for more information
 using Aura3D.Core;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Renderers;

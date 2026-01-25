@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using Silk.NET.OpenGLES;
 using System.Numerics;
 using Aura3D.Core.Resources;
@@ -65,14 +65,14 @@ public class LightPass : RenderPass
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque) && !IsSkinnedMesh(mesh), camera.View, camera.Projection);
+            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
         }
 
         UseShader("BLENDMODE_MASKED");
         SetupUniform(camera);
         using (PushTextureUnit())
         {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked) && !IsSkinnedMesh(mesh), camera.View, camera.Projection);
+            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
         }
 
         UseShader("SKINNED_MESH");
@@ -298,15 +298,14 @@ public class LightPass : RenderPass
         normalMatrix = Matrix4x4.Transpose(normalMatrix);
         UniformMatrix4("normalMatrix", normalMatrix);
 
-        if (IsSkinnedMesh(mesh))
+        if (mesh.IsSkinnedMesh)
         {
-            var skinnedMesh = mesh as SkinnedMesh;
-            var skeleton = skinnedMesh!.Skeleton!;
-            if (skinnedMesh!.SkinnedModel!.AnimationSampler != null)
+            var skeleton = mesh.Skeleton;
+            if (mesh.Model.AnimationSampler != null)
             {
                 for (int i = 0; i < skeleton.Bones.Count; i++)
                 {
-                    UniformMatrix4($"BoneMatrices[{i}]", skeleton.Bones[i].InverseWorldMatrix * skinnedMesh!.SkinnedModel!.AnimationSampler.BonesTransform[i]);
+                    UniformMatrix4($"BoneMatrices[{i}]", skeleton.Bones[i].InverseWorldMatrix * mesh.Model.AnimationSampler.BonesTransform[i]);
                 }
             }
             else

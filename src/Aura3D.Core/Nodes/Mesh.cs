@@ -1,6 +1,7 @@
 using Aura3D.Core.Resources;
 using Aura3D.Core.Math;
 using System.Numerics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Aura3D.Core.Nodes;
 
@@ -30,7 +31,8 @@ public class Mesh : Node, IOctreeObject
 
     private BoundingBox? boundingBox;
 
-    public virtual bool IsSkinnedMesh => false;
+    [MemberNotNullWhen(returnValue: true, nameof(Model), nameof(Skeleton))]
+    public bool IsSkinnedMesh => Model != null && Model.Skeleton != null;
     
     /// <summary>
     /// 网格的边界框
@@ -169,4 +171,6 @@ public class Mesh : Node, IOctreeObject
             OnChanged?.Invoke(this);
         }
     }
+
+    public Skeleton? Skeleton => Model?.Skeleton;
 }

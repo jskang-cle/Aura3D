@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Math;
+using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using SharpGLTF.Schema2;
@@ -25,26 +25,23 @@ public static class ModelLoader
         _materialExtensions.Add(handleFunc);
     }
 
-    public static (SkinnedModel, List<Resources.Animation>) LoadGlbModelAndAnimations(Stream stream)
+    public static (Model, List<Resources.Animation>) LoadGlbModelAndAnimations(Stream stream)
     {
         var modelRoot = ModelRoot.ReadGLB(stream, new ReadSettings { Validation = SharpGLTF.Validation.ValidationMode.TryFix });
 
         var model = processModelRoot(modelRoot);
 
-        if (model is not SkinnedModel skinnedModel)
-            throw new Exception("The model is not a skinned model.");
-
         var animations = processAnimations(modelRoot);
 
         foreach(var animation in animations)
         {
-            animation.Skeleton = skinnedModel.Skeleton;
+            animation.Skeleton = model.Skeleton;
         }
-        return (skinnedModel, animations);
+        return (model, animations);
     }
 
 
-    public static (SkinnedModel, List<Resources.Animation>) LoadGlbModelAndAnimations(string filePath)
+    public static (Model, List<Resources.Animation>) LoadGlbModelAndAnimations(string filePath)
     {
         using (var streamReader = new StreamReader(filePath))
         {
@@ -52,22 +49,19 @@ public static class ModelLoader
         }
     }
 
-    public static (SkinnedModel, List<Resources.Animation>) LoadGltfModelAndAnimations(string filePath)
+    public static (Model, List<Resources.Animation>) LoadGltfModelAndAnimations(string filePath)
     {
         var modelRoot = ModelRoot.Load(filePath);
 
         var model = processModelRoot(modelRoot);
 
-        if (model is not SkinnedModel skinnedModel)
-            throw new Exception("The model is not a skinned model.");
-
         var animations = processAnimations(modelRoot);
 
         foreach (var animation in animations)
         {
-            animation.Skeleton = skinnedModel.Skeleton;
+            animation.Skeleton = model.Skeleton;
         }
-        return (skinnedModel, animations);
+        return (model, animations);
     }
 
     public static Model LoadGlbModel(Stream stream)
@@ -204,7 +198,7 @@ public static class ModelLoader
 
         if (skeletonMap.Count > 0)
         {
-            var skinnedModel = new SkinnedModel();
+            var skinnedModel = new Model();
 
             skinnedModel.Skeleton = skeletonMap.Values.First();
 
@@ -341,11 +335,6 @@ public static class ModelLoader
         foreach(var mesh in model.Meshes)
         {
             mesh.Model = model;
-
-            if (mesh is SkinnedMesh skinnedMesh && model is SkinnedModel skinnedModel)
-            {
-                skinnedMesh.SkinnedModel = skinnedModel;
-            }
         }
 
         return model;
@@ -440,20 +429,7 @@ public static class ModelLoader
             {
                 Mesh? mesh = null;
 
-                if (node.Skin != null && node.Skin.Skeleton != null)
-                {
-                    var skinnedMesh = new SkinnedMesh();
-
-                    if (skeletonMap.TryGetValue(node.Skin.Skeleton, out var skeleton))
-                    {
-                        skinnedMesh.Skeleton = skeleton;
-                    }
-                    mesh = skinnedMesh;
-                }
-                else
-                {
-                    mesh = new Mesh();
-                }
+                mesh = new Mesh();
 
                 currentNode.AddChild(mesh);
 

@@ -1,75 +1,172 @@
-﻿using Assimp;
+using Assimp;
 using Aura3D.Core;
 using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
-using Silk.NET.OpenGLES;
 using StbImageSharp;
-using System;
-using System.Buffers.Text;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Numerics;
-using System.Text;
 
 namespace Aura3D.Model;
 
 public static class AssimpLoader
 {
-    public unsafe static Aura3D.Core.Nodes.Model Load(string path, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    public unsafe static Core.Nodes.Model Load(string path, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
     {
-        var model = new Aura3D.Core.Nodes.Model();
-
         var defaultFlags = PostProcessSteps.Triangulate
                   | PostProcessSteps.GenerateNormals
                   | PostProcessSteps.OptimizeMeshes
-                  | PostProcessSteps.CalculateTangentSpace;
+                  | PostProcessSteps.CalculateTangentSpace
+                | PostProcessSteps.GenerateUVCoords;
 
         var importer = new AssimpContext();
 
         var directory = Path.GetDirectoryName(path);
 
-
         var scene = importer.ImportFile(path, defaultFlags);
 
-        processSkeleton(scene);
+        var model = processScene(scene, directory,  loadTextureFunc); 
 
-        return processScene(scene, directory,  loadTextureFunc);
+        var skeleton = processSkeleton(scene);
+
+        model.Skeleton = skeleton;
+
+        foreach (var mesh in model.Meshes)
+        {
+            mesh.Model = model;
+        }
+
+        return model;
+
     }
 
 
     public unsafe static List<Core.Resources.Animation> LoadAnimations(string path)
     {
+        var defaultFlags = PostProcessSteps.Triangulate
+                  | PostProcessSteps.GenerateNormals
+                  | PostProcessSteps.OptimizeMeshes
+                  | PostProcessSteps.CalculateTangentSpace
+                | PostProcessSteps.GenerateUVCoords;
 
-        return [];
+        var importer = new AssimpContext();
+
+        var directory = Path.GetDirectoryName(path);
+
+        var scene = importer.ImportFile(path, defaultFlags);
+
+        var animations = processAnimations(scene);
+
+        return animations;
     }
 
-
-    public unsafe static Aura3D.Core.Nodes.Model Load(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    public unsafe static List<Core.Resources.Animation> LoadAnimations(Stream stream)
     {
-        var model = new Aura3D.Core.Nodes.Model();
+        var defaultFlags = PostProcessSteps.Triangulate
+                  | PostProcessSteps.GenerateNormals
+                  | PostProcessSteps.OptimizeMeshes
+                  | PostProcessSteps.CalculateTangentSpace
+                | PostProcessSteps.GenerateUVCoords;
+
+        var importer = new AssimpContext();
+
+        var scene = importer.ImportFileFromStream(stream, defaultFlags);
+
+        var animations = processAnimations(scene);
+
+        return animations;
+    }
+
+    private unsafe static List<Core.Resources.Animation> processAnimations(Scene scene)
+    {
+        List<Core.Resources.Animation> animations = [];
+
+        foreach (var assAnimation in scene.Animations)
+        {
+            if (assAnimation.HasNodeAnimations == false)
+                continue;
+            var animation = new Core.Resources.Animation();
+
+            float maxTime = 0;
+            foreach(var assChannel in assAnimation.NodeAnimationChannels)
+            {
+                var channel = new AnimationChannel();
+
+                foreach(var posKey in assChannel.PositionKeys)
+                {
+                    channel.PositionKeyframes.Add(new Keyframe<Vector3>
+                    {
+                        Time = (float)(posKey.Time / assAnimation.TicksPerSecond),
+                        Value = new Vector3(posKey.Value.X, posKey.Value.Y, posKey.Value.Z),
+                    });
+                    if (channel.PositionKeyframes.Last().Time > maxTime)
+                        maxTime = channel.PositionKeyframes.Last().Time;
+                }
+                foreach (var rotKey in assChannel.RotationKeys)
+                {
+                    channel.RotationKeyframes.Add(new Keyframe<Quaternion>
+                    {
+                        Time = (float)(rotKey.Time / assAnimation.TicksPerSecond),
+                        Value = new Quaternion(rotKey.Value.X, rotKey.Value.Y, rotKey.Value.Z, rotKey.Value.W),
+                    });
+                    if (channel.RotationKeyframes.Last().Time > maxTime)
+                        maxTime = channel.RotationKeyframes.Last().Time;
+                }
+
+                foreach (var scaleKey in assChannel.ScalingKeys)
+                {
+                    channel.ScaleKeyframes.Add(new Keyframe<Vector3>
+                    {
+                        Time = (float)(scaleKey.Time / assAnimation.TicksPerSecond),
+                        Value = new Vector3(scaleKey.Value.X, scaleKey.Value.Y, scaleKey.Value.Z),
+                    });
+                    if (channel.ScaleKeyframes.Last().Time > maxTime)
+                        maxTime = channel.ScaleKeyframes.Last().Time;
+                }
+
+                animation.Channels.Add(assChannel.NodeName, channel);
+            }   
+            animation.Name = assAnimation.Name;
+            animation.Duration = maxTime;
+            animations.Add(animation);
+        }
+        return animations;
+    }
+
+    public unsafe static Core.Nodes.Model Load(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    {
 
         var defaultFlags = PostProcessSteps.Triangulate
                   | PostProcessSteps.GenerateNormals
                   | PostProcessSteps.OptimizeMeshes
-                  | PostProcessSteps.CalculateTangentSpace;
+                  | PostProcessSteps.CalculateTangentSpace
+                | PostProcessSteps.GenerateUVCoords;
 
         var importer = new AssimpContext();
 
-
         var scene = importer.ImportFileFromStream(stream, defaultFlags);
 
-        return processScene(scene, null, loadTextureFunc);
+        var model =  processScene(scene, null, loadTextureFunc);
+
+        var skeleton = processSkeleton(scene);
+
+        model.Skeleton = skeleton;
+
+        foreach(var mesh in model.Meshes)
+        {
+            mesh.Model = model;
+        }
+
+        return model;
     }
 
 
-    private unsafe static Aura3D.Core.Nodes.Model processScene(Scene scene, string? directory, Func<string, Core.Resources.Texture>? loadTextureFunc)
+    private unsafe static Core.Nodes.Model processScene(Scene scene, string? directory, Func<string, Core.Resources.Texture>? loadTextureFunc)
     {
 
         Dictionary<int, Core.Resources.Material> materialsMap = new();
 
-        var model = new Aura3D.Core.Nodes.Model();
+        var model = new Core.Nodes.Model();
 
         processMaterial(scene, materialsMap, directory, loadTextureFunc);
 
@@ -347,6 +444,21 @@ public static class AssimpLoader
 
             }
         }
+        foreach (var (name, bone) in boneMap)
+        {
+            if (bone.Parent == null)
+            {
+                skeleton.Root = bone;
+                bone.LocalMatrix = bone.WorldMatrix;
+            }
+            else
+            {
+                bone.LocalMatrix = bone.WorldMatrix * bone.Parent.WorldMatrix.Inverse();
+            }
+            skeleton.Bones.Add(bone);
+
+        }
+
         return skeleton;
     }
 

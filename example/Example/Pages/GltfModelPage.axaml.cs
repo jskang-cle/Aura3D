@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using Ursa.Common;
@@ -182,11 +183,24 @@ public partial class GltfModelPage : UserControl
                 if (model == null)
                 {
                     model = AssimpLoader.Load(path);
+                    var animations = AssimpLoader.LoadAnimations(path);
+                    animations.First().Skeleton = model.Skeleton;
+                    model.AnimationSampler = new AnimationSampler(animations.First());
                 }
             }
             else
             {
-                 model = AssimpLoader.Load(await file.OpenReadAsync());
+                using (var stream = await file.OpenReadAsync())
+                {
+                    model = AssimpLoader.Load(stream);
+                }
+                using (var stream = await file.OpenReadAsync())
+                {
+                    var animations = AssimpLoader.LoadAnimations(stream);
+                    animations.First().Skeleton = model.Skeleton;
+                    model.AnimationSampler = new AnimationSampler(animations.First());
+                }
+
             }
 
             model.Position = modelPosition;
@@ -317,8 +331,6 @@ public partial class GltfModelPage : UserControl
         if (DataContext is GltfModelViewModel vm == false)
             return;
          node.RotationDegrees = new Vector3(node.RotationDegrees.X, (float)vm.Yaw, node.RotationDegrees.Z);
-
-        Console.WriteLine(vm.Yaw);
     }
 
     private void Slider_ValueChanged3(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)

@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Math;
+using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using Aura3D.Core.Scenes;
@@ -156,7 +156,7 @@ public partial class RenderPass
                 continue;
             if (mesh.Geometry == null)
                 continue;
-            if (IsSkinnedMesh(mesh) == true)
+            if (mesh.IsSkinnedMesh == true)
                 continue;
             if (filter(mesh))
             {
@@ -173,7 +173,7 @@ public partial class RenderPass
                 continue;
             if (mesh.Geometry == null)
                 continue;
-            if (IsSkinnedMesh(mesh) == false)
+            if (mesh.IsSkinnedMesh == false)
                 continue;
             if (filter(mesh))
             {
@@ -196,12 +196,6 @@ public partial class RenderPass
             return false;
 
         }
-    }
-    protected bool IsSkinnedMesh(Mesh mesh)
-    {
-        if (mesh.IsSkinnedMesh == true && mesh is SkinnedMesh skinnedMesh && skinnedMesh.Skeleton != null)
-            return true;
-        return false;
     }
 
     public virtual void SortMeshes(List<Mesh> Meshes, Camera camera)
