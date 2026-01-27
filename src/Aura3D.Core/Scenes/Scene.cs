@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Math;
+using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Renderers;
 using System.Drawing;
@@ -49,18 +49,6 @@ public class Scene
         node.CurrentScene = this;
 
         RenderPipeline.AddNode(node);
-
-        if (node is Camera camera)
-        {
-            if (camera.RenderTarget != null && camera.RenderTarget is ControlRenderTarget controlRenderTarget)
-            {
-                if (ControlRenderTargets.Contains(controlRenderTarget) == false)
-                {
-                    ControlRenderTargets.Add(controlRenderTarget);
-                }
-            }
-        }
-
 
         if (node is IOctreeObject otreeObject)
         {

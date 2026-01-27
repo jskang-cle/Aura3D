@@ -9,10 +9,14 @@ using System.Drawing;
 using System.Numerics;
 
 var window = Window.Create(WindowOptions.Default);
+ControlRenderTarget controlRenderTarget = new ControlRenderTarget();
+Camera.ControlRenderTarget = controlRenderTarget;
 Scene scene = new Scene(scene => new BlinnPhongPipeline(scene));
-
 window.Load += () =>
 {
+    controlRenderTarget.Width = (uint)(window.Size.X);
+    controlRenderTarget.Height = (uint)(window.Size.Y);
+    controlRenderTarget.FrameBufferId = 0;
 
     scene.RenderPipeline.Initialize(str =>
     {
@@ -20,7 +24,7 @@ window.Load += () =>
         return p;
     });
 
-    var camera = new Camera();
+    var camera = scene.MainCamera;
 
     camera.ClearColor = Color.Gray;
     camera.NearPlane = 1;
@@ -52,64 +56,15 @@ window.Load += () =>
 
     camera.SkyboxTexture = cubeTexture;
 
-    AddNode(camera);
 
+    var model = ModelLoader.LoadGlbModel("C:\\Users\\cesun\\Desktop\\untitled.glb");
 
-    using (var sr = new StreamReader("../../../../../../example/Example/Assets/Models/Soldier.glb"))
-    {
-        var (model, animations) = ModelLoader.LoadGlbModelAndAnimations(sr.BaseStream);
+    model.Scale = Vector3.One * 10000;
 
-        model.AnimationSampler = new AnimationSampler(animations.First());
+    AddNode(model);
 
-        model.Position = camera.Position + camera.Forward * 10;
+    // camera.FitToBoundingBox(model.BoundingBox);
 
-        model.Position += model.Up * 0.5f;
-
-        AddNode(model);
-
-
-
-    }
-    var node = new Node();
-    using (var sr = new StreamReader("../../../../../../example/Example/Assets/Models/coffee_table_round_01_1k.glb"))
-    {
-
-        var model = ModelLoader.LoadGlbModel(sr.BaseStream);
-
-        model.Position = camera.Position + camera.Forward * 10;
-
-        model.Position += camera.Down * 2;
-
-        model.Scale = Vector3.One * 5f;
-
-        AddNode(model);
-
-        node.Position = model.Position;
-
-    }
-
-
-    var model3 = AssimpLoader.Load("C:\\Users\\cesun\\Downloads\\wooden_stool_02_1k.blend\\wooden_stool_02_1k.gltf");
-
-    model3.Position = camera.Position + camera.Forward * 10;
-
-    model3.Position += camera.Down * 2;
-
-    model3.Scale = Vector3.One * 5f;
-
-    AddNode(model3);
-
-
-    camera.Position = camera.Position + camera.Up * 4;
-
-    camera.RotationDegrees = new Vector3(-20, 0, 0);
-
-    camera.Position = camera.Position + camera.Forward * 3;
-
-
-
-
-    node.RotationDegrees = new Vector3(0, 90, 0);
 
     DirectionalLight dl = new DirectionalLight();
 
@@ -124,11 +79,8 @@ window.Load += () =>
 window.Render += (delta) =>
 {
 
-    foreach (var renderTarget in scene.ControlRenderTargets)
-    {
-        renderTarget.Width = (uint)(window.Size.X);
-        renderTarget.Height = (uint)(window.Size.Y);
-    }
+    controlRenderTarget.Width = (uint)(window.Size.X);
+    controlRenderTarget.Height = (uint)(window.Size.Y);
     scene.RenderPipeline.DefaultFramebuffer = (uint)0;
 
     scene.RenderPipeline.Render();

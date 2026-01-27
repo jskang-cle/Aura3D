@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Numerics;
 using Aura3D.Core.Renderers;
 using Aura3D.Core.Math;
@@ -8,6 +8,15 @@ namespace Aura3D.Core.Nodes;
 
 public class Camera : Node
 {
+    public static ControlRenderTarget? ControlRenderTarget;
+
+    public Camera()
+    {
+        if (ControlRenderTarget == null)
+            throw new Exception("ControlRenderTarget is null, please set Camera.ControlRenderTarget before create Camera instance.");
+        RenderTarget = ControlRenderTarget;
+    }
+
     public float NearPlane { get; set; } = 1f; // 近裁剪面
 
     public float FarPlane { get; set; } = 100f; // 远裁剪面
@@ -20,7 +29,6 @@ public class Camera : Node
     {
         get
         {
-
             var worldTransform = WorldTransform;
 
             return Matrix4x4.CreateLookAt(worldTransform.Translation, worldTransform.Translation + worldTransform.ForwardVector(), worldTransform.UpVector());
@@ -34,11 +42,13 @@ public class Camera : Node
         {
             if (ProjectionType == ProjectionType.Perspective)
             {
-                return Matrix4x4.CreatePerspectiveFieldOfView(
-                    FieldOfView.DegreeToRadians(),
-                    RenderTarget.Width / (float)RenderTarget.Height,
-                    NearPlane,
-                    FarPlane);
+                var fovRadians = FieldOfView.DegreeToRadians();
+
+                var aspectRatio = RenderTarget.Width / (float)RenderTarget.Height;
+
+                var projection =  Matrix4x4.CreatePerspectiveFieldOfView(fovRadians, aspectRatio, NearPlane, FarPlane);
+
+                return projection;
             }
             else // Orthographic
             {
@@ -184,7 +194,7 @@ public class Camera : Node
 
         // 4. 调整近/远裁剪面（确保完整包含物体）
         float boxDiagonal = boxSize.Length();
-        camera.NearPlane = MathF.Max(0.1f, distance - boxDiagonal * 0.6f); // 近裁剪面稍微靠近物体
+        camera.NearPlane = distance - boxDiagonal * 0.6f; // 近裁剪面稍微靠近物体
         camera.FarPlane = distance + boxDiagonal * 1.2f; // 远裁剪面留出足够空间
 
         // 5. 确保摄像机始终看向包围盒中心

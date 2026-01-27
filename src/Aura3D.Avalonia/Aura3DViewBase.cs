@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using Aura3D.Core.Scenes;
 using Avalonia;
 using Avalonia.Controls;
@@ -7,6 +7,7 @@ using Avalonia.Rendering;
 using System.Diagnostics;
 using Aura3D.Core.Resources;
 using Aura3D.Core.Renderers;
+using Aura3D.Core;
 
 namespace Aura3D.Avalonia;
 
@@ -30,6 +31,10 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
     {
         base.OnOpenGlInit(gl);
 
+        Camera.ControlRenderTarget = controlRenderTarget;
+
+        UpdateControlRenderTargetsSize();
+
         Scene = new Scene(CreateRenderPipeline);
 
         Scene.RenderPipeline.Initialize(gl.GetProcAddress);
@@ -39,8 +44,10 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
         UpdateControlRenderTargetsSize();
 
         OnSceneInitialized();
+        Camera.ControlRenderTarget = null;
     }
 
+    private ControlRenderTarget controlRenderTarget = new ControlRenderTarget();
     private void UpdateControlRenderTargetsSize()
     {
         if (isSizeChanged == true)
@@ -54,11 +61,8 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
                 height = (uint)(Bounds.Height * VisualRoot.RenderScaling);
             }
 
-            foreach (var renderTarget in Scene.ControlRenderTargets)
-            {
-                renderTarget.Width = width;
-                renderTarget.Height = height;
-            }
+            controlRenderTarget.Width = width;
+            controlRenderTarget.Height = height;
 
             isSizeChanged = false;
         }
@@ -80,17 +84,16 @@ public abstract class Aura3DViewBase : global::Avalonia.OpenGL.Controls.OpenGlCo
         if (this.fb != fb)
         {
             this.fb = fb;
-            foreach(var renderTarget in Scene.ControlRenderTargets)
-            {
-                renderTarget.FrameBufferId = (uint)fb;
-            }
+            controlRenderTarget.FrameBufferId = (uint)fb;
         }
 
         Scene.RenderPipeline.Render();
 
         Scene.Update(deltaTime);
 
+        Camera.ControlRenderTarget = controlRenderTarget;
         OnSceneUpdated(deltaTime);
+        Camera.ControlRenderTarget = null;
 
 
         RequestNextFrameRendering();

@@ -1,4 +1,4 @@
-﻿#version 300 es
+#version 300 es
 precision mediump float;
 out vec4 outColor;
 
@@ -35,7 +35,8 @@ void main()
     #else
 	    vec3 ndc = vec3(vTexCoord * 2.0 - 1.0, 1.0);
 	    vec4 worldPos = invViewProj * vec4(ndc, 1.0);
-        vec3 dir = normalize(worldPos.xyz / worldPos.w);
+        float w = max(abs(worldPos.w), 1e-6);
+        vec3 dir = normalize(worldPos.xyz / w);
     #endif
         outColor = texture(uSkybox, dir);
 #endif
