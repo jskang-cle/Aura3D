@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -21,7 +21,7 @@ namespace Example.ViewModels
                 },
                 new MenuViewModel {
                     Title = "Load Model File",
-                    ViewModel = new GltfModelViewModel()
+                    ViewModel = new ModelPreviewViewModel()
                 },
                 new MenuViewModel {
                     Title = "Frustum Culling ",

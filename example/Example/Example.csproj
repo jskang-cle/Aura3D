@@ -33,6 +33,9 @@
     <Compile Update="Pages\AnimationPage.axaml.cs">
       <DependentUpon>AnimationPage.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Pages\ModelPreviewPage.axaml.cs">
+      <DependentUpon>ModelPreviewPage.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

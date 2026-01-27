@@ -41,6 +41,7 @@ public partial class AnimationPage : UserControl
 
         if (DataContext is AnimationViewModel vm)
         {
+            vm.Animations.Clear();
             foreach (var anim in animations)
             {
                 vm.Animations.Add(anim.Name);

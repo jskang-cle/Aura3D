@@ -22,7 +22,7 @@ using Camera = Aura3D.Core.Nodes.Camera;
 
 namespace Example.Pages;
 
-public partial class GltfModelPage : UserControl
+public partial class ModelPreviewPage : UserControl
 {
     Model? lion;
 
@@ -56,7 +56,7 @@ public partial class GltfModelPage : UserControl
 
                 _currentModel = value;
 
-                if (DataContext is GltfModelViewModel vm == false)
+                if (DataContext is ModelPreviewViewModel vm == false)
                     return;
 
                 vm.Roll = 0;
@@ -86,7 +86,7 @@ public partial class GltfModelPage : UserControl
             }
         }
     }
-    public GltfModelPage()
+    public ModelPreviewPage()
     {
         node = new Node();
         InitializeComponent();
@@ -95,7 +95,7 @@ public partial class GltfModelPage : UserControl
     private async void Button_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
 
-        if (DataContext is GltfModelViewModel vm == false)
+        if (DataContext is ModelPreviewViewModel vm == false)
             return;
 
         var toplevel = TopLevel.GetTopLevel(this);
@@ -183,9 +183,9 @@ public partial class GltfModelPage : UserControl
                 if (model == null)
                 {
                     model = AssimpLoader.Load(path);
-                    var animations = AssimpLoader.LoadAnimations(path);
-                    animations.First().Skeleton = model.Skeleton;
-                    model.AnimationSampler = new AnimationSampler(animations.First());
+                    //var animations = AssimpLoader.LoadAnimations(path);
+                    //animations.First().Skeleton = model.Skeleton;
+                    // model.AnimationSampler = new AnimationSampler(animations.First());
                 }
             }
             else
@@ -196,9 +196,9 @@ public partial class GltfModelPage : UserControl
                 }
                 using (var stream = await file.OpenReadAsync())
                 {
-                    var animations = AssimpLoader.LoadAnimations(stream);
-                    animations.First().Skeleton = model.Skeleton;
-                    model.AnimationSampler = new AnimationSampler(animations.First());
+                    //var animations = AssimpLoader.LoadAnimations(stream);
+                    //animations.First().Skeleton = model.Skeleton;
+                    // model.AnimationSampler = new AnimationSampler(animations.First());
                 }
 
             }
@@ -242,7 +242,7 @@ public partial class GltfModelPage : UserControl
 
     private async void Button_Click_1(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (DataContext is GltfModelViewModel vm == false)
+        if (DataContext is ModelPreviewViewModel vm == false)
             return;
 
         var button = sender as Button;
@@ -319,7 +319,7 @@ public partial class GltfModelPage : UserControl
     private void Slider_ValueChanged(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
     {
 
-        if (DataContext is GltfModelViewModel vm == false)
+        if (DataContext is ModelPreviewViewModel vm == false)
             return;
         node.Scale = new Vector3((float)vm.Scale);
     }
@@ -328,7 +328,7 @@ public partial class GltfModelPage : UserControl
     private void Slider_ValueChanged2(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
     {
 
-        if (DataContext is GltfModelViewModel vm == false)
+        if (DataContext is ModelPreviewViewModel vm == false)
             return;
          node.RotationDegrees = new Vector3(node.RotationDegrees.X, (float)vm.Yaw, node.RotationDegrees.Z);
     }
@@ -336,7 +336,7 @@ public partial class GltfModelPage : UserControl
     private void Slider_ValueChanged3(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
     {
 
-        if (DataContext is GltfModelViewModel vm == false)
+        if (DataContext is ModelPreviewViewModel vm == false)
             return;
         node.RotationDegrees = new Vector3((float)vm.Pitch, node.RotationDegrees.Y, node.RotationDegrees.Z);
     }
@@ -344,7 +344,7 @@ public partial class GltfModelPage : UserControl
     private void Slider_ValueChanged4(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
     {
 
-        if (DataContext is GltfModelViewModel vm == false)
+        if (DataContext is ModelPreviewViewModel vm == false)
             return;
         node.RotationDegrees = new Vector3(node.RotationDegrees.X, node.RotationDegrees.Y, (float)vm.Roll);
     }

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Example.ViewModels;
 
-public partial class GltfModelViewModel : ViewModelBase
+public partial class ModelPreviewViewModel : ViewModelBase
 {
     [ObservableProperty]
     public double _scale = 1.0;

@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Example.Pages;
 using Example.ViewModels;
@@ -11,7 +11,7 @@ public class ViewLocator : IDataTemplate
         return data switch
         {
             BaseGeometriesViewModel baseGeometriesViewModel => new BaseGeometriesPage(),
-            GltfModelViewModel gltfModelViewModel => new GltfModelPage(),
+            ModelPreviewViewModel gltfModelViewModel => new ModelPreviewPage(),
             FrustumCullingViewModel frustumCullingViewModel => new FrustumCullingPage(),
             AnimationViewModel animationViewModel => new AnimationPage(),
             RoboticArmViewModel roboticArmViewModel => new RoboticArmPage(),
