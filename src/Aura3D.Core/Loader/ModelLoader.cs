@@ -348,15 +348,15 @@ public static class ModelLoader
 
         foreach (var skin in modelRoot.LogicalSkins)
         {
-            if (skin.Skeleton == null)
+            if (skin.JointsCount <= 0)
                 continue;
 
-            if (dict.ContainsKey(skin.Skeleton))
-                continue;
+            var root = skin.Joints[0];
 
             var skeleton = new Skeleton();
 
             Dictionary<string, Bone> boneMap = new();
+
             for (int i = 0; i < skin.Joints.Count; i++)
             {
                 var joint = skin.Joints[i];
@@ -371,16 +371,17 @@ public static class ModelLoader
 
                 boneMap.Add(joint.Name, skeleton.Bones.Last());
             }
-            processBone(skin.Skeleton, boneMap);
+
+            processBone(skin.Joints[0], boneMap);
 
             foreach(var bone in skeleton.Bones)
             {
                 bone.WorldMatrix = GetWorldMatrix(bone);
                 bone.InverseWorldMatrix = bone.WorldMatrix.Inverse();
             }
-            skeleton.Root = boneMap[skin.Skeleton.Name];
+            skeleton.Root = boneMap[skin.Joints[0].Name];
 
-            dict[skin.Skeleton] = skeleton;
+            dict[skin.Joints[0]] = skeleton;
         }
 
         return dict;
