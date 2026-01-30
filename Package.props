@@ -10,4 +10,11 @@
     <PackageProjectUrl>https://github.com/CeSun/Aura3d</PackageProjectUrl>
 	<MinVerTagPrefix>release/</MinVerTagPrefix>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>
