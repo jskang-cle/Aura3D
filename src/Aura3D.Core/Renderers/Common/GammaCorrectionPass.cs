@@ -15,6 +15,7 @@ public class GammaCorrectionPass : RenderPass
 
         this.inputRenderTargetName = inputRenderTargetName;
         this.inputRenderTargetTextureName = inputRenderTargetTextureName;
+        ShaderName = nameof(GammaCorrectionPass);
 
         VertexShader = @"#version 300 es
 precision mediump float;
@@ -68,6 +69,7 @@ void main()
         gl.Enable(EnableCap.Blend);
         UseShader();
         ClearTextureUnit();
+        UseShader_Internal(null);
         UniformTexture("colorTexture", rt.GetTexture(inputRenderTargetTextureName));
         RenderQuad();
 

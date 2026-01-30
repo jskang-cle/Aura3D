@@ -11,6 +11,7 @@ public class FxaaPass : RenderPass
     {
         this.inputRenderTargetName = inputRenderTargetName;
         this.inputRenderTargetTextureName = inputRenderTargetTextureName;
+        ShaderName = nameof(FxaaPass);
         VertexShader = @"#version 300 es
 layout(location = 0) in vec3 a_position;
 layout(location = 1) in vec2 a_texCoord;
@@ -259,6 +260,7 @@ void main() {
         gl.Enable(EnableCap.Blend); 
         UseShader();
         ClearTextureUnit();
+        UseShader_Internal(null);
         UniformTexture("u_texture", rt.GetTexture(inputRenderTargetTextureName));
         UniformVector2("u_textureSize", new Vector2(rt.GetTexture(inputRenderTargetTextureName).Width, rt.GetTexture(inputRenderTargetTextureName).Height));
         RenderQuad();

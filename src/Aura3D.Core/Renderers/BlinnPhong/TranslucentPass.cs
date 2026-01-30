@@ -8,6 +8,7 @@ public class TranslucentPass : LightPass
 {
     public TranslucentPass(RenderPipeline renderPipeline) : base(renderPipeline)
     {
+        ShaderName = nameof(TranslucentPass);
     }
 
     public override void BeforeRender(Camera camera)
@@ -26,18 +27,12 @@ public class TranslucentPass : LightPass
         gl.BindFramebuffer(GLEnum.Framebuffer, rt.FrameBufferId);
 
         UseShader("BLENDMODE_TRANSLUCENT");
-        SetupUniform(camera);
-        using(PushTextureUnit())
-        {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
-        }
+        RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
+        
 
         UseShader("SKINNED_MESH", "BLENDMODE_TRANSLUCENT");
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
-        }
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
+        
    
     }
 }

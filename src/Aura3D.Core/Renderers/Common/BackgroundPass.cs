@@ -12,6 +12,7 @@ public class BackgroundPass: RenderPass
     {
         VertexShader = ShaderResource.BackgroundVert;
         FragmentShader = ShaderResource.BackgroundFrag;
+        ShaderName = nameof(BackgroundPass);
     }
 
 
@@ -39,7 +40,8 @@ public class BackgroundPass: RenderPass
     }
     public override void Render(Camera camera)
     {
-        ClearTextureUnit();
+        ClearTextureUnit(); 
+        UseShader_Internal(null);
         if (camera.ClearType == ClearType.Skybox && camera.SkyboxTexture != null)
         {
             if (camera.ProjectionType == ProjectionType.Orthographic)

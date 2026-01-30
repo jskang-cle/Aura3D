@@ -22,6 +22,7 @@ public class ShadowMapPass : RenderPass
     {
         VertexShader = ShaderResource.ShadowMapVert;
         FragmentShader = ShaderResource.ShadowMapFrag;
+        ShaderName = nameof(ShadowMapPass);
     }
 
     public override void Setup()

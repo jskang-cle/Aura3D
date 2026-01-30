@@ -2,7 +2,6 @@ using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using Aura3D.Core.Scenes;
-using SharpGLTF.Transforms;
 using Silk.NET.OpenGLES;
 using System.Diagnostics;
 using System.Drawing;
@@ -110,6 +109,7 @@ public partial class RenderPass
                 continue;
             if (filter(mesh))
             {
+                UseShader_Internal(mesh);
                 RenderMesh(mesh, view, projection);
             }
         }
@@ -130,6 +130,7 @@ public partial class RenderPass
                 continue;
             if (filter(mesh))
             {
+                UseShader_Internal(mesh);
                 RenderMesh(mesh, view, projection);
             }
         }
@@ -160,6 +161,7 @@ public partial class RenderPass
                 continue;
             if (filter(mesh))
             {
+                UseShader_Internal(mesh);
                 RenderMesh(mesh, view, projection);
             }
         }
@@ -177,6 +179,7 @@ public partial class RenderPass
                 continue;
             if (filter(mesh))
             {
+                UseShader_Internal(mesh);
                 RenderMesh(mesh, view, projection);
             }
         }

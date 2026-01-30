@@ -1,8 +1,8 @@
+using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
+using Aura3D.Core.Resources;
 using Silk.NET.OpenGLES;
 using System.Numerics;
-using Aura3D.Core.Resources;
-using Aura3D.Core.Math;
 
 namespace Aura3D.Core.Renderers;
 
@@ -38,6 +38,7 @@ public class LightPass : RenderPass
     {
         VertexShader = ShaderResource.MeshVert;
         FragmentShader = ShaderResource.MeshFrag;
+        ShaderName = nameof(LightPass);
     }
     public override void Setup()
     {
@@ -62,42 +63,26 @@ public class LightPass : RenderPass
         ClearTextureUnit();
 
         UseShader();
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
-        }
+        RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
 
         UseShader("BLENDMODE_MASKED");
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
-        }
+        RenderVisibleMeshesInCamera(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked) && !mesh.IsSkinnedMesh, camera.View, camera.Projection);
+        
 
         UseShader("SKINNED_MESH");
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
-        }
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
+        
 
         UseShader("SKINNED_MESH", "BLENDMODE_MASKED");
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
-        }
+        RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
     }
 
-    protected void SetupUniform(Camera camera)
+    protected void SetupUniform(Matrix4x4 view, Matrix4x4 projection)
     {
-
-        ClearTextureUnit();
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
+        UniformMatrix4("viewMatrix", view);
+        UniformMatrix4("projectionMatrix", projection);
         UniformFloat("ambientIntensity", AmbientIntensity);
-        UniformVector3("cameraPosition", camera.WorldTransform.Translation);
+        UniformVector3("cameraPosition", view.Inverse().Translation);
 
 
         for(int i = 0; i < directionalLightLimit; i++)
@@ -120,11 +105,11 @@ public class LightPass : RenderPass
 
                 if (directionalLight.CastShadow)
                 {
-                    var view = Matrix4x4.CreateLookAt(directionalLight.WorldTransform.Translation, directionalLight.WorldTransform.Translation + directionalLight.WorldTransform.ForwardVector(), directionalLight.WorldTransform.UpVector());
-                    var projection = Matrix4x4.CreateOrthographic(directionalLight.ShadowConfig.Width, directionalLight.ShadowConfig.Height, directionalLight.ShadowConfig.NearPlane, directionalLight.ShadowConfig.FarPlane);
+                    var shadowView = Matrix4x4.CreateLookAt(directionalLight.WorldTransform.Translation, directionalLight.WorldTransform.Translation + directionalLight.WorldTransform.ForwardVector(), directionalLight.WorldTransform.UpVector());
+                    var shadowProjection = Matrix4x4.CreateOrthographic(directionalLight.ShadowConfig.Width, directionalLight.ShadowConfig.Height, directionalLight.ShadowConfig.NearPlane, directionalLight.ShadowConfig.FarPlane);
 
                     UniformTexture($"DirectionalLightShadowMaps[{i}]", directionalLight.ShadowMapRenderTarget.DepthStencilTexture);
-                    UniformMatrix4($"DirectionalLights[{i}].shadowMapMatrix", view * projection);
+                    UniformMatrix4($"DirectionalLights[{i}].shadowMapMatrix", shadowView * shadowProjection);
                 }
                 else
                 {
@@ -138,7 +123,7 @@ public class LightPass : RenderPass
 
         }
 
-        Span<Matrix4x4> views = stackalloc Matrix4x4[6];
+        Span<Matrix4x4> ShadowViews = stackalloc Matrix4x4[6];
 
         for (int i = 0; i < pointLightLimit; i ++)
         {
@@ -167,19 +152,19 @@ public class LightPass : RenderPass
 
                     var position = pointLight.WorldTransform.Translation;
 
-                    views[0] = Matrix4x4.CreateLookAt(position, position + new Vector3(1, 0, 0), new Vector3(0, -1, 0));
-                    views[1] = Matrix4x4.CreateLookAt(position, position + new Vector3(-1, 0, 0), new Vector3(0, -1, 0));
-                    views[2] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, 1, 0), new Vector3(0, 0, 1));
-                    views[3] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, -1, 0), new Vector3(0, 0, -1));
-                    views[4] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, 0, 1), new Vector3(0, -1, 0));
-                    views[5] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, 0, -1), new Vector3(0, -1, 0));
+                    ShadowViews[0] = Matrix4x4.CreateLookAt(position, position + new Vector3(1, 0, 0), new Vector3(0, -1, 0));
+                    ShadowViews[1] = Matrix4x4.CreateLookAt(position, position + new Vector3(-1, 0, 0), new Vector3(0, -1, 0));
+                    ShadowViews[2] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, 1, 0), new Vector3(0, 0, 1));
+                    ShadowViews[3] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, -1, 0), new Vector3(0, 0, -1));
+                    ShadowViews[4] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, 0, 1), new Vector3(0, -1, 0));
+                    ShadowViews[5] = Matrix4x4.CreateLookAt(position, position + new Vector3(0, 0, -1), new Vector3(0, -1, 0));
 
 
-                    var projection = Matrix4x4.CreatePerspectiveFieldOfView(90f.DegreeToRadians(), pointLight.ShadowMapRenderTarget.Width / (float)pointLight.ShadowMapRenderTarget.Height, pointLight.ShadowConfig.NearPlane, pointLight.ShadowConfig.FarPlane);
+                    var shadowProjection = Matrix4x4.CreatePerspectiveFieldOfView(90f.DegreeToRadians(), pointLight.ShadowMapRenderTarget.Width / (float)pointLight.ShadowMapRenderTarget.Height, pointLight.ShadowConfig.NearPlane, pointLight.ShadowConfig.FarPlane);
 
                     for (int j = 0; j < 6; j++)
                     {
-                        UniformMatrix4($"PointLights[{i}].shadowMapMatrices[{j}]", views[j] * projection);
+                        UniformMatrix4($"PointLights[{i}].shadowMapMatrices[{j}]", ShadowViews[j] * shadowProjection);
                     }
                     UniformTextureCubeMap($"PointLightShadowMaps[{i}]", pointLight.ShadowMapRenderTarget.DepthStencilTexture);
                 }
@@ -223,11 +208,11 @@ public class LightPass : RenderPass
                 if (spotLight.CastShadow)
                 {
                     var position = spotLight.WorldTransform.Translation;
-                    var view = Matrix4x4.CreateLookAt(position, position + spotLight.WorldTransform.ForwardVector(), spotLight.WorldTransform.UpVector());
-                    var projection = Matrix4x4.CreatePerspectiveFieldOfView(spotLight.OuterAngleDegree.DegreeToRadians(), spotLight.ShadowMapRenderTarget.Width / (float)spotLight.ShadowMapRenderTarget.Height, spotLight.ShadowConfig.NearPlane, spotLight.ShadowConfig.FarPlane);
+                    var shadowView = Matrix4x4.CreateLookAt(position, position + spotLight.WorldTransform.ForwardVector(), spotLight.WorldTransform.UpVector());
+                    var shadowProjection = Matrix4x4.CreatePerspectiveFieldOfView(spotLight.OuterAngleDegree.DegreeToRadians(), spotLight.ShadowMapRenderTarget.Width / (float)spotLight.ShadowMapRenderTarget.Height, spotLight.ShadowConfig.NearPlane, spotLight.ShadowConfig.FarPlane);
 
                     UniformTexture($"SpotLightShadowMaps[{i}]", spotLight.ShadowMapRenderTarget.DepthStencilTexture);
-                    UniformMatrix4($"SpotLights[{i}].shadowMapMatrix", view * projection);
+                    UniformMatrix4($"SpotLights[{i}].shadowMapMatrix", shadowView * shadowProjection);
 
                 }
                 else
@@ -245,9 +230,10 @@ public class LightPass : RenderPass
 
     public override void RenderMesh(Mesh mesh, Matrix4x4 view, Matrix4x4 projection)
     {
+        ClearTextureUnit();
+        SetupUniform(view, projection);
         if (mesh.Material != null)
         {
-            ClearTextureUnit();
 
             foreach(var channel in mesh.Material.Channels)
             {

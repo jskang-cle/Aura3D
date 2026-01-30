@@ -42,6 +42,7 @@ public class CelLightPass : RenderPass
         FragmentShader = ShaderResource.CelFrag;
         rampTexture = TextureLoader.LoadTexture(ShaderResource.CelRamp2);
         renderPipeline.AddGpuResource(rampTexture);
+        ShaderName = nameof(CelLightPass);
     }
 
     public override void BeforeRender(Camera camera)
@@ -62,42 +63,30 @@ public class CelLightPass : RenderPass
         ClearTextureUnit();
 
         UseShader();
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderMeshes(mesh => mesh.IsSkinnedMesh == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
-        }
+        RenderMeshes(mesh => mesh.IsSkinnedMesh == false && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+        
 
         UseShader("BLENDMODE_MASKED");
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderMeshes(mesh => mesh.IsSkinnedMesh == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
-        }
+        RenderMeshes(mesh => mesh.IsSkinnedMesh == false && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+        
 
         UseShader("SKINNED_MESH");
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderMeshes(mesh => mesh.IsSkinnedMesh && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
-        }
+        RenderMeshes(mesh => mesh.IsSkinnedMesh && (mesh.Material == null || mesh.Material.BlendMode == BlendMode.Opaque), camera.View, camera.Projection);
+        
 
         UseShader("SKINNED_MESH", "BLENDMODE_MASKED");
-        SetupUniform(camera);
-        using (PushTextureUnit())
-        {
-            RenderMeshes(mesh => mesh.IsSkinnedMesh && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
-        }
+        RenderMeshes(mesh => mesh.IsSkinnedMesh && (mesh.Material != null && mesh.Material.BlendMode == BlendMode.Masked), camera.View, camera.Projection);
+        
     }
 
-    protected void SetupUniform(Camera camera)
+    protected void SetupUniform(Matrix4x4 view, Matrix4x4 projection)
     {
 
         ClearTextureUnit();
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
+        UniformMatrix4("viewMatrix", view);
+        UniformMatrix4("projectionMatrix", projection);
         UniformFloat("ambientIntensity", AmbientIntensity);
-        UniformVector3("cameraPosition", camera.WorldTransform.Translation);
+        UniformVector3("cameraPosition", view.Inverse().Translation);
 
         UniformTexture("RampTexture", rampTexture);
 
@@ -121,11 +110,11 @@ public class CelLightPass : RenderPass
 
                 if (directionalLight.CastShadow)
                 {
-                    var view = Matrix4x4.CreateLookAt(directionalLight.WorldTransform.Translation, directionalLight.WorldTransform.Translation + directionalLight.WorldTransform.ForwardVector(), directionalLight.WorldTransform.UpVector());
-                    var projection = Matrix4x4.CreateOrthographic(directionalLight.ShadowConfig.Width, directionalLight.ShadowConfig.Height, directionalLight.ShadowConfig.NearPlane, directionalLight.ShadowConfig.FarPlane);
+                    var shadowView = Matrix4x4.CreateLookAt(directionalLight.WorldTransform.Translation, directionalLight.WorldTransform.Translation + directionalLight.WorldTransform.ForwardVector(), directionalLight.WorldTransform.UpVector());
+                    var shadowProjection = Matrix4x4.CreateOrthographic(directionalLight.ShadowConfig.Width, directionalLight.ShadowConfig.Height, directionalLight.ShadowConfig.NearPlane, directionalLight.ShadowConfig.FarPlane);
 
                     UniformTexture($"DirectionalLightShadowMaps[{i}]", directionalLight.ShadowMapRenderTarget.DepthStencilTexture);
-                    UniformMatrix4($"DirectionalLights[{i}].shadowMapMatrix", view * projection);
+                    UniformMatrix4($"DirectionalLights[{i}].shadowMapMatrix", shadowView * shadowProjection);
                 }
                 else
                 {
@@ -145,10 +134,10 @@ public class CelLightPass : RenderPass
 
     public override void RenderMesh(Mesh mesh, Matrix4x4 view, Matrix4x4 projection)
     {
+        ClearTextureUnit();
+        SetupUniform(view, projection);
         if (mesh.Material != null)
         {
-            ClearTextureUnit();
-
             foreach(var channel in mesh.Material.Channels)
             {
                 switch(channel.Name){

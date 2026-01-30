@@ -1,15 +1,17 @@
 using Silk.NET.OpenGLES;
 using System.Drawing;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 using Aura3D.Core.Math;
 using Aura3D.Core.Resources;
+using Aura3D.Core.Nodes;
+using ShaderType = Silk.NET.OpenGLES.ShaderType;
 
 namespace Aura3D.Core.Renderers;
 
 public partial class RenderPass
 {
+    public string ShaderName { get; protected set; }
 
     protected string VertexShader = string.Empty;
 
@@ -18,27 +20,53 @@ public partial class RenderPass
 
     public Shader? CurrentShader { get; private set; } = null;
 
+    string[] defines = [];
+
     public void UseShader(params string[] defines)
     {
-        var name = string.Join(";", defines);
-
-        if (Shaders.TryGetValue(name, out Shader? shader))
-        {
-            gl.UseProgram(shader.ProgramId);
-            CurrentShader = shader;
-        }
-        else
-        {
-            shader = CreateShaderProgram(defines);
-
-            Shaders[name] = shader;
-
-            gl.UseProgram(shader.ProgramId);
-            CurrentShader = shader;
-        }
+        this.defines = defines;
     }
 
-    private Shader CreateShaderProgram(string[] defines)
+    protected void UseShader_Internal(Mesh? mesh)
+    {
+        Shader? shader = null;
+
+        var name = string.Join(";", defines);
+
+        if (mesh != null && mesh.Material != null)
+        {
+            var (vertexShader, fragmentShader) = mesh.Material.GetShaderSource(ShaderName);
+
+            if (vertexShader != null || fragmentShader != null)
+            {
+                if (mesh.Material.Shaders.TryGetValue(name, out shader) == false)
+                {
+                    if (vertexShader == null)
+                        vertexShader = VertexShader;
+                    if (fragmentShader == null)
+                        fragmentShader = FragmentShader;
+
+                    shader = CreateShaderProgram(defines, vertexShader, fragmentShader);
+
+                    mesh.Material.Shaders[name] = shader;
+                }
+            }
+        }
+
+        if (shader == null)
+        {
+            if (Shaders.TryGetValue(name, out shader) == false)
+            {
+                shader = CreateShaderProgram(defines, VertexShader, FragmentShader);
+                Shaders[name] = shader;
+            }
+        }
+
+        gl.UseProgram(shader.ProgramId);
+        CurrentShader = shader;
+    }
+
+    private Shader CreateShaderProgram(string[] defines, string vertexShader, string fragmentShader)
     {
         var shader = new Shader();
 
@@ -46,9 +74,9 @@ public partial class RenderPass
         
         var definesText = string.Join("\n", defines.Select(d => $"#define {d}"));
 
-        var vs = VertexShader.Replace("//{{defines}}", definesText);
+        var vs = vertexShader.Replace("//{{defines}}", definesText);
 
-        var fs = FragmentShader.Replace("//{{defines}}", definesText);
+        var fs = fragmentShader.Replace("//{{defines}}", definesText);
 
         var vertex = gl.CreateShader(ShaderType.VertexShader);
 
@@ -141,44 +169,7 @@ public partial class RenderPass
     private int currentTextureUnit = 0;
     public void ClearTextureUnit()
     {
-        if (textureUints.Count == 0)
-            currentTextureUnit = 0;
-        else
-        {
-            var textureUnit = textureUints.Peek();
-            currentTextureUnit = textureUnit;
-        }
-    }
-
-    Stack<int> textureUints = new Stack<int>();
-    public void PopTextureUnit()
-    {
-        textureUints.Pop();
-    }
-
-    public IDisposable PushTextureUnit()
-    {
-        if (textureUnitScope == null)
-        {
-             textureUnitScope = new TextureUnitScope(this);
-        }
-
-        textureUints.Push(currentTextureUnit);
-
-        return textureUnitScope;
-    }
-    TextureUnitScope? textureUnitScope = null;
-    public class TextureUnitScope : IDisposable
-    {
-        private RenderPass renderPass;
-        public TextureUnitScope(RenderPass renderPass)
-        {
-            this.renderPass = renderPass;
-        }
-        public void Dispose()
-        {
-            renderPass.PopTextureUnit();
-        }
+        currentTextureUnit = 0;
     }
 
     public void UniformTexture(string name, uint textureId)

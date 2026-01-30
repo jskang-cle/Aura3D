@@ -1,7 +1,7 @@
 using Aura3D.Core.Nodes;
+using Aura3D.Core.Resources;
 using Silk.NET.OpenGLES;
 using System.Numerics;
-using Aura3D.Core.Resources;
 
 namespace Aura3D.Core.Renderers;
 
@@ -11,6 +11,7 @@ public class NoLightPass : RenderPass
     {
         this.FragmentShader = ShaderResource.NoLightFrag;
         this.VertexShader = ShaderResource.NoLightVert;
+        ShaderName = nameof(NoLightPass);
     }
 
     public override void BeforeRender(Camera camera)
@@ -27,24 +28,15 @@ public class NoLightPass : RenderPass
     public override void Render(Camera camera)
     {
         UseShader();
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
         RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
 
-
         UseShader("BLENDMODE_MASKED");
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
         RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
 
         UseShader("SKINNED_MESH");
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
         RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Opaque), camera.View, camera.Projection);
 
         UseShader("SKINNED_MESH", "BLENDMODE_MASKED");
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
         RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Masked), camera.View, camera.Projection);
 
 
@@ -53,14 +45,10 @@ public class NoLightPass : RenderPass
         gl.DepthMask(false);
 
         UseShader("BLENDMODE_TRANSLUCENT");
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
         RenderStaticMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
 
 
         UseShader("SKINNED_MESH", "BLENDMODE_TRANSLUCENT");
-        UniformMatrix4("viewMatrix", camera.View);
-        UniformMatrix4("projectionMatrix", camera.Projection);
         RenderSkinnedMeshes(mesh => IsMaterialBlendMode(mesh, BlendMode.Translucent), camera.View, camera.Projection);
 
     }
@@ -72,9 +60,11 @@ public class NoLightPass : RenderPass
 
     public override void RenderMesh(Mesh mesh, Matrix4x4 view, Matrix4x4 projection)
     {
+        ClearTextureUnit();
+        UniformMatrix4("viewMatrix", view);
+        UniformMatrix4("projectionMatrix", projection);
         if (mesh.Material != null)
         {
-            ClearTextureUnit();
 
             foreach (var channel in mesh.Material.Channels)
             {
