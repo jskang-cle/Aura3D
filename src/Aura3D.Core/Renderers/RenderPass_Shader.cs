@@ -33,7 +33,7 @@ public partial class RenderPass
 
         var name = string.Join(";", defines);
 
-        if (mesh != null && mesh.Material != null)
+        if (mesh != null && mesh.Material != null && mesh.Material.HasShader)
         {
             var (vertexShader, fragmentShader) = mesh.Material.GetShaderSource(ShaderName);
 

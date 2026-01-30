@@ -14,6 +14,7 @@ public class Material : IClone<Material>, IGpuResource
 
     public float AlphaCutoff { get; set; } = 0.5f;
 
+    public bool HasShader { get; set; } = false;
     public IReadOnlyDictionary<string, string> VertexShaders => _vertexShaders;
 
     private Dictionary<string, string> _vertexShaders = new Dictionary<string, string>();
@@ -55,6 +56,26 @@ public class Material : IClone<Material>, IGpuResource
         return material;
     }
 
+    public Dictionary<string, Action<RenderPass>> ShaderPassParametersCallbacks = [];
+    public void SetShaderPassParametersCallback(string key, Action<RenderPass> callback)
+    {
+        ShaderPassParametersCallbacks[key] = callback;
+    }
+
+    public void RemoveShaderPassParametersCallback(string key)
+    {
+        ShaderPassParametersCallbacks.Remove(key);
+    }
+
+    public Action<RenderPass>? GetShaderPassParametersCallback(string key)
+    {
+        Action<RenderPass>? callback = null;
+
+        ShaderPassParametersCallbacks.TryGetValue(key, out callback);
+
+        return callback;
+    }
+
     public void SetShaderSource(string key, ShaderType shaderType, string shader)
     {
         if (shaderType == ShaderType.Fragment)
@@ -65,6 +86,7 @@ public class Material : IClone<Material>, IGpuResource
         {
             _vertexShaders[key] = shader;
         }
+        HasShader = true;
     }
 
     public (string? vertexShader, string? fragmentShader) GetShaderSource(string key)
@@ -90,6 +112,10 @@ public class Material : IClone<Material>, IGpuResource
         else if (shaderType == ShaderType.Vertex)
         {
             _vertexShaders.Remove(key);
+        }
+        if (_fragmentShaders.Count == 0 && _vertexShaders.Count == 0)
+        {
+            HasShader = false;
         }
     }
 

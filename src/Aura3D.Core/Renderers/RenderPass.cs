@@ -96,6 +96,15 @@ public partial class RenderPass
     {
         UniformMatrix4("modelMatrix", mesh.WorldTransform);
         gl.BindVertexArray(mesh.Geometry!.Vao);
+
+        if (mesh != null && mesh.Material != null && mesh.Material.HasShader == true)
+        {
+            var callback = mesh.Material.GetShaderPassParametersCallback(ShaderName);
+            if (callback != null)
+            {
+                callback(this);
+            }
+        }
         gl.DrawElements(GLEnum.Triangles, (uint)mesh.Geometry.IndicesCount, GLEnum.UnsignedInt, (void*)0);
     }
 
