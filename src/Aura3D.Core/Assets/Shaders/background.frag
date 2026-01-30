@@ -33,10 +33,20 @@ void main()
         vec3 dir = normalize(worldPos);
         dir = (viewRot * vec4(dir, 0.0)).xyz;
     #else
-	    vec3 ndc = vec3(vTexCoord * 2.0 - 1.0, 1.0) - vec3(0, 0, -1);
-	    vec4 worldPos = invViewProj * vec4(ndc, 1.0);
+	    vec4 ndc = vec4(vTexCoord * 2.0 - 1.0, 1.0, 1.0);
+	    vec4 worldPos = invViewProj * ndc;
         float w = max(abs(worldPos.w), 1e-6);
-        vec3 dir = normalize(worldPos.xyz / w);
+        vec3 fragPos = worldPos.xyz / w;
+
+        vec4 cameraPos = vec4(0.0, 0.0, -1.0, 1);
+	    worldPos = invViewProj * ndc;
+        w = max(abs(cameraPos.w), 1e-6);
+        vec3 cameraWorldPos = cameraPos.xyz / w;
+
+
+        vec3 dir = fragPos - cameraWorldPos;
+
+        dir = normalize(dir);
     #endif
         outColor = texture(uSkybox, dir);
 #endif

@@ -57,13 +57,13 @@ window.Load += () =>
     camera.SkyboxTexture = cubeTexture;
 
 
-    var model = ModelLoader.LoadGlbModel("C:\\Users\\cesun\\Desktop\\untitled.glb");
+    var model = ModelLoader.LoadGlbModel($"../../../../../../example/Example/Assets/Models/Soldier.glb");
 
     model.Scale = Vector3.One * 10000;
 
     AddNode(model);
 
-    // camera.FitToBoundingBox(model.BoundingBox);
+    camera.FitToBoundingBox(model.BoundingBox);
 
 
     DirectionalLight dl = new DirectionalLight();
