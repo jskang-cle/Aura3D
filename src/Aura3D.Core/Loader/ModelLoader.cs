@@ -461,9 +461,9 @@ public static class ModelLoader
                                 if (node.Skin == null)
                                     return new float[] { v.X, v.Y, v.Z, v.W };
                                 var x = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
-                                var y = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
-                                var z = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
-                                var w = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
+                                var y = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Y].Name).First().Index;
+                                var z = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Z].Name).First().Index;
+                                var w = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.W].Name).First().Index;
                                 return new float[] { x, y, z, w };
                             }).ToList());
                             break;
