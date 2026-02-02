@@ -3,7 +3,7 @@ using Aura3D.Core.Scenes;
 using Silk.NET.OpenGLES;
 
 namespace Aura3D.Core.Renderers;
-public class BlinnPhongPipeline : RenderPipeline
+public class BlinnPhongPipeline : RenderPipeline, IRenderPipelineCreateInstance
 {
 
     public BlinnPhongPipeline(Scene scene) : base(scene)
@@ -65,4 +65,6 @@ public class BlinnPhongPipeline : RenderPipeline
     {
 
     }
+
+    public static RenderPipeline CreateInstance(Scene scene) => new BlinnPhongPipeline(scene);
 }

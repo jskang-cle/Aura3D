@@ -1,4 +1,5 @@
-﻿using Avalonia.Input;
+﻿using Aura3D.Core.Renderers;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.OpenGL;
 using System;
@@ -9,6 +10,14 @@ using System.Threading.Tasks;
 
 namespace Aura3D.Avalonia;
 
+public class Aura3DView<T> : Aura3DView where T : IRenderPipelineCreateInstance
+{ 
+    public Aura3DView()
+    {
+        CreateRenderPipeline = T.CreateInstance;
+    }
+
+}
 public class Aura3DView : Aura3DViewBase
 {
     public UpdateRoutedEventArgs updateRoutedEventArgs;

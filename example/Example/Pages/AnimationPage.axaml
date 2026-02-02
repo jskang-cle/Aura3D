@@ -6,6 +6,7 @@
              xmlns:u="https://irihi.tech/ursa"
              xmlns:vm="clr-namespace:Example.ViewModels"
              x:DataType="vm:AnimationViewModel"
+             xmlns:acr="clr-namespace:Aura3D.Core.Renderers;assembly=Aura3D.Core"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Example.AnimationPage">
     
@@ -38,7 +39,7 @@
         </Border>
         
     </StackPanel>
-    <a:Aura3DView SceneInitialized="Aura3DView_SceneInitialized">
+    <a:Aura3DView  x:TypeArguments="acr:NoLightPipeline" SceneInitialized="Aura3DView_SceneInitialized">
 		  
     </a:Aura3DView>
   </DockPanel>

@@ -7,6 +7,12 @@ using System.Numerics;
 
 namespace Aura3D.Core.Renderers;
 
+public interface IRenderPipelineCreateInstance
+{
+    public abstract static RenderPipeline CreateInstance(Scene scene);
+
+
+}
 public abstract partial class RenderPipeline
 {
     public RenderPipeline(Scene scene)

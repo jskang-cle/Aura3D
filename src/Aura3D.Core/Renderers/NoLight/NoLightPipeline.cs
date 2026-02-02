@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Aura3D.Core.Renderers;
 
-public class NoLightPipeline : RenderPipeline
+public class NoLightPipeline : RenderPipeline, IRenderPipelineCreateInstance
 {
     public NoLightPipeline(Scene scene) : base(scene)
     {
@@ -29,6 +29,8 @@ public class NoLightPipeline : RenderPipeline
             .AddTexture("Color", TextureFormat.Rgba8)
             .SetDepthTexture(TextureFormat.DepthComponent16);
     }
+
+    public static RenderPipeline CreateInstance(Scene scene) => new NoLightPipeline(scene);
 
     public override void BeforeCameraRender(Camera camera)
     {

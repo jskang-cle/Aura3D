@@ -3,7 +3,7 @@ using Aura3D.Core.Scenes;
 using Silk.NET.OpenGLES;
 
 namespace Aura3D.Core.Renderers;
-public class CelShadingPipeline : RenderPipeline
+public class CelShadingPipeline : RenderPipeline, IRenderPipelineCreateInstance
 {
 
     public CelShadingPipeline(Scene scene) : base(scene)
@@ -70,4 +70,6 @@ public class CelShadingPipeline : RenderPipeline
     {
 
     }
+
+    public static RenderPipeline CreateInstance(Scene scene) => new CelShadingPipeline(scene);
 }
