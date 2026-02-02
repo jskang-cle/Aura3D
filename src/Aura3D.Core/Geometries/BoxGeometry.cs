@@ -121,17 +121,17 @@ public class BoxGeometry : Geometry
         );
 
         // 将数据设置到基类 Geometry
-        SetVertexAttribute(BuildInVertexAttribute.Position, positions);
-        SetVertexAttribute(BuildInVertexAttribute.Normal, normals);
-        SetVertexAttribute(BuildInVertexAttribute.TexCoord, uvs);
+        SetVertexAttribute(BuildInVertexAttribute.Position, 3, positions);
+        SetVertexAttribute(BuildInVertexAttribute.Normal, 3, normals);
+        SetVertexAttribute(BuildInVertexAttribute.TexCoord_0, 2, uvs);
 
         SetIndices(indices);
 
         ModelHelper.CalcVerticsTbn(indices, normals, uvs, out var tangents, out var bitangents);
 
-        SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
+        SetVertexAttribute(BuildInVertexAttribute.Tangent, 3, tangents);
 
-        SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
+        SetVertexAttribute(BuildInVertexAttribute.Bitangent, 3, bitangents);
 
         // 标记需要上传到 GPU（Geometry 构造时默认 true，但明确设置更可读）
         NeedsUpload = true;

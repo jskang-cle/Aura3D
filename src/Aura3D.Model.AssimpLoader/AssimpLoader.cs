@@ -388,11 +388,11 @@ public static class AssimpLoader
 
             }
 
-            geometry.SetVertexAttribute(BuildInVertexAttribute.Position, positions);
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Position, 3, positions);
 
             if (assimpMesh.HasTextureCoords(0))
             {
-                geometry.SetVertexAttribute(BuildInVertexAttribute.TexCoord, uvs);
+                geometry.SetVertexAttribute(BuildInVertexAttribute.TexCoord_0, 2, uvs);
             }
 
 
@@ -405,13 +405,13 @@ public static class AssimpLoader
             }
             geometry.SetIndices(indices);
 
-            geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, normals);
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, 3, normals);
 
             if (assimpMesh.HasNormals && assimpMesh.HasTextureCoords(0))
             {
                 ModelHelper.CalcVerticsTbn(geometry.Indices, normals, uvs, out var tangents, out var bitangents);
-                geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
-                geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
+                geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, 3, tangents);
+                geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, 3, bitangents);
             }
 
 

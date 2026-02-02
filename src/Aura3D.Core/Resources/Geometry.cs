@@ -45,19 +45,9 @@ public class Geometry : IGpuResource, IClone<Geometry>
         VertexAttributeLocations.Add(location);
     }
 
-    public void SetVertexAttribute(BuildInVertexAttribute attribute, List<float> data)
+    public void SetVertexAttribute(BuildInVertexAttribute attribute, uint size, List<float> data)
     {
-        SetVertexAttribute(attribute.ToString(), (uint)attribute, attribute switch
-        {
-            BuildInVertexAttribute.Position => 3,
-            BuildInVertexAttribute.TexCoord => 2,
-            BuildInVertexAttribute.Normal => 3,
-            BuildInVertexAttribute.Tangent => 3,
-            BuildInVertexAttribute.Bitangent => 3,
-            BuildInVertexAttribute.BoneIndices => 4,
-            BuildInVertexAttribute.BoneWeights => 4,
-            _ => throw new Exception("Unknown built-in vertex attribute")
-        }, data);
+        SetVertexAttribute(attribute.ToString(), (uint)attribute, (int)size, data);
     }
 
     public void SetIndices(List<uint> indices)
@@ -163,10 +153,15 @@ public struct VertexAttribute
 public enum BuildInVertexAttribute
 {
     Position = 0,
-    TexCoord = 1,
+    TexCoord_0 = 1,
     Normal = 2,
     Tangent = 3,
     Bitangent = 4,
-    BoneIndices = 5,
-    BoneWeights = 6
+    Jonits_0 = 5,
+    Weights_0 = 6,
+    Jonits_1 = 7,
+    Weights_1 = 8,
+    TexCoord_1 = 9,
+    TexCoord_2 = 10,
+    TexCoord_3 = 11,
 }

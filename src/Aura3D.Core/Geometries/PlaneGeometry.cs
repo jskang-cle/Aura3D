@@ -89,16 +89,16 @@ public class PlaneGeometry : Geometry
             }
         }
 
-        SetVertexAttribute(BuildInVertexAttribute.Position, positions);
-        SetVertexAttribute(BuildInVertexAttribute.Normal, normals);
-        SetVertexAttribute(BuildInVertexAttribute.TexCoord, uvs);
+        SetVertexAttribute(BuildInVertexAttribute.Position, 3, positions);
+        SetVertexAttribute(BuildInVertexAttribute.Normal, 3, normals);
+        SetVertexAttribute(BuildInVertexAttribute.TexCoord_0, 2, uvs);
         SetIndices(indices);
 
         ModelHelper.CalcVerticsTbn(indices, normals, uvs, out var tangents, out var bitangents);
 
-        SetVertexAttribute(BuildInVertexAttribute.Tangent, tangents);
+        SetVertexAttribute(BuildInVertexAttribute.Tangent, 3, tangents);
 
-        SetVertexAttribute(BuildInVertexAttribute.Bitangent, bitangents);
+        SetVertexAttribute(BuildInVertexAttribute.Bitangent, 3, bitangents);
 
         NeedsUpload = true;
     }
