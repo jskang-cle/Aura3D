@@ -17,7 +17,7 @@
 ## Features
 ### 1. Basic Functions
 - Model Rendering
-- Light Sources
+- Light
 - Projections
 - Skeletal Animation
 - Instanced Rendering
@@ -58,12 +58,12 @@ Initialize your scene in the SceneInitialized event:
     
     // Version 0.0.1 requires manual instantiation of the camera
     var camera = new Camera();
+	view.AddNode(camera);
+
     // For other versions or newer releases, the main camera is built-in
     var camera = view.MainCamera;
 
     camera.ClearColor = Color.Gray;
-
-	view.AddNode(camera);
 
 	var model = ModelLoader.LoadGlbModel("your model file path(*.glb)");
 
