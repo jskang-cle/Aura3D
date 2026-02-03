@@ -60,12 +60,12 @@ dotnet add package Aura3D.Avalonia
 
     // 0.0.1版本需要手动new相机
     var camera = new Camera();
+	view.AddNode(camera);
     // 其他或者更新版本内置了主相机
     var camera = view.MainCamera;
 
     camera.ClearColor = Color.Gray;
 
-	view.AddNode(camera);
 
 	var model = ModelLoader.LoadGlbModel("your model file path(*.glb)");
 
