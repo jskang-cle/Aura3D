@@ -25,7 +25,7 @@
 			   <u:NavMenu.Header>
                    <Panel Width="150">
                    <DockPanel Height="60" HorizontalAlignment="Center">
-			            <Image DockPanel.Dock="Left" Source="avares://Example/Assets/avalonia-logo.ico" Width="32" Height="32"/>
+			            <Image DockPanel.Dock="Left" Source="avares://Example/Assets/Aura3D.png" Width="50" Height="50"/>
                        <Border Padding="10 0 10 0">
                            <TextBlock Foreground="#666" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" Text="Aura3D"></TextBlock>
                        </Border> 

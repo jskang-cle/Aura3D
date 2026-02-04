@@ -1,4 +1,5 @@
 using Assimp;
+using Assimp.Unmanaged;
 using Aura3D.Core;
 using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
@@ -55,7 +56,14 @@ public static class AssimpLoader
 
         var scene = importer.ImportFile(path, defaultFlags);
 
+        var skeleton = processSkeleton(scene);
+
         var animations = processAnimations(scene);
+
+        foreach(var animation in animations)
+        {
+            animation.Skeleton = skeleton;
+        }
 
         return animations;
     }
@@ -73,6 +81,13 @@ public static class AssimpLoader
         var scene = importer.ImportFileFromStream(stream, defaultFlags);
 
         var animations = processAnimations(scene);
+
+        var skeleton = processSkeleton(scene);
+
+        foreach (var animation in animations)
+        {
+            animation.Skeleton = skeleton;
+        }
 
         return animations;
     }
@@ -169,8 +184,14 @@ public static class AssimpLoader
         var model = new Core.Nodes.Model();
 
         processMaterial(scene, materialsMap, directory, loadTextureFunc);
+        var skeleton = processSkeleton(scene);
 
-        processNode(scene, scene.RootNode, model, materialsMap);
+        foreach (var assiMesh in scene.Meshes)
+        {
+            var mesh = processMesh(scene, assiMesh, skeleton, materialsMap);
+
+            model.AddChild(mesh);
+        }
 
         return model;
     }
@@ -333,143 +354,140 @@ public static class AssimpLoader
 
     }
 
-    private static unsafe void processNode(Scene scene, Assimp.Node node, Core.Nodes.Node parent, Dictionary<int, Core.Resources.Material> materialMap)
+    private static unsafe Core.Nodes.Mesh processMesh(Scene scene, Assimp.Mesh assimpMesh, Skeleton? skeleton, Dictionary<int, Core.Resources.Material> materialMap)
     {
-        var currentNode = new Core.Nodes.Node();
+        var mesh = new Core.Nodes.Mesh();
 
-        parent.AddChild(currentNode);
+        var geometry = new Geometry();
 
-        currentNode.LocalTransform = node.Transform;
 
-        currentNode.Name = node.Name;
+        List<float> positions = new List<float>();
+        List<float> normals = new List<float>();
+        List<float> uvs = new List<float>();
+        List<float> bones = new List<float>();
+        List<float> boneWeight = new List<float>();
 
-        for(int i = 0; i < node.MeshCount; i ++)
+        for (int j = 0; j < assimpMesh.VertexCount; j++)
         {
-            var mesh = new Core.Nodes.Mesh();
+            var vertex = assimpMesh.Vertices[j];
+            positions.Add(vertex.X);
+            positions.Add(vertex.Y);
+            positions.Add(vertex.Z);
 
-            mesh.LocalTransform = Matrix4x4.Identity;
-
-            currentNode.AddChild(mesh);
-
-            mesh.LocalTransform = Matrix4x4.Identity;
-
-
-            var geometry = new Geometry();
-
-            var assimpMesh = scene.Meshes[node.MeshIndices[i]];
-
-            List<float> positions = new List<float>();
-            List<float> normals = new List<float>();
-            List<float> uvs = new List<float>();
-            List<float> bones = new List<float>();
-            List<float> boneWeight = new List<float>();
-
-            for(int j = 0; j < assimpMesh.VertexCount; j ++)
+            if (assimpMesh.HasNormals)
             {
-                var vertex = assimpMesh.Vertices[j];
-                positions.Add(vertex.X);
-                positions.Add(vertex.Y);
-                positions.Add(vertex.Z);
-
-                if (assimpMesh.HasNormals)
-                {
-                    normals.Add(assimpMesh.Normals[j].X);
-                    normals.Add(assimpMesh.Normals[j].Y);
-                    normals.Add(assimpMesh.Normals[j].Z);
-                }
-
-                if (assimpMesh.HasTextureCoords(0))
-                {
-
-                    uvs.Add(assimpMesh.TextureCoordinateChannels[0][j].X);
-                    uvs.Add(assimpMesh.TextureCoordinateChannels[0][j].Y);
-                }
-
-
+                normals.Add(assimpMesh.Normals[j].X);
+                normals.Add(assimpMesh.Normals[j].Y);
+                normals.Add(assimpMesh.Normals[j].Z);
             }
-
-            geometry.SetVertexAttribute(BuildInVertexAttribute.Position, 3, positions);
 
             if (assimpMesh.HasTextureCoords(0))
             {
-                geometry.SetVertexAttribute(BuildInVertexAttribute.TexCoord_0, 2, uvs);
+
+                uvs.Add(assimpMesh.TextureCoordinateChannels[0][j].X);
+                uvs.Add(assimpMesh.TextureCoordinateChannels[0][j].Y);
             }
 
 
-            List<uint> indices = [];
-
-           ;
-            foreach(var index in assimpMesh.GetIndices())
-            {
-                indices.Add((uint)index);
-            }
-            geometry.SetIndices(indices);
-
-            geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, 3, normals);
-
-            if (assimpMesh.HasNormals && assimpMesh.HasTextureCoords(0))
-            {
-                ModelHelper.CalcVerticsTbn(geometry.Indices, normals, uvs, out var tangents, out var bitangents);
-                geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, 3, tangents);
-                geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, 3, bitangents);
-            }
-
-
-            mesh.Geometry = geometry;
-
-            mesh.Material = materialMap[assimpMesh.MaterialIndex];
         }
 
-        for(int i = 0; i < node.ChildCount; i ++)
+        geometry.SetVertexAttribute(BuildInVertexAttribute.Position, 3, positions);
+
+        if (assimpMesh.HasTextureCoords(0))
         {
-            processNode(scene, node.Children[i],currentNode, materialMap);
+            geometry.SetVertexAttribute(BuildInVertexAttribute.TexCoord_0, 2, uvs);
+        }
+        if (assimpMesh.HasNormals)
+        {
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, 3, normals);
+        }    
+
+
+        List<uint> indices = [];
+
+        ;
+        foreach (var index in assimpMesh.GetIndices())
+        {
+            indices.Add((uint)index);
+        }
+        geometry.SetIndices(indices);
+
+
+        if (assimpMesh.HasNormals && assimpMesh.HasTextureCoords(0))
+        {
+            ModelHelper.CalcVerticsTbn(geometry.Indices, normals, uvs, out var tangents, out var bitangents);
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Tangent, 3, tangents);
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Bitangent, 3, bitangents);
+        }
+
+
+        mesh.Geometry = geometry;
+
+        mesh.Material = materialMap[assimpMesh.MaterialIndex];
+
+
+        if (assimpMesh.HasBones && skeleton != null)
+        {
+
+            List<float> joints = new List<float>(new float[4 * assimpMesh.VertexCount]);
+            List<float> weights = new List<float>(new float[4 * assimpMesh.VertexCount]);
+            int[] len = new int[assimpMesh.VertexCount];
+            foreach (var bone in assimpMesh.Bones)
+            {
+                var id = skeleton.Bones.First(b => b.Name == bone.Name).Index;
+
+                foreach(var vertexWeight in bone.VertexWeights)
+                {
+                    joints[vertexWeight.VertexID * 4 + len[vertexWeight.VertexID]] = id;
+                    weights[vertexWeight.VertexID * 4 + len[vertexWeight.VertexID]] = vertexWeight.Weight;
+                    len[vertexWeight.VertexID]++;
+                }
+            }
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Jonits_0, 4, joints);
+            geometry.SetVertexAttribute(BuildInVertexAttribute.Weights_0, 4, weights);
+        }
+        return mesh;
+    }
+
+    
+    public static void processBoneNode(Assimp.Node assimpNode, Dictionary<string, Core.Resources.Bone> boneMap)
+    {
+        if (assimpNode.Parent != null && assimpNode.HasMeshes == false)
+        {
+
+            var bone = new Core.Resources.Bone();
+            bone.Name = assimpNode.Name;
+            bone.Index = boneMap.Count;
+            bone.LocalMatrix = Matrix4x4.Transpose(assimpNode.Transform);
+            if (boneMap.Count > 0)
+            {
+                var parentName = assimpNode.Parent.Name;
+                var parentNode = boneMap[parentName];
+                bone.Parent = parentNode;
+                bone.Parent.Children.Add(bone);
+            }
+            boneMap.Add(assimpNode.Name, bone);
+
+        }
+
+        foreach(var child in assimpNode.Children)
+        {
+            processBoneNode(child, boneMap);
         }
     }
 
-    public static Skeleton processSkeleton(Scene scene)
+    public static Skeleton? processSkeleton(Scene scene)
     {
         Dictionary<string, Core.Resources.Bone> boneMap = [];
-        var skeleton = new Skeleton();
-        processNode(scene, scene.RootNode, boneMap);
 
-        foreach (var (name, bone) in boneMap)
+        processBoneNode(scene.RootNode, boneMap);
+
+        /*
+        foreach (var mesh in scene.Meshes)
         {
-            var node = scene.RootNode.FindNode(name);
-
-            if (node.Parent != null && boneMap.TryGetValue(node.Parent.Name, out var parentBone))
-            {
-
-                bone.Parent = parentBone;
-                parentBone.Children.Add(bone);
-
-            }
-        }
-        foreach (var (name, bone) in boneMap)
-        {
-            if (bone.Parent == null)
-            {
-                skeleton.Root = bone;
-                bone.LocalMatrix = bone.WorldMatrix;
-            }
-            else
-            {
-                bone.LocalMatrix = bone.WorldMatrix * bone.Parent.WorldMatrix.Inverse();
-            }
-            skeleton.Bones.Add(bone);
-
-        }
-
-        return skeleton;
-    }
-
-    private static void processNode(Scene scene, Assimp.Node node, Dictionary<string, Core.Resources.Bone> boneMap)
-    {
-        foreach (var meshIndex in node.MeshIndices)
-        {
-            var mesh = scene.Meshes[meshIndex];
             if (mesh.HasBones)
             {
-                foreach(var assiBone in mesh.Bones)
+                foreach (var assiBone in mesh.Bones)
                 {
                     if (boneMap.ContainsKey(assiBone.Name))
                         continue;
@@ -480,14 +498,37 @@ public static class AssimpLoader
                     bone.Index = boneMap.Count;
                     boneMap.Add(assiBone.Name, bone);
                 }
-            }    
+            }
         }
-        foreach(var child in node.Children)
-        {
-            processNode(scene, child, boneMap);
-        }
-    }
+        */
 
+
+        if (boneMap.Count == 0)
+            return null;
+
+        var skeleton = new Skeleton();
+
+        foreach (var (name, bone) in boneMap)
+        {
+            if (bone.Parent == null)
+            {
+                skeleton.Root = bone;
+                //bone.LocalMatrix = bone.WorldMatrix;
+                bone.WorldMatrix = bone.LocalMatrix;
+            }
+            else
+            {
+                //bone.LocalMatrix = bone.WorldMatrix * bone.Parent.InverseWorldMatrix;
+                bone.WorldMatrix = bone.LocalMatrix * bone.Parent.WorldMatrix;
+            }
+            bone.InverseWorldMatrix = bone.WorldMatrix.Inverse();
+
+            skeleton.Bones.Add(bone);
+
+        }
+
+        return skeleton;
+    }
 
 
 }

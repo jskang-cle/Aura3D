@@ -46,7 +46,6 @@ void main()
 
         vec3 dir = fragPos - cameraWorldPos;
 
-        dir = normalize(dir);
     #endif
         outColor = texture(uSkybox, dir);
 #endif
