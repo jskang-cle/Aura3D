@@ -6,9 +6,9 @@ using System.Numerics;
 
 namespace Aura3D.Core.Resources;
 
-public class AnimationBlend : IAnimationSampler
+public class AnimationBlendSpace : IAnimationSampler
 {
-    public AnimationBlend(Skeleton skeleton)
+    public AnimationBlendSpace(Skeleton skeleton)
     {
         Skeleton = skeleton;
 
@@ -23,9 +23,6 @@ public class AnimationBlend : IAnimationSampler
 
     Dictionary<Vector2, IAnimationSampler> AnimationSamplerMaps = [];
 
-    List<(float, IAnimationSampler)> XAxisSampmplers = [];
-    List<(float, IAnimationSampler)> YAxisSampmplers = [];
-
     public void AddAnimationSampler(Vector2 point, IAnimationSampler animationSampler)
     {
         if (point.X > 1 || point.X < -1)
@@ -35,18 +32,6 @@ public class AnimationBlend : IAnimationSampler
             throw new Exception();
 
         AnimationSamplerMaps.Add(point, animationSampler);
-        XAxisSampmplers.Add((point.X, animationSampler));
-        YAxisSampmplers.Add((point.Y, animationSampler));
-
-        XAxisSampmplers.Sort((left, right) =>
-        {
-            return right.Item1 > left.Item1 ? -1 : 1;
-        });
-
-        YAxisSampmplers.Sort((left, right) =>
-        {
-            return right.Item1 > left.Item1 ? -1 : 1;
-        });
 
     }
     Vector2 AxisValue = default;
@@ -61,6 +46,22 @@ public class AnimationBlend : IAnimationSampler
 
     public void Update(double deltaTime)
     {
+        foreach(var (point, anim) in AnimationSamplerMaps)
+        {
+            float distance = CalculateDistance(AxisValue.X, AxisValue.Y, point.X, point.Y);
+            
+            if (distance < 0.000001)
+            {
+                
+            }
 
+        }
+    }
+
+    private float CalculateDistance(float x1, float y1, float x2, float y2)
+    {
+        float dx = x1 - x2;
+        float dy = y1 - y2;
+        return (float)MathF.Sqrt(dx * dx + dy * dy);
     }
 }

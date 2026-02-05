@@ -64,7 +64,7 @@ window.Load += () =>
     if (animations.Count > 0 && model.Skeleton != null)
     {
 
-        var animationBlend = new AnimationBlend(model.Skeleton);
+        var animationBlend = new AnimationBlendSpace(model.Skeleton);
         animationBlend.AddAnimationSampler(new(0, 1), new AnimationSampler(animations[0]));
         animationBlend.AddAnimationSampler(new(0, -1), new AnimationSampler(animations[1]));
         animationBlend.AddAnimationSampler(new(1, 0), new AnimationSampler(animations[2]));
