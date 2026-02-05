@@ -14,17 +14,11 @@ public static class AssimpLoader
 {
     public unsafe static Core.Nodes.Model Load(string path, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
     {
-        var defaultFlags = PostProcessSteps.Triangulate
-                  | PostProcessSteps.GenerateNormals
-                  | PostProcessSteps.OptimizeMeshes
-                  | PostProcessSteps.CalculateTangentSpace
-                | PostProcessSteps.GenerateUVCoords;
-
         var importer = new AssimpContext();
 
         var directory = Path.GetDirectoryName(path);
 
-        var scene = importer.ImportFile(path, defaultFlags);
+        var scene = importer.ImportFile(path, DefaultFlags);
 
         var model = processScene(scene, directory,  loadTextureFunc); 
 
@@ -38,23 +32,16 @@ public static class AssimpLoader
         }
 
         return model;
-
     }
 
 
     public unsafe static List<Core.Resources.Animation> LoadAnimations(string path)
     {
-        var defaultFlags = PostProcessSteps.Triangulate
-                  | PostProcessSteps.GenerateNormals
-                  | PostProcessSteps.OptimizeMeshes
-                  | PostProcessSteps.CalculateTangentSpace
-                | PostProcessSteps.GenerateUVCoords;
-
         var importer = new AssimpContext();
 
         var directory = Path.GetDirectoryName(path);
 
-        var scene = importer.ImportFile(path, defaultFlags);
+        var scene = importer.ImportFile(path, DefaultFlags);
 
         var skeleton = processSkeleton(scene);
 
@@ -70,15 +57,9 @@ public static class AssimpLoader
 
     public unsafe static List<Core.Resources.Animation> LoadAnimations(Stream stream)
     {
-        var defaultFlags = PostProcessSteps.Triangulate
-                  | PostProcessSteps.GenerateNormals
-                  | PostProcessSteps.OptimizeMeshes
-                  | PostProcessSteps.CalculateTangentSpace
-                | PostProcessSteps.GenerateUVCoords;
-
         var importer = new AssimpContext();
 
-        var scene = importer.ImportFileFromStream(stream, defaultFlags);
+        var scene = importer.ImportFileFromStream(stream, DefaultFlags);
 
         var animations = processAnimations(scene);
 
@@ -92,6 +73,92 @@ public static class AssimpLoader
         return animations;
     }
 
+    public unsafe static Core.Nodes.Model Load(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    {
+        var importer = new AssimpContext();
+
+        var scene = importer.ImportFileFromStream(stream, DefaultFlags);
+
+        var model = processScene(scene, null, loadTextureFunc);
+
+        var skeleton = processSkeleton(scene);
+
+        model.Skeleton = skeleton;
+
+        foreach (var mesh in model.Meshes)
+        {
+            mesh.Model = model;
+        }
+
+        return model;
+    }
+
+
+    public static (Core.Nodes.Model, List<Core.Resources.Animation>) LoadModelAndAnimations(string path, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    {
+
+        var importer = new AssimpContext();
+
+        var directory = Path.GetDirectoryName(path);
+
+        var scene = importer.ImportFile(path, DefaultFlags);
+
+        var model = processScene(scene, directory, loadTextureFunc);
+
+        var skeleton = processSkeleton(scene);
+
+        model.Skeleton = skeleton;
+
+        foreach (var mesh in model.Meshes)
+        {
+            mesh.Model = model;
+        }
+
+        var animations = processAnimations(scene);
+
+        foreach (var animation in animations)
+        {
+            animation.Skeleton = skeleton;
+        }
+
+        return (model, animations);
+    }
+
+
+
+    public static (Core.Nodes.Model, List<Core.Resources.Animation>) LoadModelAndAnimations(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    {
+
+        var importer = new AssimpContext();
+
+        var scene = importer.ImportFileFromStream(stream, DefaultFlags);
+
+        var model = processScene(scene, null, loadTextureFunc);
+
+        var skeleton = processSkeleton(scene);
+
+        model.Skeleton = skeleton;
+
+        foreach (var mesh in model.Meshes)
+        {
+            mesh.Model = model;
+        }
+
+        var animations = processAnimations(scene);
+
+        foreach (var animation in animations)
+        {
+            animation.Skeleton = skeleton;
+        }
+
+        return (model, animations);
+    }
+
+    private static PostProcessSteps DefaultFlags => PostProcessSteps.Triangulate
+                  | PostProcessSteps.GenerateNormals
+                  | PostProcessSteps.OptimizeMeshes
+                  | PostProcessSteps.CalculateTangentSpace
+                | PostProcessSteps.GenerateUVCoords;
     private unsafe static List<Core.Resources.Animation> processAnimations(Scene scene)
     {
         List<Core.Resources.Animation> animations = [];
@@ -148,34 +215,7 @@ public static class AssimpLoader
         return animations;
     }
 
-    public unsafe static Core.Nodes.Model Load(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
-    {
-
-        var defaultFlags = PostProcessSteps.Triangulate
-                  | PostProcessSteps.GenerateNormals
-                  | PostProcessSteps.OptimizeMeshes
-                  | PostProcessSteps.CalculateTangentSpace
-                | PostProcessSteps.GenerateUVCoords;
-
-        var importer = new AssimpContext();
-
-        var scene = importer.ImportFileFromStream(stream, defaultFlags);
-
-        var model =  processScene(scene, null, loadTextureFunc);
-
-        var skeleton = processSkeleton(scene);
-
-        model.Skeleton = skeleton;
-
-        foreach(var mesh in model.Meshes)
-        {
-            mesh.Model = model;
-        }
-
-        return model;
-    }
-
-
+    
     private unsafe static Core.Nodes.Model processScene(Scene scene, string? directory, Func<string, Core.Resources.Texture>? loadTextureFunc)
     {
 
@@ -196,8 +236,7 @@ public static class AssimpLoader
         return model;
     }
 
-
-    public static unsafe void processMaterial(Scene scene, Dictionary<int, Core.Resources.Material> materialsMap, string? path, Func<string, Core.Resources.Texture>? loadTextureFunc)
+    private static unsafe void processMaterial(Scene scene, Dictionary<int, Core.Resources.Material> materialsMap, string? path, Func<string, Core.Resources.Texture>? loadTextureFunc)
     {
         for (int i = 0; i < scene.MaterialCount; i++)
         {
@@ -450,7 +489,7 @@ public static class AssimpLoader
     }
 
     
-    public static void processBoneNode(Assimp.Node assimpNode, Dictionary<string, Core.Resources.Bone> boneMap)
+    private static void processBoneNode(Assimp.Node assimpNode, Dictionary<string, Core.Resources.Bone> boneMap)
     {
         if (assimpNode.Parent != null && assimpNode.HasMeshes == false)
         {
