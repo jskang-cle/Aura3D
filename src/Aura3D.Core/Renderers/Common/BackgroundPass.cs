@@ -44,6 +44,7 @@ public class BackgroundPass: RenderPass
         UseShader_Internal(null);
         if (camera.ClearType == ClearType.Skybox && camera.SkyboxTexture != null)
         {
+            Matrix4x4 projection = default;
             if (camera.ProjectionType == ProjectionType.Orthographic)
             {
                 UseShader("SKYBOX", "ORTHOGRAPHIC");
@@ -51,14 +52,21 @@ public class BackgroundPass: RenderPass
                 UniformFloat("farPlane", camera.FarPlane);
                 float aspectRatio = camera.RenderTarget.Width / (float)camera.RenderTarget.Height;
                 UniformVector2("orthoSize", new Vector2(100 * aspectRatio, 100));
+                projection = camera.Projection;
 
             }
             else
             {
-                UseShader("SKYBOX");
+                UseShader("SKYBOX"); 
+
+                var fovRadians = camera.FieldOfView.DegreeToRadians();
+
+                var aspectRatio = camera.RenderTarget.Width / (float)camera.RenderTarget.Height;
+
+                projection = Matrix4x4.CreatePerspectiveFieldOfView(fovRadians, aspectRatio, 10, 100);
 
             }
-            UniformMatrix4("invViewProj", (camera.View * camera.Projection).Inverse());
+            UniformMatrix4("invViewProj", (camera.View * projection).Inverse());
             UniformTextureCubeMap("uSkybox", camera.SkyboxTexture);
             RenderQuad();
         }
