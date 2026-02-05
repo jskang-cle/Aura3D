@@ -69,8 +69,8 @@ window.Load += () =>
         animationBlend.AddAnimationSampler(new(0, -1), new AnimationSampler(animations[1]));
         animationBlend.AddAnimationSampler(new(1, 0), new AnimationSampler(animations[2]));
         animationBlend.AddAnimationSampler(new(-1, 0), new AnimationSampler(animations[3]));
-
-        model.AnimationSampler = new AnimationSampler(animations[0]);
+        animationBlend.SetAxis(0, 0.5f);
+        model.AnimationSampler = animationBlend;//new AnimationSampler(animations[0]);
     }
 
     model.RotationDegrees = new Vector3(0, 180, 0);
