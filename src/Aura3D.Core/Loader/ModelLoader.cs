@@ -31,6 +31,9 @@ public static class ModelLoader
 
         var model = processModelRoot(modelRoot);
 
+        if (model.Skeleton == null)
+            return (model, []);
+
         var animations = processAnimations(modelRoot);
 
         foreach(var animation in animations)
@@ -54,6 +57,9 @@ public static class ModelLoader
         var modelRoot = ModelRoot.Load(filePath);
 
         var model = processModelRoot(modelRoot);
+
+        if (model.Skeleton == null)
+            return (model, []);
 
         var animations = processAnimations(modelRoot);
 
@@ -93,7 +99,19 @@ public static class ModelLoader
     {
         var modelRoot = ModelRoot.Load(filePath);
 
-        return processAnimations(modelRoot);
+        var skeleton = processSkeleton(modelRoot);
+
+        if (skeleton == null)
+            return [];
+
+        var animations = processAnimations(modelRoot);
+
+        foreach(var animation in animations)
+        {
+            animation.Skeleton = skeleton;
+        }
+
+        return animations;
     }
 
 
@@ -108,7 +126,19 @@ public static class ModelLoader
     {
         var modelRoot = ModelRoot.ReadGLB(stream, new ReadSettings { Validation = SharpGLTF.Validation.ValidationMode.TryFix });
 
-        return processAnimations(modelRoot);
+        var skeleton = processSkeleton(modelRoot);
+
+        if (skeleton == null)
+            return [];
+
+        var animations = processAnimations(modelRoot);
+
+        foreach (var animation in animations)
+        {
+            animation.Skeleton = skeleton;
+        }
+
+        return animations;
 
     }
 
@@ -194,20 +224,11 @@ public static class ModelLoader
     {
         Model? model = null;
 
-        var skeletonMap = processSkeleton(modelRoot);
+        var skeleton = processSkeleton(modelRoot);
 
-        if (skeletonMap.Count > 0)
-        {
-            var skinnedModel = new Model();
+        model = new Model();
 
-            skinnedModel.Skeleton = skeletonMap.Values.First();
-
-            model = skinnedModel;
-        }
-        else
-        {
-            model = new Model();
-        }
+        model.Skeleton = skeleton;
 
         model.Name = modelRoot.DefaultScene.Name;
 
@@ -328,7 +349,7 @@ public static class ModelLoader
 
         foreach (var node in modelRoot.DefaultScene.VisualChildren)
         {
-            processNode(node, model, materialMap, skeletonMap);
+            processNode(node, model, materialMap, skeleton);
         }
 
 
@@ -341,7 +362,7 @@ public static class ModelLoader
     }
 
 
-    private static Dictionary<SharpGLTF.Schema2.Node, Skeleton> processSkeleton(ModelRoot modelRoot)
+    private static Skeleton? processSkeleton(ModelRoot modelRoot)
     {
         var dict = new Dictionary<SharpGLTF.Schema2.Node, Skeleton>();
 
@@ -384,7 +405,11 @@ public static class ModelLoader
             dict[skin.Joints[0]] = skeleton;
         }
 
-        return dict;
+        if (dict.Count > 0)
+        {
+            return dict.Values.First();
+        }
+        return null;
     }
 
     private static Matrix4x4 GetWorldMatrix(Bone bone)
@@ -414,7 +439,7 @@ public static class ModelLoader
         }
 
     }
-    private static void processNode(SharpGLTF.Schema2.Node node, Node parent, Dictionary<SharpGLTF.Schema2.Material, Material> materialMap, Dictionary<SharpGLTF.Schema2.Node, Skeleton> skeletonMap)
+    private static void processNode(SharpGLTF.Schema2.Node node, Node parent, Dictionary<SharpGLTF.Schema2.Material, Material> materialMap, Skeleton? skeleton)
     {
         Node? currentNode = new Node();
 
@@ -463,30 +488,30 @@ public static class ModelLoader
                             geometry.SetVertexAttribute(BuildInVertexAttribute.Normal, 3, primitive.GetVertexColumns().Normals.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList());
                             break;
                         case "JOINTS_0":
-                            if (skeletonMap.Count == 0)
+                            if (skeleton == null)
                                 break;
                             geometry.SetVertexAttribute(BuildInVertexAttribute.Jonits_0, 4, primitive.GetVertexColumns().Joints0.SelectMany(v =>
                             {
                                 if (node.Skin == null)
                                     return new float[] { v.X, v.Y, v.Z, v.W };
-                                var x = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
-                                var y = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Y].Name).First().Index;
-                                var z = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Z].Name).First().Index;
-                                var w = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.W].Name).First().Index;
+                                var x = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
+                                var y = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Y].Name).First().Index;
+                                var z = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Z].Name).First().Index;
+                                var w = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.W].Name).First().Index;
                                 return new float[] { x, y, z, w };
                             }).ToList());
                             break;
                         case "JOINTS_1":
-                            if (skeletonMap.Count == 0)
+                            if (skeleton == null)
                                 break;
                             geometry.SetVertexAttribute(BuildInVertexAttribute.Jonits_1, 4, primitive.GetVertexColumns().Joints1.SelectMany(v =>
                             {
                                 if (node.Skin == null)
                                     return new float[] { v.X, v.Y, v.Z, v.W };
-                                var x = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
-                                var y = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Y].Name).First().Index;
-                                var z = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Z].Name).First().Index;
-                                var w = skeletonMap.First().Value.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.W].Name).First().Index;
+                                var x = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.X].Name).First().Index;
+                                var y = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Y].Name).First().Index;
+                                var z = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.Z].Name).First().Index;
+                                var w = skeleton.Bones.Where(bone => bone.Name == node.Skin.Joints[(int)v.W].Name).First().Index;
                                 return new float[] { x, y, z, w };
                             }).ToList());
                             break;
@@ -526,7 +551,7 @@ public static class ModelLoader
 
         foreach (var child in node.VisualChildren)
         {
-            processNode(child, currentNode, materialMap, skeletonMap);
+            processNode(child, currentNode, materialMap, skeleton);
         }
 
     }

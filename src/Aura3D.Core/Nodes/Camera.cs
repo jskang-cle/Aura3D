@@ -157,47 +157,40 @@ public class Camera : Node
         );
     }
 
-    public void FitToBoundingBox(BoundingBox aabb, float padding = 0.1f, float preferredDistance = 0)
+    public void FitToBoundingBox(BoundingBox aabb, float padding = 0.1f)
     {
         var camera = this;
         if (camera == null) throw new ArgumentNullException(nameof(camera));
         if (aabb == null) throw new ArgumentNullException(nameof(aabb));
         if (padding < 0 || padding > 1) throw new ArgumentOutOfRangeException(nameof(padding));
 
-        // 1. 计算包围盒中心和尺寸
         Vector3 boxCenter = aabb.Center;
         Vector3 boxSize = aabb.Size;
 
-        // 2. 计算所需的观察距离
-        float distance;
-        if (preferredDistance > 0)
-        {
-            distance = preferredDistance;
-        }
-        else
-        {
-            // 根据视野和包围盒尺寸计算最小观察距离
-            float fovRadians = camera.FieldOfView.DegreeToRadians();
-            float aspectRatio = camera.RenderTarget.Width / (float)camera.RenderTarget.Height;
+        float fovRadians = camera.FieldOfView.DegreeToRadians();
+        float aspectRatio = camera.RenderTarget.Width / (float)camera.RenderTarget.Height;
 
-            // 计算包围盒对角线一半（考虑最大维度）
-            float maxExtent = MathF.Max(boxSize.X, MathF.Max(boxSize.Y, boxSize.Z)) / 2f;
+        float maxExtent = MathF.Max(boxSize.X, MathF.Max(boxSize.Y, boxSize.Z)) / 2f;
 
-            // 考虑边距和宽高比的距离计算
-            distance = maxExtent / MathF.Sin(fovRadians / 2f) * (1 + padding);
-            distance = MathF.Max(distance, maxExtent / (MathF.Sin(fovRadians / 2f) * aspectRatio) * (1 + padding));
-        }
+        float distance = maxExtent / MathF.Sin(fovRadians / 2f) * (1 + padding);
+        distance = MathF.Max(distance, maxExtent / (MathF.Sin(fovRadians / 2f) * aspectRatio) * (1 + padding));
+       
 
-        // 3. 设置摄像机位置（从包围盒中心沿摄像机当前前方向后移动指定距离）
         Vector3 cameraDirection = camera.Forward;
         camera.Position = boxCenter - cameraDirection * distance;
 
-        // 4. 调整近/远裁剪面（确保完整包含物体）
         float boxDiagonal = boxSize.Length();
-        camera.NearPlane = distance - boxDiagonal * 0.6f; // 近裁剪面稍微靠近物体
-        camera.FarPlane = distance + boxDiagonal * 1.2f; // 远裁剪面留出足够空间
 
-        // 5. 确保摄像机始终看向包围盒中心
+        camera.NearPlane = distance - boxDiagonal * 0.6f;
+        camera.FarPlane = distance + boxDiagonal * 1.2f;
+
+        if (camera.NearPlane < 0)
+        {
+            camera.NearPlane = -camera.NearPlane;
+
+            camera.FarPlane = camera.FarPlane + 2 * camera.NearPlane;
+        }
+
         camera.LookAt(boxCenter);
     }
 }

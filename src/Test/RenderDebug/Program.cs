@@ -59,11 +59,10 @@ window.Load += () =>
     camera.SkyboxTexture = cubeTexture;
 
 
-    var model = AssimpLoader.Load($"../../../../../../example/Example/Assets/Models/Soldier.glb");
+    var (model, animations) = AssimpLoader.LoadModelAndAnimations($"../../../../../../example/Example/Assets/Models/Soldier.glb");
 
-    var animations = AssimpLoader.LoadAnimations($"../../../../../../example/Example/Assets/Models/Soldier.glb");
 
-    model.RotationDegrees = new Vector3(-90, 180, 0);
+    model.RotationDegrees = new Vector3(0, 180, 0);
 
 
     model.AnimationSampler = new AnimationSampler(animations.FirstOrDefault());

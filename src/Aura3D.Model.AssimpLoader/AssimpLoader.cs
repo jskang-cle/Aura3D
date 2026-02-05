@@ -7,6 +7,7 @@ using Aura3D.Core.Resources;
 using StbImageSharp;
 using System.Drawing;
 using System.Numerics;
+using Node = Assimp.Node;
 
 namespace Aura3D.Model;
 
@@ -45,13 +46,15 @@ public static class AssimpLoader
 
         var skeleton = processSkeleton(scene);
 
+        if (skeleton == null)
+            return [];
+
         var animations = processAnimations(scene);
 
         foreach(var animation in animations)
         {
             animation.Skeleton = skeleton;
         }
-
         return animations;
     }
 
@@ -61,9 +64,13 @@ public static class AssimpLoader
 
         var scene = importer.ImportFileFromStream(stream, DefaultFlags);
 
+        var skeleton = processSkeleton(scene);
+
+        if (skeleton == null)
+            return [];
+
         var animations = processAnimations(scene);
 
-        var skeleton = processSkeleton(scene);
 
         foreach (var animation in animations)
         {
@@ -113,14 +120,18 @@ public static class AssimpLoader
         {
             mesh.Model = model;
         }
+        List<Core.Resources.Animation> animations = [];
 
-        var animations = processAnimations(scene);
-
-        foreach (var animation in animations)
+        if (skeleton != null)
         {
-            animation.Skeleton = skeleton;
-        }
+            animations = processAnimations(scene);
 
+            foreach (var animation in animations)
+            {
+                animation.Skeleton = skeleton;
+            }
+
+        }
         return (model, animations);
     }
 
@@ -144,11 +155,16 @@ public static class AssimpLoader
             mesh.Model = model;
         }
 
-        var animations = processAnimations(scene);
+        List<Core.Resources.Animation> animations = [];
 
-        foreach (var animation in animations)
+        if (skeleton != null)
         {
-            animation.Skeleton = skeleton;
+            animations = processAnimations(scene);
+
+            foreach (var animation in animations)
+            {
+                animation.Skeleton = skeleton;
+            }
         }
 
         return (model, animations);
@@ -224,18 +240,52 @@ public static class AssimpLoader
         var model = new Core.Nodes.Model();
 
         processMaterial(scene, materialsMap, directory, loadTextureFunc);
+
         var skeleton = processSkeleton(scene);
 
-        foreach (var assiMesh in scene.Meshes)
-        {
-            var mesh = processMesh(scene, assiMesh, skeleton, materialsMap);
+        List<Core.Nodes.Mesh> meshes = [];
 
+        processNodeMesh(scene, scene.RootNode, skeleton, materialsMap, meshes);
+
+        foreach(var mesh in meshes)
+        {
             model.AddChild(mesh);
         }
 
         return model;
     }
 
+    public unsafe static void processNodeMesh(Scene scene, Node assimpNode, Skeleton? skeleton, Dictionary<int, Core.Resources.Material> materialsMap, List<Core.Nodes.Mesh> meshes)
+    {
+        if (assimpNode.HasMeshes)
+        {
+            foreach(var meshIndex in assimpNode.MeshIndices)
+            {
+                var assimpMesh = scene.Meshes[meshIndex];
+
+                var mesh = processMesh(scene, assimpMesh, skeleton, materialsMap);
+
+                mesh.Name = assimpMesh.Name;
+
+                mesh.WorldTransform = GetWorldTransform(assimpNode);
+
+                meshes.Add(mesh);
+            }
+        }
+        foreach (var child in assimpNode.Children)
+        {
+            processNodeMesh(scene, child, skeleton, materialsMap, meshes);
+        }
+
+    }
+
+    private static Matrix4x4 GetWorldTransform(Node assimpNode)
+    {
+        if (assimpNode.Parent == null)
+            return Matrix4x4.Transpose(assimpNode.Transform);
+        else 
+            return Matrix4x4.Transpose(assimpNode.Transform) * GetWorldTransform(assimpNode.Parent);
+    }
     private static unsafe void processMaterial(Scene scene, Dictionary<int, Core.Resources.Material> materialsMap, string? path, Func<string, Core.Resources.Texture>? loadTextureFunc)
     {
         for (int i = 0; i < scene.MaterialCount; i++)
@@ -515,13 +565,31 @@ public static class AssimpLoader
         }
     }
 
+    private static void processBoneNode2(Assimp.Node assimpNode, Dictionary<string, Core.Resources.Bone> boneMap)
+    {
+        if (boneMap.TryGetValue(assimpNode.Name, out var bone))
+        {
+
+            foreach (var child in assimpNode.Children)
+            {
+                if (boneMap.TryGetValue(child.Name, out var childBone))
+                {
+                    bone.Children.Add(childBone);
+                    childBone.Parent = bone;
+                }
+            }
+        }
+
+        foreach (var child in assimpNode.Children)
+        {
+            processBoneNode2(child, boneMap);
+        }
+
+    }
     public static Skeleton? processSkeleton(Scene scene)
     {
         Dictionary<string, Core.Resources.Bone> boneMap = [];
 
-        processBoneNode(scene.RootNode, boneMap);
-
-        /*
         foreach (var mesh in scene.Meshes)
         {
             if (mesh.HasBones)
@@ -532,18 +600,23 @@ public static class AssimpLoader
                         continue;
                     var bone = new Core.Resources.Bone();
                     bone.Name = assiBone.Name;
-                    bone.InverseWorldMatrix = assiBone.OffsetMatrix;
-                    bone.WorldMatrix = assiBone.OffsetMatrix.Inverse();
+                    bone.InverseWorldMatrix = Matrix4x4.Transpose(assiBone.OffsetMatrix);
+                    bone.WorldMatrix = bone.InverseWorldMatrix.Inverse();
                     bone.Index = boneMap.Count;
                     boneMap.Add(assiBone.Name, bone);
                 }
             }
         }
+
+        /*
+        processBoneNode(scene.RootNode, boneMap);
         */
 
 
         if (boneMap.Count == 0)
             return null;
+
+        processBoneNode2(scene.RootNode, boneMap);
 
         var skeleton = new Skeleton();
 
@@ -552,15 +625,15 @@ public static class AssimpLoader
             if (bone.Parent == null)
             {
                 skeleton.Root = bone;
-                //bone.LocalMatrix = bone.WorldMatrix;
-                bone.WorldMatrix = bone.LocalMatrix;
+                bone.LocalMatrix = bone.WorldMatrix;
+               // bone.WorldMatrix = bone.LocalMatrix;
             }
             else
             {
-                //bone.LocalMatrix = bone.WorldMatrix * bone.Parent.InverseWorldMatrix;
-                bone.WorldMatrix = bone.LocalMatrix * bone.Parent.WorldMatrix;
+                bone.LocalMatrix = bone.WorldMatrix * bone.Parent.InverseWorldMatrix;
+                //bone.WorldMatrix = bone.LocalMatrix * bone.Parent.WorldMatrix;
             }
-            bone.InverseWorldMatrix = bone.WorldMatrix.Inverse();
+            // bone.InverseWorldMatrix = bone.WorldMatrix.Inverse();
 
             skeleton.Bones.Add(bone);
 

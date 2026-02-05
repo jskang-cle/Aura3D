@@ -2,6 +2,7 @@ using Aura3D.Avalonia;
 using Aura3D.Core;
 using Aura3D.Core.Math;
 using Aura3D.Core.Nodes;
+using Aura3D.Core.Resources;
 using Aura3D.Model;
 using Avalonia;
 using Avalonia.Controls;
@@ -165,6 +166,7 @@ public partial class ModelPreviewPage : UserControl
         foreach (var file in files)
         {
             Model? model = null;
+            List<Animation> animations = [];
             var path = file.TryGetLocalPath();
             if (path != null)
             {
@@ -173,34 +175,30 @@ public partial class ModelPreviewPage : UserControl
                 {
                     if (extension.ToLower() == ".glb")
                     {
-                        model = ModelLoader.LoadGlbModel(path);
+                        (model, animations) = ModelLoader.LoadGlbModelAndAnimations(path);
                     }
                     else if (extension.ToLower() == ".gltf")
                     {
-                        model = ModelLoader.LoadGltfModel(path);
+                        (model, animations) = ModelLoader.LoadGlbModelAndAnimations(path);
                     }
                 }
                 if (model == null)
                 {
-                    model = AssimpLoader.Load(path);
-                    //var animations = AssimpLoader.LoadAnimations(path);
-                    //animations.First().Skeleton = model.Skeleton;
-                    // model.AnimationSampler = new AnimationSampler(animations.First());
+                     (model, animations) = AssimpLoader.LoadModelAndAnimations(path);
                 }
             }
             else
             {
                 using (var stream = await file.OpenReadAsync())
                 {
-                    model = AssimpLoader.Load(stream);
-                }
-                using (var stream = await file.OpenReadAsync())
-                {
-                    //var animations = AssimpLoader.LoadAnimations(stream);
-                    //animations.First().Skeleton = model.Skeleton;
-                    // model.AnimationSampler = new AnimationSampler(animations.First());
+                    (model, animations) = AssimpLoader.LoadModelAndAnimations(stream);
                 }
 
+            }
+
+            if (animations.Count > 0)
+            {
+                model.AnimationSampler = new AnimationSampler(animations.First());
             }
 
             model.Position = modelPosition;
