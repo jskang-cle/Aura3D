@@ -49,7 +49,7 @@ public partial class ModelPreviewPage : UserControl
             if (_currentModel != null)
             {
                 aura3d.Remove(node);
-                node.RemoveChild(_currentModel);
+                node.RemoveChild(_currentModel, AttachToParentRule.KeepWorld);
                 _currentModel = null;
             }
             if (value != null)
@@ -79,7 +79,7 @@ public partial class ModelPreviewPage : UserControl
 
                 node.Scale = Vector3.One;
                 
-                node.AddChild(model);
+                node.AddChild(model, AttachToParentRule.KeepWorld);
 
                 aura3d.Scene.AddNode(node);
 

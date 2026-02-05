@@ -9,6 +9,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
+  
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
@@ -29,13 +30,11 @@
     <ProjectReference Include="..\..\src\Aura3D.Model.AssimpLoader\Aura3D.Model.AssimpLoader.csproj" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <Compile Update="Pages\AnimationPage.axaml.cs">
-      <DependentUpon>AnimationPage.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Pages\ModelPreviewPage.axaml.cs">
-      <DependentUpon>ModelPreviewPage.axaml</DependentUpon>
-    </Compile>
+    <None Update="Models\*.FBX">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

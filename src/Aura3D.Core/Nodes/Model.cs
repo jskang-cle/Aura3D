@@ -69,14 +69,15 @@ public class Model : Node
             cloneNode = new Node();
         }
         
-        if (parentNode != null)
-        {
-            parentNode.AddChild(cloneNode);
-        }
 
         cloneNode.LocalTransform = node.LocalTransform;
         cloneNode.Enable = node.Enable;
         cloneNode.Name = node.Name;
+
+        if (parentNode != null)
+        {
+            parentNode.AddChild(cloneNode, AttachToParentRule.KeepLocal);
+        }
 
         foreach (var child in node.Children)
         {

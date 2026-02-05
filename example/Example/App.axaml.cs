@@ -40,29 +40,29 @@ namespace Example
 
 
 
-                    m.RemoveChild(item2.Parent);
-                    item2.Parent.RemoveChild(item2);
-                    m.RemoveChild(item3.Parent);
-                    item3.Parent.RemoveChild(item3);
-                    m.RemoveChild(item4.Parent);
-                    item4.Parent.RemoveChild(item4);
-                    m.RemoveChild(item5.Parent);
-                    item5.Parent.RemoveChild(item5);
-                    m.RemoveChild(item6.Parent);
-                    item6.Parent.RemoveChild(item6);
-                    m.RemoveChild(item7.Parent);
-                    item7.Parent.RemoveChild(item7);
-                    item7List[1].Parent.RemoveChild(item7List[1]);
+                    m.RemoveChild(item2.Parent, AttachToParentRule.KeepWorld);
+                    item2.Parent.RemoveChild(item2, AttachToParentRule.KeepWorld);
+                    m.RemoveChild(item3.Parent, AttachToParentRule.KeepWorld);
+                    item3.Parent.RemoveChild(item3, AttachToParentRule.KeepWorld);
+                    m.RemoveChild(item4.Parent, AttachToParentRule.KeepWorld);
+                    item4.Parent.RemoveChild(item4, AttachToParentRule.KeepWorld);
+                    m.RemoveChild(item5.Parent, AttachToParentRule.KeepWorld);
+                    item5.Parent.RemoveChild(item5, AttachToParentRule.KeepWorld);
+                    m.RemoveChild(item6.Parent, AttachToParentRule.KeepWorld);
+                    item6.Parent.RemoveChild(item6, AttachToParentRule.KeepWorld);
+                    m.RemoveChild(item7.Parent, AttachToParentRule.KeepWorld);
+                    item7.Parent.RemoveChild(item7, AttachToParentRule.KeepWorld);
+                    item7List[1].Parent.RemoveChild(item7List[1], AttachToParentRule.KeepWorld);
                     item7List[1].Name = "item7_2";
-                    item7.AddChild(item7List[1]);
+                    item7.AddChild(item7List[1], AttachToParentRule.KeepWorld);
 
 
-                    item1.AddChild(item2);
-                    item2.AddChild(item3);
-                    item3.AddChild(item4);
-                    item4.AddChild(item5);
-                    item5.AddChild(item6);
-                    item6.AddChild(item7List[0]);
+                    item1.AddChild(item2, AttachToParentRule.KeepWorld);
+                    item2.AddChild(item3, AttachToParentRule.KeepWorld);
+                    item3.AddChild(item4, AttachToParentRule.KeepWorld);
+                    item4.AddChild(item5, AttachToParentRule.KeepWorld);
+                    item5.AddChild(item6, AttachToParentRule.KeepWorld);
+                    item6.AddChild(item7List[0], AttachToParentRule.KeepWorld);
 
                     model = m;
 

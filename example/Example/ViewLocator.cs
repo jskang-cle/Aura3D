@@ -15,6 +15,7 @@ public class ViewLocator : IDataTemplate
             FrustumCullingViewModel frustumCullingViewModel => new FrustumCullingPage(),
             AnimationViewModel animationViewModel => new AnimationPage(),
             RoboticArmViewModel roboticArmViewModel => new RoboticArmPage(),
+            BlendSpaceViewModel blendSpaceViewModel => new BlendSpacePage(),
             _ => new TextBlock() { Text = "NotFound" }
         };
     }

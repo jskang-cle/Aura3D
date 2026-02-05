@@ -95,11 +95,12 @@ public static class ModelLoader
 
     }
 
-    public static List<Resources.Animation> LoadGltfAnimations(string filePath)
+    public static List<Resources.Animation> LoadGltfAnimations(string filePath, Skeleton? skeleton = null)
     {
         var modelRoot = ModelRoot.Load(filePath);
 
-        var skeleton = processSkeleton(modelRoot);
+        if (skeleton == null)
+            skeleton = processSkeleton(modelRoot);
 
         if (skeleton == null)
             return [];
@@ -445,9 +446,10 @@ public static class ModelLoader
 
         currentNode.Name = node.Name;
 
-        parent.AddChild(currentNode);
-
         currentNode.LocalTransform = node.LocalMatrix;
+
+        parent.AddChild(currentNode, AttachToParentRule.KeepLocal);
+
 
         if (node.Mesh != null)
         {
@@ -457,9 +459,9 @@ public static class ModelLoader
 
                 mesh = new Mesh();
 
-                currentNode.AddChild(mesh);
-
                 mesh.LocalTransform = Matrix4x4.Identity;
+
+                currentNode.AddChild(mesh, AttachToParentRule.KeepLocal);
 
                 mesh.Name = node.Name;
 

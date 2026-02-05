@@ -36,7 +36,7 @@ public static class AssimpLoader
     }
 
 
-    public unsafe static List<Core.Resources.Animation> LoadAnimations(string path)
+    public unsafe static List<Core.Resources.Animation> LoadAnimations(string path, Skeleton? skeleton = null)
     {
         var importer = new AssimpContext();
 
@@ -44,7 +44,8 @@ public static class AssimpLoader
 
         var scene = importer.ImportFile(path, DefaultFlags);
 
-        var skeleton = processSkeleton(scene);
+        if (skeleton == null)
+            skeleton = processSkeleton(scene);
 
         if (skeleton == null)
             return [];
@@ -58,13 +59,14 @@ public static class AssimpLoader
         return animations;
     }
 
-    public unsafe static List<Core.Resources.Animation> LoadAnimations(Stream stream)
+    public unsafe static List<Core.Resources.Animation> LoadAnimations(Stream stream, Skeleton? skeleton = null)
     {
         var importer = new AssimpContext();
 
         var scene = importer.ImportFileFromStream(stream, DefaultFlags);
 
-        var skeleton = processSkeleton(scene);
+        if (skeleton == null)
+            skeleton = processSkeleton(scene);
 
         if (skeleton == null)
             return [];
@@ -249,7 +251,7 @@ public static class AssimpLoader
 
         foreach(var mesh in meshes)
         {
-            model.AddChild(mesh);
+            model.AddChild(mesh, AttachToParentRule.KeepLocal);
         }
 
         return model;

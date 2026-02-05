@@ -19,10 +19,6 @@ public partial class Node
 
     public void MarkTransformDirty()
     {
-        if (CurrentScene != null && CurrentScene.RenderPipeline != null)
-        {
-            
-        }
         _transformDirty = true;
         foreach (var child in Children)
         {
@@ -315,7 +311,7 @@ public partial class Node
     /// 将指定子节点添加到当前节点，并更新其变换，使其在世界空间中的位置保持不变。
     /// </summary>
     /// <param name="child">要添加的子节点。</param>
-    public void AddChild(Node child)
+    public void AddChild(Node child, AttachToParentRule attachToParentRule)
     {
         // 检查子节点是否已存在，若存在则不重复添加
         if (_children.Contains(child))
@@ -330,13 +326,22 @@ public partial class Node
         // 将子节点加入集合
         _children.Add(child);
 
-        var tempWorldTransform = child.WorldTransform;
+        if (attachToParentRule == AttachToParentRule.KeepWorld)
+        {
+            var tempWorldTransform = child.WorldTransform;
 
-        // 设置子节点的父节点为当前节点
-        child.Parent = this; 
+            // 设置子节点的父节点为当前节点
+            child.Parent = this;
 
-        // 更新子节点的本地变换，使其世界空间位置保持不变
-        child.WorldTransform = tempWorldTransform;
+            // 更新子节点的本地变换，使其世界空间位置保持不变
+            child.WorldTransform = tempWorldTransform;
+        }
+        else
+        {
+            child.Parent = this;
+            child.MarkTransformDirty();
+        }
+       
 
         if (Enable == false)
             child.Enable = false;
@@ -362,7 +367,7 @@ public partial class Node
     /// 从当前节点移除指定子节点，并将其变换恢复为世界空间变换，保持其在场景中的位置不变。
     /// </summary>
     /// <param name="child">要移除的子节点。</param>
-    public void RemoveChild(Node child)
+    public void RemoveChild(Node child, AttachToParentRule attachToParentRule)
     {
         // 检查子节点是否存在，若不存在则不处理
         if (_children.Contains(child) == false)
@@ -373,14 +378,23 @@ public partial class Node
         // 从集合中移除子节点
         _children.Remove(child); 
 
-        // 记录子节点当前的世界变换
-        var lastWorldTransform = child.WorldTransform;
+        if (attachToParentRule == AttachToParentRule.KeepWorld)
+        {
+            // 记录子节点当前的世界变换
+            var lastWorldTransform = child.WorldTransform;
 
-        // 清除子节点的父节点引用
-        child.Parent = null;
+            // 清除子节点的父节点引用
+            child.Parent = null;
 
-        // 将子节点的本地变换设置为其世界变换，保持位置不变
-        child.LocalTransform = lastWorldTransform;
+            // 将子节点的本地变换设置为其世界变换，保持位置不变
+            child.LocalTransform = lastWorldTransform;
+        }
+        else
+        {
+            child.Parent = null;
+
+            child.MarkTransformDirty();
+        }
 
         if (CurrentScene != null)
         {
@@ -427,4 +441,10 @@ public partial class Node
     {
 
     }
+}
+
+public enum AttachToParentRule
+{
+    KeepWorld,
+    KeepLocal
 }

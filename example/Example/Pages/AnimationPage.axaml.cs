@@ -16,7 +16,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace Example;
+namespace Example.Pages;
 
 public partial class AnimationPage : UserControl
 {
