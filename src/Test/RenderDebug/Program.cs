@@ -61,57 +61,62 @@ window.Load += () =>
 
     var (model, animations) = AssimpLoader.LoadModelAndAnimations($"../../../../../../example/Example/Assets/Models/Soldier.glb");
 
+    if (animations.Count > 0)
+    {
+        model.AnimationSampler = new AnimationSampler(animations[0]);
+    }
 
     model.RotationDegrees = new Vector3(0, 180, 0);
 
-
-    model.AnimationSampler = new AnimationSampler(animations.FirstOrDefault());
-
-    var mesh = model.Meshes.First()!;
-
     List<Color> colors = [];
-    mesh.Material.SetShaderPassParametersCallback("NoLightPass", pass =>
+    if (model.Skeleton != null)
     {
         int i = 0;
-        foreach (var color in colors)
+        colors.Clear();
+        foreach (var bone in model.Skeleton.Bones)
         {
-            pass.UniformColor($"boneColor[{i}]", color);
+            Console.WriteLine($"{i}:\t {bone.Name}");
+
+            if (i >= 0 && i <= 3)
+                colors.Add(Color.Red);
+
+            else if (i >= 4 && i <= 5)
+                colors.Add(Color.Green);
+
+            else if (i >= 6 && i <= 22)
+                colors.Add(Color.Blue);
+
+            else if (i >= 23 && i <= 40)
+                colors.Add(Color.Blue);
+
+            else if (i >= 41 && i <= 44)
+                colors.Add(Color.Green);
+
+            else if (i >= 45 && i <= 48)
+                colors.Add(Color.Green);
+            else
+            {
+
+            }
             i++;
-        }
-    });
-
-    int i = 0;
-    colors.Clear();
-    foreach (var bone in model.Skeleton.Bones)
-    {
-        Console.WriteLine($"{i}:\t {bone.Name}");
-
-        if (i >= 0 && i <= 3)
-            colors.Add(Color.Red);
-
-        else if (i >= 4 && i <= 5)
-            colors.Add(Color.Green);
-
-        else if (i >= 6 && i <= 22)
-            colors.Add(Color.Blue);
-
-        else if (i >= 23 && i <= 40)
-            colors.Add(Color.Blue);
-
-        else if (i >= 41 && i <= 44)
-            colors.Add(Color.Green);
-
-        else if (i >= 45 && i <= 48)
-            colors.Add(Color.Green);
-        else
-        {
 
         }
-        i++;
-
     }
-
-    mesh.Material?.SetShaderSource("NoLightPass", ShaderType.Fragment, @"#version 300 es
+    
+    foreach (var mesh in model.Meshes)
+    {
+        if (mesh.Material == null)
+            continue;
+        mesh.Material.SetShaderPassParametersCallback("NoLightPass", pass =>
+        {
+            int i = 0;
+            foreach (var color in colors)
+            {
+                pass.UniformColor($"boneColor[{i}]", color);
+                i++;
+            }
+        });
+        mesh.Material?.SetShaderSource("NoLightPass", ShaderType.Fragment, @"#version 300 es
 precision mediump float;
 out vec4 outColor;
 
@@ -142,7 +147,7 @@ void main()
 	outColor = baseColor * myColor;
 }");
 
-    mesh.Material?.SetShaderSource("NoLightPass", ShaderType.Vertex, @"#version 300 es
+        mesh.Material?.SetShaderSource("NoLightPass", ShaderType.Vertex, @"#version 300 es
 precision mediump float;
 
 #define BONE_NUMBER 150
@@ -206,6 +211,8 @@ void main()
 
 	gl_Position = projectionMatrix * viewMatrix * worldPosition;
 }");
+    }
+
 
     AddNode(model);
 
