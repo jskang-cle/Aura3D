@@ -61,8 +61,15 @@ window.Load += () =>
 
     var (model, animations) = AssimpLoader.LoadModelAndAnimations($"../../../../../../example/Example/Assets/Models/Soldier.glb");
 
-    if (animations.Count > 0)
+    if (animations.Count > 0 && model.Skeleton != null)
     {
+
+        var animationBlend = new AnimationBlend(model.Skeleton);
+        animationBlend.AddAnimationSampler(new(0, 1), new AnimationSampler(animations[0]));
+        animationBlend.AddAnimationSampler(new(0, -1), new AnimationSampler(animations[1]));
+        animationBlend.AddAnimationSampler(new(1, 0), new AnimationSampler(animations[2]));
+        animationBlend.AddAnimationSampler(new(-1, 0), new AnimationSampler(animations[3]));
+
         model.AnimationSampler = new AnimationSampler(animations[0]);
     }
 

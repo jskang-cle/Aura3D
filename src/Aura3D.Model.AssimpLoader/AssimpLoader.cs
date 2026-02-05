@@ -339,7 +339,7 @@ public static class AssimpLoader
                 {
                     Name = "Normal",
                     Texture = texture,
-                    Color = Color.White,
+                    Color = Color.Blue,
                 });
 
             }
