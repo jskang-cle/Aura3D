@@ -36,6 +36,10 @@ namespace Example.ViewModels
                     ViewModel = new BlendSpaceViewModel()
                 },
                 new MenuViewModel {
+                    Title ="Animation Graph",
+                    ViewModel = new AnimationGraphViewModel()
+                },
+                new MenuViewModel {
                     Title = "Robotic Arm",
                     ViewModel = new RoboticArmViewModel()
                 }

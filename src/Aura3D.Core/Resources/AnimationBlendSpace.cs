@@ -8,6 +8,10 @@ namespace Aura3D.Core.Resources;
 
 public class AnimationBlendSpace : IAnimationSampler
 {
+    public void Reset()
+    {
+        AxisValue = new(0, 0);
+    }
     public AnimationBlendSpace(Skeleton skeleton)
     {
         Skeleton = skeleton;
