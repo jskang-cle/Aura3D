@@ -116,18 +116,19 @@ public static class ModelLoader
     }
 
 
-    public static List<Resources.Animation> LoadGlbAnimations(string filePath)
+    public static List<Resources.Animation> LoadGlbAnimations(string filePath, Skeleton? skeleton = null)
     {
         using (var sr = new StreamReader(filePath))
         {
             return LoadGlbAnimations(sr.BaseStream);
         }
     }
-    public static List<Resources.Animation> LoadGlbAnimations(Stream stream)
+    public static List<Resources.Animation> LoadGlbAnimations(Stream stream, Skeleton? skeleton = null)
     {
         var modelRoot = ModelRoot.ReadGLB(stream, new ReadSettings { Validation = SharpGLTF.Validation.ValidationMode.TryFix });
 
-        var skeleton = processSkeleton(modelRoot);
+        if (skeleton == null)
+            skeleton = processSkeleton(modelRoot);
 
         if (skeleton == null)
             return [];

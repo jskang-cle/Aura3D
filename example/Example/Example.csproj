@@ -10,7 +10,7 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   
-
+  
   <ItemGroup>
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
@@ -30,11 +30,5 @@
     <ProjectReference Include="..\..\src\Aura3D.Model.AssimpLoader\Aura3D.Model.AssimpLoader.csproj" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <None Update="Models\*.FBX">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 
 </Project>

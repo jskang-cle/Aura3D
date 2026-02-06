@@ -1,4 +1,5 @@
 using Aura3D.Avalonia;
+using Aura3D.Core;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using Aura3D.Model;
@@ -8,7 +9,9 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Example.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -22,6 +25,10 @@ public partial class BlendSpacePage : UserControl
         InitializeComponent();
     }
 
+    List<Animation> animations = [];
+
+    Model? model = null;
+
     private void aura3Dview_SceneInitialized(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         var aura3DView = sender as Aura3DView;
@@ -34,27 +41,58 @@ public partial class BlendSpacePage : UserControl
         dl.LightColor = Color.White;
 
         aura3DView.AddNode(dl);
-        
-        var model = AssimpLoader.Load("Models/SK_Mannequin.FBX");
 
-        var forward = AssimpLoader.LoadAnimations("Models/Jog_Fwd_Rifle.FBX", model.Skeleton);
-        var back = AssimpLoader.LoadAnimations("Models/Jog_Bwd_Rifle.FBX", model.Skeleton);
-        var left = AssimpLoader.LoadAnimations("Models/Jog_Lt_Rifle.FBX", model.Skeleton);
-        var right = AssimpLoader.LoadAnimations("Models/Jog_Rt_Rifle.FBX", model.Skeleton);
-        var idle = AssimpLoader.LoadAnimations("Models/Idle_Rifle_Hip.FBX", model.Skeleton);
+        if (model == null)
+        {
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/SK_Mannequin.FBX")))
+            {
+                model = AssimpLoader.Load(stream, "fbx");
+            }
+        }
+
+        if (animations.Count == 0)
+        {
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/Idle_Rifle_Hip.FBX")))
+            {
+                animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
+            }
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/Jog_Fwd_Rifle.FBX")))
+            {
+                animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
+            }
+
+
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/Jog_Bwd_Rifle.FBX")))
+            {
+                animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
+            }
+
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/Jog_Lt_Rifle.FBX")))
+            {
+                animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
+            }
+
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/Jog_Rt_Rifle.FBX")))
+            {
+                animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
+            }
+        }
+
 
         animationBlendSpace = new AnimationBlendSpace(model.Skeleton);
 
-        animationBlendSpace.AddAnimationSampler(new(0, 0), new AnimationSampler(idle.First()));
-        animationBlendSpace.AddAnimationSampler(new(0, 1), new AnimationSampler(forward.First()));
+        animationBlendSpace.AddAnimationSampler(new(0, 0), new AnimationSampler(animations.First()));
 
-        animationBlendSpace.AddAnimationSampler(new(0, -1), new AnimationSampler(back.First()));
+        animationBlendSpace.AddAnimationSampler(new(0, 1), new AnimationSampler(animations.Skip(1).First()));
 
-        animationBlendSpace.AddAnimationSampler(new(-1, 0), new AnimationSampler(left.First()));
+        animationBlendSpace.AddAnimationSampler(new(0, -1), new AnimationSampler(animations.Skip(2).First()));
 
-        animationBlendSpace.AddAnimationSampler(new(1, 0), new AnimationSampler(right.First()));
+        animationBlendSpace.AddAnimationSampler(new(-1, 0), new AnimationSampler(animations.Skip(3).First()));
+
+        animationBlendSpace.AddAnimationSampler(new(1, 0), new AnimationSampler(animations.Skip(4).First()));
 
         model.AnimationSampler = animationBlendSpace;
+        
         aura3Dview.AddNode(model);
 
         aura3Dview.MainCamera.FitToBoundingBox(model.BoundingBox);

@@ -59,11 +59,11 @@ public static class AssimpLoader
         return animations;
     }
 
-    public unsafe static List<Core.Resources.Animation> LoadAnimations(Stream stream, Skeleton? skeleton = null)
+    public unsafe static List<Core.Resources.Animation> LoadAnimations(Stream stream, Skeleton? skeleton = null, string? extension = null)
     {
         var importer = new AssimpContext();
 
-        var scene = importer.ImportFileFromStream(stream, DefaultFlags);
+        var scene = importer.ImportFileFromStream(stream, DefaultFlags, extension);
 
         if (skeleton == null)
             skeleton = processSkeleton(scene);
@@ -82,11 +82,11 @@ public static class AssimpLoader
         return animations;
     }
 
-    public unsafe static Core.Nodes.Model Load(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    public unsafe static Core.Nodes.Model Load(Stream stream, string? extension = null, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
     {
         var importer = new AssimpContext();
 
-        var scene = importer.ImportFileFromStream(stream, DefaultFlags);
+        var scene = importer.ImportFileFromStream(stream, DefaultFlags, extension);
 
         var model = processScene(scene, null, loadTextureFunc);
 
@@ -139,12 +139,11 @@ public static class AssimpLoader
 
 
 
-    public static (Core.Nodes.Model, List<Core.Resources.Animation>) LoadModelAndAnimations(Stream stream, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
+    public static (Core.Nodes.Model, List<Core.Resources.Animation>) LoadModelAndAnimations(Stream stream, string? extension = null, Func<string, Core.Resources.Texture>? loadTextureFunc = null)
     {
-
         var importer = new AssimpContext();
 
-        var scene = importer.ImportFileFromStream(stream, DefaultFlags);
+        var scene = importer.ImportFileFromStream(stream, DefaultFlags, extension);
 
         var model = processScene(scene, null, loadTextureFunc);
 

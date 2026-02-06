@@ -32,7 +32,11 @@ public class Material : IClone<Material>, IGpuResource
             BlendMode = this.BlendMode,
             DoubleSided = this.DoubleSided,
             AlphaCutoff = this.AlphaCutoff,
-            Channels = Channels
+            Channels = Channels,
+            _vertexShaders = _vertexShaders,
+            _fragmentShaders = _fragmentShaders,
+            ShaderPassParametersCallbacks = ShaderPassParametersCallbacks
+
         };
     }
 
@@ -51,6 +55,19 @@ public class Material : IClone<Material>, IGpuResource
                 Texture = channel.Texture is Texture texture? texture.Clone() : null
             };
             material.Channels.Add(newChannel);
+        }
+        foreach(var vs in _vertexShaders)
+        {
+            material._vertexShaders.Add(vs.Key, vs.Value);
+        }
+        foreach (var fs in _fragmentShaders)
+        {
+            material._fragmentShaders.Add(fs.Key, fs.Value);
+        }
+
+        foreach (var callback in ShaderPassParametersCallbacks)
+        {
+            material.ShaderPassParametersCallbacks.Add(callback.Key, callback.Value);
         }
 
         return material;
