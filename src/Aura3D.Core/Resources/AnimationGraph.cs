@@ -95,6 +95,13 @@ public class AnimationGraphNode
 
     public IAnimationSampler Sampler {  get; private set; }
 
-    public List<(Func<IAnimationSampler, double, bool>, AnimationGraphNode)> NextNodes { get; private set; } = [];
+    public void AddNextNode(Func<IAnimationSampler, double, bool> func, AnimationGraphNode node)
+    {
+        if (this == node)
+            throw new Exception();
+        NextNodes.Add((func, node));
+    }
+
+    internal List<(Func<IAnimationSampler, double, bool>, AnimationGraphNode)> NextNodes { get; private set; } = [];
 
 }

@@ -49,35 +49,13 @@ public partial class AnimationGraphPage : UserControl
 
         runNode.BlendTime = 1;
 
+        idleNode.AddNextNode((sampler, deltaTime) => vm.Speed > 0.001, walkNode);
 
-        idleNode.NextNodes.Add(((sampler, deltaTime) =>
-        {
-            if (vm.Speed > 0.0001)
-                return true;
-            return false;
-        }, walkNode));
+        walkNode.AddNextNode((sampler, deltaTime) => vm.Speed > 300, runNode);
 
+        walkNode.AddNextNode((sampler, deltaTime) => vm.Speed < 0.001, idleNode);
 
-        walkNode.NextNodes.Add(((sampler, deltaTime) =>
-        {
-            if (vm.Speed > 300)
-                return true;
-            return false;
-        }, runNode));
-
-        walkNode.NextNodes.Add(((sampler, deltaTime) =>
-        {
-            if (vm.Speed < 0.0001)
-                return true;
-            return false;
-        }, idleNode));
-
-        runNode.NextNodes.Add(((sampler, deltaTime) =>
-        {
-            if (vm.Speed < 300)
-                return true;
-            return false;
-        }, walkNode));
+        runNode.AddNextNode((sampler, deltaTime) => vm.Speed < 300, walkNode);
 
         var animationGraph = new AnimationGraph(model.Skeleton, idleNode);
 
