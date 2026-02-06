@@ -32,6 +32,7 @@ public class Material : IClone<Material>, IGpuResource
             BlendMode = this.BlendMode,
             DoubleSided = this.DoubleSided,
             AlphaCutoff = this.AlphaCutoff,
+            HasShader = this.HasShader,
             Channels = Channels,
             _vertexShaders = _vertexShaders,
             _fragmentShaders = _fragmentShaders,
