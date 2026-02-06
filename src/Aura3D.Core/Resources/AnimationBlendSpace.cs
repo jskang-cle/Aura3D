@@ -76,18 +76,28 @@ public class AnimationBlendSpace : IAnimationSampler
         }
 
         index = 0;
-        foreach (var result in weights)
+        for (int i = 0; i < weights.Count; i ++)
         {
-            float weight = result / totalRawWeight;
-            if (weight > 0.001)
+            float weight = weights[i] / totalRawWeight;
+            if (weight < 0.0001)
+                weight = 0;
+            if (weight > 0.9999)
+                weight = 1;
+            weights[i] = weight;
+        }
+        
+        index = 0;
+        foreach (var weight in weights)
+        {
+            if (weight > 0)
             {
                 animationSamplers[index].Item2.Update(deltaTime);
-                for (int i = 0; i < BonesTransform.Count; i++)
+                for (int j = 0; j < BonesTransform.Count; j++)
                 {
                     if (index == 0)
-                        bonesTransform[i] =  animationSamplers[index].Item2.BonesTransform[i] * weight;
+                        bonesTransform[j] = animationSamplers[index].Item2.BonesTransform[j] * weight;
 
-                    bonesTransform[i] = bonesTransform[i] + animationSamplers[index].Item2.BonesTransform[i] * weight;
+                    bonesTransform[j] = bonesTransform[j] + animationSamplers[index].Item2.BonesTransform[j] * weight;
                 }
             }
             index++;
