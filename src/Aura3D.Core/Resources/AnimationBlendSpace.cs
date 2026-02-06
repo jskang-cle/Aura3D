@@ -100,8 +100,8 @@ public class AnimationBlendSpace : IAnimationSampler
                 {
                     if (index == 0)
                         bonesTransform[j] = animationSamplers[index].Item2.BonesTransform[j] * weight;
-
-                    bonesTransform[j] = bonesTransform[j] + animationSamplers[index].Item2.BonesTransform[j] * weight;
+                    else
+                        bonesTransform[j] = bonesTransform[j] + animationSamplers[index].Item2.BonesTransform[j] * weight;
                 }
             }
             index++;

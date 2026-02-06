@@ -1,5 +1,6 @@
 using Aura3D.Avalonia;
 using Aura3D.Core;
+using Aura3D.Core.Geometries;
 using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using Aura3D.Model;
@@ -36,9 +37,22 @@ public partial class BlendSpacePage : UserControl
             return;
         var dl = new DirectionalLight();
 
-        dl.RotationDegrees = new Vector3(-30, 0, 0);
+        dl.RotationDegrees = new Vector3(-30, -60, 0);
 
         dl.LightColor = Color.White;
+
+        dl.CastShadow = true;
+
+        dl.ShadowConfig.FarPlane = 1000;
+
+        dl.ShadowConfig.NearPlane = 10;
+
+        dl.ShadowConfig.Width = 500;
+
+        dl.ShadowConfig.Height = 500;
+
+        
+
 
         aura3DView.AddNode(dl);
 
@@ -76,6 +90,14 @@ public partial class BlendSpacePage : UserControl
             {
                 animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
             }
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/AS_Rifle_WalkBwdLeft_Aim.FBX")))
+            {
+                animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
+            }
+            using (var stream = AssetLoader.Open(new Uri($"avares://Example/Assets/Models/AS_Rifle_WalkBwdRight_Aim.FBX")))
+            {
+                animations.AddRange(AssimpLoader.LoadAnimations(stream, model.Skeleton, "fbx"));
+            }
         }
 
 
@@ -91,14 +113,39 @@ public partial class BlendSpacePage : UserControl
 
         animationBlendSpace.AddAnimationSampler(new(1, 0), new AnimationSampler(animations.Skip(4).First()));
 
+        animationBlendSpace.AddAnimationSampler(new(-1, -1), new AnimationSampler(animations.Skip(5).First()));
+
+        animationBlendSpace.AddAnimationSampler(new(1, -1), new AnimationSampler(animations.Skip(6).First()));
+
         model.AnimationSampler = animationBlendSpace;
         
         aura3Dview.AddNode(model);
 
-        aura3Dview.MainCamera.FitToBoundingBox(model.BoundingBox);
+        aura3Dview.MainCamera.FitToBoundingBox(model.BoundingBox, 0.5f);
 
         aura3Dview.MainCamera.ClearColor = Color.FromArgb(255, 100, 100, 100);
 
+        aura3Dview.MainCamera.Position += aura3Dview.MainCamera.Up * 100 ;
+
+        aura3DView.MainCamera.RotationDegrees = new Vector3(-30, 0, 0);
+
+        var mesh = new Mesh();
+
+        mesh.Geometry = new PlaneGeometry(400, 400);
+
+        mesh.Material = new Material
+        {
+            Channels = [
+            new Channel(){
+                Name = "BaseColor",
+                Color = Color.Blue
+            }
+             ]
+        };
+
+        aura3DView.AddNode(mesh);
+
+        dl.Position = aura3Dview.MainCamera.Position;
 
     }
 
