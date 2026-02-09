@@ -1,7 +1,8 @@
-using Aura3D.Core.Resources;
 using Aura3D.Core.Math;
-using System.Numerics;
+using Aura3D.Core.Resources;
+using SharpGLTF.Schema2;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace Aura3D.Core.Nodes;
 
@@ -173,4 +174,51 @@ public class Mesh : Node, IOctreeObject
     }
 
     public Skeleton? Skeleton => Model?.Skeleton;
+
+
+    private Dictionary<int, BoundingBox> SkeletalMeshBoudingBox = new ();
+
+    private Dictionary<int, BoundingBox> skeletalMeshBoudingBox2 = new ();
+
+    public void CalcSkeletalMeshBoundingBox()
+    {
+        SkeletalMeshBoudingBox.Clear();
+        Dictionary<int, List<Vector3>> JointPoints = new Dictionary<int, List<Vector3>>();
+        var mesh = this;
+
+        if (mesh.Geometry == null)
+            return;
+
+        var positions = mesh.Geometry.GetAttributeData(BuildInVertexAttribute.Position);
+
+        var joints = mesh.Geometry.GetAttributeData(BuildInVertexAttribute.Jonits_0);
+
+        var weights = mesh.Geometry.GetAttributeData(BuildInVertexAttribute.Weights_0);
+
+        if (positions != null && joints != null && weights != null)
+        {
+            for (var i = 0; i < positions.Count / 3; i++)
+            {
+                var position = new Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+                for (var j = 0; j < 4; j++)
+                {
+                    if (weights[i * 4 + j] > 0.3f)
+                    {
+                        var jointIndex = (int)joints[i * 4 + j];
+                        if (JointPoints[jointIndex] == null)
+                            JointPoints[jointIndex] = new();
+                        JointPoints[jointIndex].Add(position);
+                    }
+                }
+
+            }
+        }
+
+        foreach (var (index, points) in JointPoints)
+        {
+            var boundingBox = BoundingBox.CreateFromPoints(points);
+            SkeletalMeshBoudingBox.Add(index, boundingBox);
+            skeletalMeshBoudingBox2.Add(index, boundingBox);
+        }
+    }
 }
