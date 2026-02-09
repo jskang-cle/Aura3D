@@ -3,6 +3,7 @@ using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 using Aura3D.Core.Scenes;
 using Silk.NET.OpenGLES;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
@@ -178,7 +179,18 @@ public partial class RenderPass
 
     public void RenderSkinnedMeshes(Func<Mesh, bool> filter, Matrix4x4 view, Matrix4x4 projection)
     {
-        foreach (var mesh in renderPipeline.Meshes)
+        var list = renderPipeline.Meshes;
+
+        if (EnableFrustumCulling == true)
+        {
+            meshes.Clear();
+
+            renderPipeline.UpdateVisibleMeshesInCamera(view, projection, meshes);
+
+            list = meshes;
+
+        }
+        foreach (var mesh in list)
         {
             if (mesh.Enable == false)
                 continue;

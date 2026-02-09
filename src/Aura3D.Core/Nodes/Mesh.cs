@@ -1,6 +1,5 @@
 using Aura3D.Core.Math;
 using Aura3D.Core.Resources;
-using SharpGLTF.Schema2;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
@@ -58,7 +57,7 @@ public class Mesh : Node, IOctreeObject
                 CurrentScene.RenderPipeline.AddGpuResource(value);
             }
             geometry = value;
-            UpdateBoundingBox();
+            InitBoundingBox();
         }
     }
 
@@ -102,7 +101,7 @@ public class Mesh : Node, IOctreeObject
     /// <summary>
     /// 更新边界框
     /// </summary>
-    protected virtual void UpdateBoundingBox()
+    public virtual void InitBoundingBox()
     {
         if (Geometry == null)
         {
@@ -112,33 +111,40 @@ public class Mesh : Node, IOctreeObject
             return;
         }
         
-        // 获取顶点位置数据
-        var positionData = Geometry.GetAttributeData(BuildInVertexAttribute.Position);
-        if (positionData == null || positionData.Count < 3)
+        if (IsSkinnedMesh == false)
         {
-            localBoundingBox = null;
-            boundingBox = null;
-            OnChanged?.Invoke(this);
-            return;
-        }
-        
-        // 将float列表转换为Vector3列表
-        var positions = new List<Vector3>();
-        for (int i = 0; i < positionData.Count; i += 3)
-        {
-            if (i + 2 < positionData.Count)
+
+            // 获取顶点位置数据
+            var positionData = Geometry.GetAttributeData(BuildInVertexAttribute.Position);
+            if (positionData == null || positionData.Count < 3)
             {
-                positions.Add(new Vector3(
-                    positionData[i],
-                    positionData[i + 1],
-                    positionData[i + 2]
-                ));
+                localBoundingBox = null;
+                boundingBox = null;
+                OnChanged?.Invoke(this);
+                return;
             }
+
+            // 将float列表转换为Vector3列表
+            var positions = new List<Vector3>();
+            for (int i = 0; i < positionData.Count; i += 3)
+            {
+                if (i + 2 < positionData.Count)
+                {
+                    positions.Add(new Vector3(
+                        positionData[i],
+                        positionData[i + 1],
+                        positionData[i + 2]
+                    ));
+                }
+            }
+
+            // 从顶点位置创建局部空间边界框
+            localBoundingBox = Math.BoundingBox.CreateFromPoints(positions);
         }
-        
-        // 从顶点位置创建局部空间边界框
-        localBoundingBox = Math.BoundingBox.CreateFromPoints(positions);
-        
+        else
+        {
+            CalcSkeletalMeshBoundingBox();
+        }
         // 更新世界空间中的边界框
         UpdateWorldBoundingBox();
         OnChanged?.Invoke(this);
@@ -147,7 +153,7 @@ public class Mesh : Node, IOctreeObject
     /// <summary>
     /// 更新世界空间中的边界框
     /// </summary>
-    protected virtual void UpdateWorldBoundingBox()
+    public virtual void UpdateWorldBoundingBox()
     {
         if (localBoundingBox == null)
         {
@@ -178,10 +184,12 @@ public class Mesh : Node, IOctreeObject
 
     private Dictionary<int, BoundingBox> SkeletalMeshBoudingBox = new ();
 
-    private Dictionary<int, BoundingBox> skeletalMeshBoudingBox2 = new ();
+    private List<BoundingBox> skeletalMeshBoudingBox2 = new ();
 
     public void CalcSkeletalMeshBoundingBox()
     {
+        if (IsSkinnedMesh == false)
+            return;
         SkeletalMeshBoudingBox.Clear();
         Dictionary<int, List<Vector3>> JointPoints = new Dictionary<int, List<Vector3>>();
         var mesh = this;
@@ -205,7 +213,7 @@ public class Mesh : Node, IOctreeObject
                     if (weights[i * 4 + j] > 0.3f)
                     {
                         var jointIndex = (int)joints[i * 4 + j];
-                        if (JointPoints[jointIndex] == null)
+                        if (JointPoints.TryGetValue(jointIndex, out _) == false)
                             JointPoints[jointIndex] = new();
                         JointPoints[jointIndex].Add(position);
                     }
@@ -218,7 +226,37 @@ public class Mesh : Node, IOctreeObject
         {
             var boundingBox = BoundingBox.CreateFromPoints(points);
             SkeletalMeshBoudingBox.Add(index, boundingBox);
-            skeletalMeshBoudingBox2.Add(index, boundingBox);
+
+            localBoundingBox = BoundingBox.CreateMerged(SkeletalMeshBoudingBox.Values);
         }
+
+    }
+
+    public void CalcSkeletalMeshBoundingBoxInPlayAnimation(IReadOnlyList<Matrix4x4> boneTransforms)
+    {
+        if (IsSkinnedMesh == false)
+            return;
+        if (SkeletalMeshBoudingBox.Count <= 0)
+        {
+            CalcSkeletalMeshBoundingBox();
+        }
+        skeletalMeshBoudingBox2.Clear();
+        foreach (var (index, boundingBox) in SkeletalMeshBoudingBox)
+        {
+            if (index < boneTransforms.Count)
+            {
+                skeletalMeshBoudingBox2.Add(boundingBox.Transform(Skeleton.Bones[index].InverseWorldMatrix * boneTransforms[index]));
+            }
+        }
+
+        localBoundingBox = BoundingBox.CreateMerged(skeletalMeshBoudingBox2);
+
+        if (_transformDirty == true)
+        {
+            base.UpdateTransform();
+        }
+        UpdateWorldBoundingBox();
+
+        OnChanged?.Invoke(this);
     }
 }

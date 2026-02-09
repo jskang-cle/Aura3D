@@ -23,6 +23,11 @@ public class Model : Node
         if (AnimationSampler != null && AnimationSampler.NeedUpdate)
         {
             AnimationSampler.Update(delta);
+
+            foreach (var mesh in Meshes)
+            {
+                mesh.CalcSkeletalMeshBoundingBoxInPlayAnimation(AnimationSampler.BonesTransform);
+            }
         }
     }
 
