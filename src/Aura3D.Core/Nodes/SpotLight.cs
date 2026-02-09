@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Renderers;
+using Aura3D.Core.Renderers;
 using Aura3D.Core.Resources;
 using Silk.NET.OpenGLES;
 

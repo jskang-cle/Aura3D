@@ -1,4 +1,4 @@
-﻿using Silk.NET.OpenGLES;
+using Silk.NET.OpenGLES;
 
 namespace Aura3D.Core.Resources;
 

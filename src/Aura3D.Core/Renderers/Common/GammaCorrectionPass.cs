@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using Silk.NET.OpenGLES;
 using System.Numerics;
 

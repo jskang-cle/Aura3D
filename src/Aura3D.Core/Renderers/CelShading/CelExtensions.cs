@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Resources;
+using Aura3D.Core.Resources;
 using SharpGLTF.Schema2;
 using System;
 using System.Threading.Channels;

@@ -1,4 +1,4 @@
-﻿using Silk.NET.OpenGLES;
+using Silk.NET.OpenGLES;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;

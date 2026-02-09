@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Scenes;
+using Aura3D.Core.Scenes;
 using Aura3D.Core.Resources;
 using System.Numerics;
 using Aura3D.Core.Math;

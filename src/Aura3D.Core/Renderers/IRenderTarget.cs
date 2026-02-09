@@ -1,4 +1,4 @@
-﻿namespace Aura3D.Core.Renderers;
+namespace Aura3D.Core.Renderers;
 
 public interface IRenderTarget
 {

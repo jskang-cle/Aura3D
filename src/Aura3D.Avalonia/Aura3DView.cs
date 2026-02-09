@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Renderers;
+using Aura3D.Core.Renderers;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.OpenGL;

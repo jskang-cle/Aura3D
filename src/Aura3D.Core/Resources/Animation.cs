@@ -1,4 +1,4 @@
-﻿  using System.Numerics;
+  using System.Numerics;
 using Aura3D.Core.Math;
 
 namespace Aura3D.Core.Resources;

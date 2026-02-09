@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using Aura3D.Core.Resources;
 
 namespace Aura3D.Core.Geometries;

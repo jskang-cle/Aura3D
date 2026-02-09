@@ -1,4 +1,4 @@
-﻿using Silk.NET.Core.Native;
+using Silk.NET.Core.Native;
 using System;
 using System.Collections.Generic;
 using System.Numerics;

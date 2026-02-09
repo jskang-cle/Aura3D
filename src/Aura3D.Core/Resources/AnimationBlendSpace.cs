@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Nodes;
+using Aura3D.Core.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

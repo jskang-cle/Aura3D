@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Renderers;
+using Aura3D.Core.Renderers;
 using System.Drawing;
 
 namespace Aura3D.Core.Resources;

@@ -1,4 +1,4 @@
-﻿using Aura3D.Core.Resources;
+using Aura3D.Core.Resources;
 using StbImageSharp;
 
 namespace Aura3D.Core;
