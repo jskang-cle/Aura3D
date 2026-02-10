@@ -34,14 +34,9 @@ public void OnSceneInitialized(object sender, RoutedEventArgs args)
 {
     var view = (Aura3DView)sender;
 
-    // 0.0.1版本需要手动new相机
-    var camera = new Camera();
-    // 其他或者更新版本内置了主相机
     var camera = view.MainCamera;
     
     camera.ClearColor = Color.Gray;
-
-	view.AddNode(camera);  
 }
 ```
 
