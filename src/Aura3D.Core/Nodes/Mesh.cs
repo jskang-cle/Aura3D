@@ -34,6 +34,23 @@ public class Mesh : Node, IOctreeObject
     [MemberNotNullWhen(returnValue: true, nameof(Model), nameof(Skeleton))]
     public bool IsSkinnedMesh => Model != null && Model.Skeleton != null;
     
+    private bool _enbaleSkeletonBoudingBox = false;
+    public bool EnableSkeletonBoudingBox
+    {
+        get => _enbaleSkeletonBoudingBox;
+
+        set
+        {
+            if (_enbaleSkeletonBoudingBox != value)
+            {
+                _enbaleSkeletonBoudingBox = value;
+                localBoundingBox = null;
+                boundingBox = null;
+                OnBoudingBoxChanged?.Invoke(this);
+            }
+        }
+    }
+
     /// <summary>
     /// 网格的边界框
     /// </summary>
@@ -41,8 +58,10 @@ public class Mesh : Node, IOctreeObject
     {
         get
         {
-            UpdateTransform();
-
+            if (boundingBox == null)
+            {
+                UpdateWorldBoundingBox();
+            }
             return boundingBox;
         }
     }
@@ -57,7 +76,12 @@ public class Mesh : Node, IOctreeObject
                 CurrentScene.RenderPipeline.AddGpuResource(value);
             }
             geometry = value;
-            InitBoundingBox();
+
+            localBoundingBox = null;
+
+            boundingBox = null;
+
+            OnBoudingBoxChanged?.Invoke(this);
         }
     }
 
@@ -96,58 +120,38 @@ public class Mesh : Node, IOctreeObject
     /// </summary>
     private BoundingBox? localBoundingBox;
 
-    public event Action<IOctreeObject>? OnChanged = delegate { };
+    public BoundingBox? LocalBoundingBox
+    {
+        get
+        {
+            if (localBoundingBox == null)
+                initLocalBoundingBox();
+            return localBoundingBox;
+        }
+    }
+
+    public event Action<IOctreeObject>? OnBoudingBoxChanged = delegate { };
 
     /// <summary>
     /// 更新边界框
     /// </summary>
-    public virtual void InitBoundingBox()
+    private void initLocalBoundingBox()
     {
         if (Geometry == null)
         {
             localBoundingBox = null;
             boundingBox = null;
-            OnChanged?.Invoke(this);
             return;
         }
         
-        if (IsSkinnedMesh == false)
+        if (IsSkinnedMesh == false || EnableSkeletonBoudingBox == false)
         {
-
-            // 获取顶点位置数据
-            var positionData = Geometry.GetAttributeData(BuildInVertexAttribute.Position);
-            if (positionData == null || positionData.Count < 3)
-            {
-                localBoundingBox = null;
-                boundingBox = null;
-                OnChanged?.Invoke(this);
-                return;
-            }
-
-            // 将float列表转换为Vector3列表
-            var positions = new List<Vector3>();
-            for (int i = 0; i < positionData.Count; i += 3)
-            {
-                if (i + 2 < positionData.Count)
-                {
-                    positions.Add(new Vector3(
-                        positionData[i],
-                        positionData[i + 1],
-                        positionData[i + 2]
-                    ));
-                }
-            }
-
-            // 从顶点位置创建局部空间边界框
-            localBoundingBox = Math.BoundingBox.CreateFromPoints(positions);
+            calcStaticMeshBoudingBox();
         }
         else
         {
-            CalcSkeletalMeshBoundingBox();
+            calcSkeletalMeshBoundingBox();
         }
-        // 更新世界空间中的边界框
-        UpdateWorldBoundingBox();
-        OnChanged?.Invoke(this);
     }
     
     /// <summary>
@@ -155,43 +159,82 @@ public class Mesh : Node, IOctreeObject
     /// </summary>
     public virtual void UpdateWorldBoundingBox()
     {
-        if (localBoundingBox == null)
+        if (LocalBoundingBox == null)
         {
             boundingBox = null;
             return;
         }
-        
-        // 应用变换矩阵到边界框
-        // 注意：对于有旋转的变换，轴对齐边界框需要重新计算
-        boundingBox = localBoundingBox?.Transform(WorldTransform);
-    }
-    
-    /// <summary>
-    /// 重写UpdateTransform方法，确保在变换更新后也更新世界空间边界框
-    /// </summary>
-    public override void UpdateTransform()
-    {
-        if (_transformDirty == true)
-        {
-            base.UpdateTransform();
-            UpdateWorldBoundingBox();
-            OnChanged?.Invoke(this);
-        }
+        boundingBox = LocalBoundingBox.Transform(WorldTransform);
     }
 
     public Skeleton? Skeleton => Model?.Skeleton;
 
+    public IAnimationSampler? AnimationSampler => Model?.AnimationSampler;
 
     private Dictionary<int, BoundingBox> SkeletalMeshBoudingBox = new ();
 
     private List<BoundingBox> skeletalMeshBoudingBox2 = new ();
 
-    public void CalcSkeletalMeshBoundingBox()
+    protected override void OnWorldTransformChanged()
+    {
+        base.OnWorldTransformChanged();
+        UpdateWorldBoundingBox();
+        OnBoudingBoxChanged?.Invoke(this);
+    }
+
+    private void calcStaticMeshBoudingBox()
+    {
+        if (Geometry == null)
+            return;
+
+        // 获取顶点位置数据
+        var positionData = Geometry.GetAttributeData(BuildInVertexAttribute.Position);
+        if (positionData == null || positionData.Count < 3)
+        {
+            localBoundingBox = null;
+            boundingBox = null;
+            return;
+        }
+
+        // 将float列表转换为Vector3列表
+        var positions = new List<Vector3>();
+        for (int i = 0; i < positionData.Count; i += 3)
+        {
+            if (i + 2 < positionData.Count)
+            {
+                positions.Add(new Vector3(
+                    positionData[i],
+                    positionData[i + 1],
+                    positionData[i + 2]
+                ));
+            }
+        }
+
+        localBoundingBox = BoundingBox.CreateFromPoints(positions);
+
+        // 骨骼网格体 加大BoxBoudingBox以减少误差
+        if (IsSkinnedMesh)
+        {
+            var size = localBoundingBox.Size;
+
+            var center = localBoundingBox.Center;
+
+            float length = MathF.Max(size.X, MathF.Max(size.Y, size.Z));
+
+            localBoundingBox = new BoundingBox(center - new Vector3(length / 2), center + new Vector3(length / 2));
+
+        }
+    }
+
+    private void calcSkeletalMeshBoundingBox()
     {
         if (IsSkinnedMesh == false)
             return;
+
         SkeletalMeshBoudingBox.Clear();
+
         Dictionary<int, List<Vector3>> JointPoints = new Dictionary<int, List<Vector3>>();
+
         var mesh = this;
 
         if (mesh.Geometry == null)
@@ -221,7 +264,6 @@ public class Mesh : Node, IOctreeObject
 
             }
         }
-
         foreach (var (index, points) in JointPoints)
         {
             var boundingBox = BoundingBox.CreateFromPoints(points);
@@ -229,34 +271,27 @@ public class Mesh : Node, IOctreeObject
 
             localBoundingBox = BoundingBox.CreateMerged(SkeletalMeshBoudingBox.Values);
         }
-
     }
 
-    public void CalcSkeletalMeshBoundingBoxInPlayAnimation(IReadOnlyList<Matrix4x4> boneTransforms)
+    public void CalcSkeletalMeshBoundingBoxInPlayAnimation()
     {
         if (IsSkinnedMesh == false)
             return;
-        if (SkeletalMeshBoudingBox.Count <= 0)
-        {
-            CalcSkeletalMeshBoundingBox();
-        }
+        if (AnimationSampler == null)
+            return;
+
         skeletalMeshBoudingBox2.Clear();
+
         foreach (var (index, boundingBox) in SkeletalMeshBoudingBox)
         {
-            if (index < boneTransforms.Count)
+            if (index < AnimationSampler.BonesTransform.Count)
             {
-                skeletalMeshBoudingBox2.Add(boundingBox.Transform(Skeleton.Bones[index].InverseWorldMatrix * boneTransforms[index]));
+                skeletalMeshBoudingBox2.Add(boundingBox.Transform(Skeleton.Bones[index].InverseWorldMatrix * AnimationSampler.BonesTransform[index]));
             }
         }
 
         localBoundingBox = BoundingBox.CreateMerged(skeletalMeshBoudingBox2);
 
-        if (_transformDirty == true)
-        {
-            base.UpdateTransform();
-        }
-        UpdateWorldBoundingBox();
-
-        OnChanged?.Invoke(this);
+        boundingBox = null;
     }
 }

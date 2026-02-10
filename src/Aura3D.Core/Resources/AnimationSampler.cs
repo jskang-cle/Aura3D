@@ -9,10 +9,16 @@ namespace Aura3D.Core.Resources;
 
 public class AnimationSampler : IAnimationSampler
 {
-    public bool NeedUpdate { get; set; } = true;
+    public bool ExternalUpdate { get; set; } = false;
     public AnimationSampler(Animation animation)
     {
         bonesTransform = new Matrix4x4[animation.Skeleton!.Bones.Count];
+
+        for (var i = 0; i < bonesTransform.Length; i++)
+        {
+            bonesTransform[i] = animation.Skeleton.Bones[i].WorldMatrix;
+        }
+
         this.animation = animation;
         Skeleton = animation.Skeleton!;
     }

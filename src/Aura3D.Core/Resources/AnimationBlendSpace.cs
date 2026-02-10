@@ -17,11 +17,16 @@ public class AnimationBlendSpace : IAnimationSampler
         Skeleton = skeleton;
 
         bonesTransform = new Matrix4x4[skeleton.Bones.Count];
+
+        for (var i = 0; i < bonesTransform.Length; i++)
+        {
+            bonesTransform[i] = skeleton.Bones[i].WorldMatrix;
+        }
     }
 
     public Skeleton Skeleton { get; private set; }
 
-    public bool NeedUpdate { get; set; } = true;
+    public bool ExternalUpdate { get; set; } = false;
 
     public IReadOnlyList<Matrix4x4> BonesTransform => bonesTransform;
 

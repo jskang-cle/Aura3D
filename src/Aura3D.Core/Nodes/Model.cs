@@ -20,13 +20,11 @@ public class Model : Node
     {
         if (IsSkinnedModel == false)
             return;
-        if (AnimationSampler != null && AnimationSampler.NeedUpdate)
+        if (AnimationSampler != null)
         {
-            AnimationSampler.Update(delta);
-
-            foreach (var mesh in Meshes)
+            if(AnimationSampler.ExternalUpdate == false)
             {
-                mesh.CalcSkeletalMeshBoundingBoxInPlayAnimation(AnimationSampler.BonesTransform);
+                AnimationSampler.Update(delta);
             }
         }
     }

@@ -1,3 +1,4 @@
+using SharpGLTF.Schema2;
 using System.Numerics;
 
 namespace Aura3D.Core.Resources;
@@ -7,6 +8,12 @@ public class AnimationGraph : IAnimationSampler
     public AnimationGraph(Skeleton skeleton, AnimationGraphNode root)
     {
         bonesTransform = new Matrix4x4[skeleton.Bones.Count];
+
+        for (var i = 0; i < bonesTransform.Length; i++)
+        {
+            bonesTransform[i] = skeleton.Bones[i].WorldMatrix;
+        }
+
         Root = root;
         currentNode = root;
         lastNode = currentNode;
@@ -19,7 +26,7 @@ public class AnimationGraph : IAnimationSampler
     private AnimationGraphNode currentNode;
 
     public float currentWeight = 1;
-    public bool NeedUpdate { get; set; } = true;
+    public bool ExternalUpdate { get; set; } = false;
 
     private DateTime startTime { get; set; } = default;
     public IReadOnlyList<Matrix4x4> BonesTransform => bonesTransform;

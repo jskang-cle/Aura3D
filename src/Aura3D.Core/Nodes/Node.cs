@@ -15,17 +15,6 @@ public partial class Node
 
     #region Transform
 
-    protected bool _transformDirty = true;
-
-    public void MarkTransformDirty()
-    {
-        _transformDirty = true;
-        foreach (var child in Children)
-        {
-            child.MarkTransformDirty();
-        }
-    }
-
     /// <summary>
     /// 节点的位置。
     /// </summary>
@@ -41,11 +30,11 @@ public partial class Node
         {
             _position = value;
 
-            MarkTransformDirty();
-
-            if (autoUpdateTransform)
+            if (_autoUpdateTransform)
             {
-                UpdateTransform();
+                updateLocalTransform();
+                updateWorldTransform();
+                updateChildrenWorldTransform();
             }
         }
     }
@@ -70,11 +59,11 @@ public partial class Node
 
             _rotationQuaternion = Quaternion.CreateFromYawPitchRoll(value.Y, value.X, value.Z);
 
-            MarkTransformDirty();
-
-            if (autoUpdateTransform)
+            if (_autoUpdateTransform)
             {
-                UpdateTransform();
+                updateLocalTransform();
+                updateWorldTransform();
+                updateChildrenWorldTransform();
             }
         }
     }
@@ -99,11 +88,11 @@ public partial class Node
 
             _rotationQuaternion = Quaternion.CreateFromYawPitchRoll(_rotation.Y, _rotation.X, _rotation.Z);
 
-            MarkTransformDirty();
-
-            if (autoUpdateTransform)
+            if (_autoUpdateTransform)
             {
-                UpdateTransform();
+                updateLocalTransform();
+                updateWorldTransform();
+                updateChildrenWorldTransform();
             }
         }
     }
@@ -127,11 +116,11 @@ public partial class Node
 
             _rotationDegrees = new Vector3(_rotation.X.RadiansToDegree(), _rotation.Y.RadiansToDegree(), _rotation.Z.RadiansToDegree());
 
-            MarkTransformDirty();
-
-            if (autoUpdateTransform)
+            if (_autoUpdateTransform)
             {
-                UpdateTransform();
+                updateLocalTransform();
+                updateWorldTransform();
+                updateChildrenWorldTransform();
             }
 
         }
@@ -150,11 +139,11 @@ public partial class Node
         {
             _scale = value;
 
-            MarkTransformDirty();
-
-            if (autoUpdateTransform)
+            if (_autoUpdateTransform)
             {
-                UpdateTransform();
+                updateLocalTransform();
+                updateWorldTransform();
+                updateChildrenWorldTransform();
             }
         }
     }
@@ -172,7 +161,7 @@ public partial class Node
         {
             _localTransform = value;
 
-            using (BeginTransformUpdate())
+            using (BeginTransformUpdate(UpdateTransformMode.World | UpdateTransformMode.ChildrenWorld))
             {
                 Position = _localTransform.Translation;
 
@@ -191,75 +180,99 @@ public partial class Node
     {
         get 
         {
-            UpdateTransform();
             return _worldTransform;
         }
         set
         {
             _worldTransform = value;
 
+            Matrix4x4 localTransform = default;
+
             if (Parent != null)
             {
-                LocalTransform = _worldTransform * Parent.WorldTransform.Inverse();
+                localTransform = _worldTransform * Parent.WorldTransform.Inverse();
             }
             else
             {
-                LocalTransform = _worldTransform;
+                localTransform = _worldTransform;
             }
+
+            using (BeginTransformUpdate(UpdateTransformMode.Local | UpdateTransformMode.ChildrenWorld))
+            {
+                Position = localTransform.Translation;
+
+                RotationQuaternion = localTransform.Rotation();
+
+                Scale = localTransform.Scale();
+            }
+
+            OnWorldTransformChanged();
         }
     }
 
     
-    private bool autoUpdateTransform = true;
+    private bool _autoUpdateTransform = true;
 
 
-    private class TransformUpdateScope(Node node) : IDisposable
+    private class TransformUpdateScope(Node node, UpdateTransformMode updateTransformMode) : IDisposable
     {
+        UpdateTransformMode updateTransformMode = updateTransformMode;
         public void Dispose()
         {
-            node.EndTransformUpdate();
+            node.EndTransformUpdate(updateTransformMode);
         }
     }
 
-    public IDisposable BeginTransformUpdate()
+    public IDisposable BeginTransformUpdate(UpdateTransformMode updateTransformMode = UpdateTransformMode.All)
     {
-        autoUpdateTransform = false;
+        _autoUpdateTransform = false;
 
-        return new TransformUpdateScope(this);
+        return new TransformUpdateScope(this, updateTransformMode);
     }
 
-    protected void EndTransformUpdate()
+    protected void EndTransformUpdate(UpdateTransformMode updateTransformMode)
     {
-        autoUpdateTransform = true;
+        _autoUpdateTransform = true;
 
-        UpdateTransform();
+        if (updateTransformMode.HasFlag(UpdateTransformMode.Local))
+            updateLocalTransform();
+        if (updateTransformMode.HasFlag(UpdateTransformMode.World))
+            updateWorldTransform();
+        if (updateTransformMode.HasFlag(UpdateTransformMode.ChildrenWorld))
+            updateChildrenWorldTransform();
     }
 
 
-    public virtual void UpdateTransform()
+    private void updateWorldTransform()
     {
-        if (_transformDirty == false)
-            return;
-        _transformDirty = false;
-
-        // 更新本地变换
-        _localTransform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
-
         if (Parent != null)
         {
-            // 计算世界变换
             _worldTransform = _localTransform * Parent.WorldTransform;
         }
         else
         {
             _worldTransform = _localTransform;
         }
+        OnWorldTransformChanged();
+    }
 
-        foreach(var child in Children)
+    protected virtual void OnWorldTransformChanged()
+    {
+
+    }
+
+    private void updateChildrenWorldTransform()
+    {
+        foreach (var child in Children)
         {
-            child._transformDirty = true;
-            child.UpdateTransform();
+            child.updateWorldTransform();
+            child.updateChildrenWorldTransform();
         }
+    }
+
+    private void updateLocalTransform()
+    {
+        _localTransform = MatrixHelper.CreateTransform(_position, _rotationQuaternion, _scale);
     }
 
     public Vector3 Forward => WorldTransform.ForwardVector();
@@ -285,7 +298,9 @@ public partial class Node
 
         _scale = new Vector3(1.0f, 1.0f, 1.0f);
 
-        UpdateTransform();
+        updateLocalTransform();
+
+        updateWorldTransform();
     }
 
     #endregion
@@ -339,7 +354,6 @@ public partial class Node
         else
         {
             child.Parent = this;
-            child.MarkTransformDirty();
         }
        
 
@@ -392,8 +406,6 @@ public partial class Node
         else
         {
             child.Parent = null;
-
-            child.MarkTransformDirty();
         }
 
         if (CurrentScene != null)
@@ -447,4 +459,12 @@ public enum AttachToParentRule
 {
     KeepWorld,
     KeepLocal
+}
+
+public enum UpdateTransformMode
+{
+    Local = 1 >> 0,
+    World = 1 >> 1,
+    ChildrenWorld = 1 >> 2,
+    All = Local | World | ChildrenWorld
 }

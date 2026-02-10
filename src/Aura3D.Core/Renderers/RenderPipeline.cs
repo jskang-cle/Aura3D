@@ -134,8 +134,6 @@ public abstract partial class RenderPipeline
         {
             AddGpuResource(gpuResource);
         }
-
-        node.UpdateTransform();
     }
 
     public void RemoveNode(Node node)

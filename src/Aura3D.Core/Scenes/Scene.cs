@@ -52,7 +52,7 @@ public class Scene
 
         if (node is IOctreeObject otreeObject)
         {
-            otreeObject.OnChanged += OnNodeTransformDirty;
+            otreeObject.OnBoudingBoxChanged += OnBoudingBoxChanged;
         }
 
         if (node is Mesh mesh)
@@ -91,7 +91,7 @@ public class Scene
 
         if (node is IOctreeObject otreeObject)
         {
-            otreeObject.OnChanged -= OnNodeTransformDirty;
+            otreeObject.OnBoudingBoxChanged -= OnBoudingBoxChanged;
         }
 
 
@@ -114,7 +114,7 @@ public class Scene
             return;
         _dirtyNodes.Add(node);
     }
-    void OnNodeTransformDirty(IOctreeObject otreeObject)
+    void OnBoudingBoxChanged(IOctreeObject otreeObject)
     {
         if (otreeObject is not Node node)
             return;
@@ -122,22 +122,30 @@ public class Scene
     }
     public void Update(double deltaTime)
     {
-        foreach(var node in _dirtyNodes)
+      
+        foreach(var node in Nodes)
+        {
+            node.Update(deltaTime);
+            if (node is Mesh mesh)
+            {
+                if (mesh.IsSkinnedMesh && mesh.AnimationSampler != null && mesh.EnableSkeletonBoudingBox == true)
+                {
+                    mesh.CalcSkeletalMeshBoundingBoxInPlayAnimation();
+                    StaticMeshOctree.Update(mesh);
+                }
+                
+            }
+        }
+
+        foreach (var node in _dirtyNodes)
         {
             if (_nodes.Contains(node) == false)
                 continue;
-
-            node.UpdateTransform();
-
             if (node is Mesh mesh)
             {
                 StaticMeshOctree.Update(mesh);
             }
         }
         _dirtyNodes.Clear();
-        foreach(var node in Nodes)
-        {
-            node.Update(deltaTime);
-        }
     }
 }

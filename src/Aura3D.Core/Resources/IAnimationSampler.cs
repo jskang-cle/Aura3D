@@ -9,7 +9,7 @@ namespace Aura3D.Core.Resources;
 
 public interface IAnimationSampler
 {
-    public bool NeedUpdate { get; set; }
+    public bool ExternalUpdate { get; set; }
     public IReadOnlyList<Matrix4x4> BonesTransform { get; }
     public void Update(double deltaTime);
 
