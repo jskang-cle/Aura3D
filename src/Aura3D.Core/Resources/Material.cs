@@ -150,6 +150,46 @@ public class Material : IClone<Material>, IGpuResource
         }
         Shaders.Clear();
     }
+
+    public ITexture? BaseColor
+    {
+        get => GetTexture("BaseColor");
+        set => SetTexture("BaseColor", value);
+    }
+
+    public ITexture? Normal
+    {
+        get => GetTexture("Normal");
+        set => SetTexture("Normal", value);
+    }
+
+    public void SetTexture(string name, ITexture? texture)
+    {
+        var channel = Channels.FirstOrDefault(c => c.Name == name);
+        if (channel != null)
+        {
+            channel.Texture = texture;
+        }
+        else
+        {
+            Channels.Add(new Channel { Name = "Normal", Texture = texture });
+        }
+    }
+
+    public ITexture? GetTexture(string name)
+    {
+        var channel = Channels.FirstOrDefault(c => c.Name == name);
+        if (channel != null)
+        {
+             return channel.Texture;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+
 }
 
 
