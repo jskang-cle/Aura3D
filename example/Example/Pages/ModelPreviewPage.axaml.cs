@@ -179,7 +179,7 @@ public partial class ModelPreviewPage : UserControl
                     }
                     else if (extension.ToLower() == ".gltf")
                     {
-                        (model, animations) = ModelLoader.LoadGlbModelAndAnimations(path);
+                        (model, animations) = ModelLoader.LoadGltfModelAndAnimations(path);
                     }
                 }
                 if (model == null)
