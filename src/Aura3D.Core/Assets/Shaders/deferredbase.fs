@@ -1,0 +1,32 @@
+﻿#version 300 es
+precision mediump float;
+layout (location = 0) out vec4 Buffer_BaseColor_Metalness;
+layout (location = 1) out vec4 Buffer_Normal_Roughness;
+layout (location = 2) out vec4 Buffer_Emissive_Occlusion;
+
+//{{defines}}
+
+uniform sampler2d Texture_BaseColor;
+uniform sampler2d Texture_Normal;
+uniform sampler2d Texture_Metalness;
+uniform sampler2d Texture_Roughness;
+uniform sampler2d Texture_Emissive;
+uniform sampler2d Texture_Occlusion;
+
+
+in vec2 vTexCoord;
+
+void main() 
+{
+    vec4 baseColor = texture(Texture_BaseColor, vTexCoord);
+    vec4 normal = texture(Texture_Normal, vTexCoord);
+    vec4 metalness = texture(Texture_Metalness, vTexCoord);
+    vec4 roughness = texture(Texture_Roughness, vTexCoord);
+    vec4 emissive = texture(Texture_Emissive, vTexCoord);
+    vec4 occlusion = texture(Texture_Occlusion, vTexCoord);
+
+    Buffer_BaseColor_Metalness = vec4(baseColor.rgb, metalness.r);
+    Buffer_Normal_Roughness = vec4(normal.rgb, roughness.r);
+    Buffer_Emissive_Occlusion = vec4(emissive.rgb, occlusion.r);
+
+}
